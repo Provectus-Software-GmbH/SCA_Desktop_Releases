@@ -3,7 +3,7 @@
 This repository is used exclusively for publishing official Secure Contacts App (SCA) Desktop releases.
 
 It contains:
-- Windows installers (.exe)
+- Windows installers (.exe/.msi)
 - macOS installation packages (.pkg/.dmg)
 - Release notes
 - Deployment and update documentation
