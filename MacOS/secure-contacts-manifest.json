@@ -1,0 +1,48 @@
+{
+  "title": "Secure Contacts",
+  "description": "Policies for configuring Secure Contacts by Provectus Software GmbH",
+  "id": "de.provectus.SecureContacts",
+  "targets": ["system", "user"],
+  "properties": {
+    "SecContacts.Defaults": {
+      "title": "Defaults",
+      "description": "Set the SecContacts.Defaults configuration string.",
+      "type": "string"
+    },
+    "SecContacts.Licenses": {
+      "title": "Licenses",
+      "description": "Set the SecContacts.Licenses configuration string.",
+      "type": "string"
+    },
+    "SecContacts.AADGroups": {
+      "title": "AAD Groups",
+      "description": "Set the SecContacts.AADGroups configuration string.",
+      "type": "string"
+    },
+    "SecContacts.AADCache": {
+      "title": "AAD Cache",
+      "description": "Set the SecContacts.AADCache configuration string.",
+      "type": "string"
+    },
+    "SecContacts.ServiceUrls": {
+      "title": "Service URLs",
+      "description": "Set the SecContacts.ServiceUrls configuration string.",
+      "type": "string"
+    },
+    "SecContacts.AzureBlobStorage": {
+      "title": "Azure Blob Storage",
+      "description": "Set the SecContacts.AzureBlobStorage configuration string.",
+      "type": "string"
+    },
+    "SecContacts.SharedMailboxContacts": {
+      "title": "Shared Mailbox Contacts",
+      "description": "Set the SecContacts.SharedMailboxContacts configuration string.",
+      "type": "string"
+    },
+    "SecContacts.CustomDatasourceNames": {
+      "title": "Custom Datasource Names",
+      "description": "Set the SecContacts.CustomDatasourceNames configuration string.",
+      "type": "string"
+    }
+  }
+}

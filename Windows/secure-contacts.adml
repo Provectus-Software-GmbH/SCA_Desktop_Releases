@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitionResources revision="1.2" schemaVersion="1.0">
+  <displayName>Secure Contacts Policies</displayName>
+  <description>Policies for configuring Secure Contacts by Provectus Software GmbH</description>
+  <resources>
+    <stringTable>
+      <string id="SecureContactsCategory">Secure Contacts</string>
+      <string id="SecContactsCategory">Secure Contacts Settings</string>
+      <string id="SUPPORTED_Windows10">At least Windows 10</string>
+
+      <string id="Title_Defaults">Defaults</string>
+      <string id="Help_Defaults">Set the SecContacts.Defaults configuration string.</string>
+
+      <string id="Title_DefaultsExtension">Defaults Extension</string>
+      <string id="Help_DefaultsExtension">Set the SecContacts.DefaultsExtension continuation string. Use this when SecContacts.Defaults exceeds the 1023-character limit.</string>
+
+      <string id="Title_Licenses">Licenses</string>
+      <string id="Help_Licenses">Set the SecContacts.Licenses configuration string.</string>
+
+      <string id="Title_AADGroups">AAD Groups</string>
+      <string id="Help_AADGroups">Set the SecContacts.AADGroups configuration string.</string>
+
+      <string id="Title_AADCache">AAD Cache</string>
+      <string id="Help_AADCache">Set the SecContacts.AADCache configuration string.</string>
+
+      <string id="Title_AADCacheList">AAD Cache List</string>
+      <string id="Help_AADCacheList">Set the SecContacts.AADCacheList multi-string configuration value. Enter one item per line.</string>
+
+      <string id="Title_ServiceUrls">Service URLs</string>
+      <string id="Help_ServiceUrls">Set the SecContacts.ServiceUrls configuration string.</string>
+
+      <string id="Title_AzureBlobStorage">Azure Blob Storage</string>
+      <string id="Help_AzureBlobStorage">Set the SecContacts.AzureBlobStorage configuration string.</string>
+
+      <string id="Title_AzureBlobStorageList">Azure Blob Storage List</string>
+      <string id="Help_AzureBlobStorageList">Set the SecContacts.AzureBlobStorageList multi-string configuration value. Enter one item per line.</string>
+
+      <string id="Title_SharedMailboxContacts">Shared Mailbox Contacts</string>
+      <string id="Help_SharedMailboxContacts">Set the SecContacts.SharedMailboxContacts configuration string.</string>
+
+      <string id="Title_CustomDatasourceNames">Custom Datasource Names</string>
+      <string id="Help_CustomDatasourceNames">Set the SecContacts.CustomDatasourceNames configuration string.</string>
+    </stringTable>
+
+    <presentationTable>
+      <presentation id="Pol_Defaults">
+        <textBox refId="Txt_Defaults"><label>Defaults:</label></textBox>
+      </presentation>
+      <presentation id="Pol_DefaultsExtension">
+        <textBox refId="Txt_DefaultsExtension"><label>Defaults Extension:</label></textBox>
+      </presentation>
+      <presentation id="Pol_Licenses">
+        <textBox refId="Txt_Licenses"><label>Licenses:</label></textBox>
+      </presentation>
+      <presentation id="Pol_AADGroups">
+        <textBox refId="Txt_AADGroups"><label>AAD Groups:</label></textBox>
+      </presentation>
+      <presentation id="Pol_AADCache">
+        <textBox refId="Txt_AADCache"><label>AAD Cache:</label></textBox>
+      </presentation>
+      <presentation id="Pol_AADCacheList">
+      <multiTextBox refId="Txt_AADCacheList"><label>AAD Cache List:</label></multiTextBox>
+      </presentation>
+      <presentation id="Pol_ServiceUrls">
+        <textBox refId="Txt_ServiceUrls"><label>Service URLs:</label></textBox>
+      </presentation>
+      <presentation id="Pol_AzureBlobStorage">
+        <textBox refId="Txt_AzureBlobStorage"><label>Azure Blob Storage:</label></textBox>
+      </presentation>
+      <presentation id="Pol_AzureBlobStorageList">
+        <multiTextBox refId="Txt_AzureBlobStorageList"><label>Azure Blob Storage List:</label></multiTextBox>
+      </presentation>
+      <presentation id="Pol_SharedMailboxContacts">
+        <textBox refId="Txt_SharedMailboxContacts"><label>Shared Mailbox Contacts:</label></textBox>
+      </presentation>
+      <presentation id="Pol_CustomDatasourceNames">
+        <textBox refId="Txt_CustomDatasourceNames"><label>Custom Datasource Names:</label></textBox>
+      </presentation>
+    </presentationTable>
+  </resources>
+</policyDefinitionResources>
