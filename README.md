@@ -1,6 +1,8 @@
 # Secure Contacts App (SCA) Desktop Releases
 
-This repository publishes official Secure Contacts App (SCA) Desktop releases and deployment support files.
+Secure Contacts App (SCA) is an enterprise contact management solution that lets organizations securely manage, synchronize, and distribute business contacts across managed devices.
+
+This repository publishes official SCA Desktop releases and the supporting files IT administrators need to configure and manage the app via Microsoft Intune or other MDM platforms on Windows and macOS.
 
 It contains:
 - Windows installers (.exe/.msi)

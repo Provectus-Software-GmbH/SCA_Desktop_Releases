@@ -1,6 +1,8 @@
 # Secure Contacts — macOS Deployment Files
 
-macOS Intune/MDM configuration files for Secure Contacts App (SCA). Supports Intune plist-based custom profiles and non-Intune MDM platforms (Jamf, Kandji).
+Secure Contacts App (SCA) is an enterprise contact management solution that lets organizations securely manage, synchronize, and distribute business contacts across managed devices.
+
+This folder contains the files IT administrators need to configure and manage SCA on macOS devices. The primary method uses Intune plist-based custom profiles; a second path covers non-Intune MDM platforms such as Jamf and Kandji.
 
 **Start here:** [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md)
 

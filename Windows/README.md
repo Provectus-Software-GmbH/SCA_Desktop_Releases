@@ -1,6 +1,8 @@
 # Secure Contacts — Windows Deployment Files
 
-Windows Intune configuration files for Secure Contacts App (SCA). Supports ADMX/ADML imported templates and OMA-URI custom profiles (manual or PowerShell-automated via Graph).
+Secure Contacts App (SCA) is an enterprise contact management solution that lets organizations securely manage, synchronize, and distribute business contacts across managed devices.
+
+This folder contains the files IT administrators need to configure and manage SCA on Windows devices via Microsoft Intune. Two methods are supported: ADMX/ADML imported templates and OMA-URI custom profiles (manual or PowerShell-automated via Graph).
 
 **Start here:** [SCA-Intune-Config-Manual-Win.md](SCA-Intune-Config-Manual-Win.md)
 
