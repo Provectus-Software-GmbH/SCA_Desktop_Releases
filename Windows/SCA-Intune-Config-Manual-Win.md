@@ -119,6 +119,7 @@ Use this checklist before assigning the profile.
 - Use `secure-contacts.intune-oma-uri.md` as the blank structure template.
 - Use `secure-contacts.intune-oma-uri.example.md` only as a reference for valid sample formats.
 - Paste your real production values into the Intune OMA-URI value fields.
+- If exported JSON examples show sequences like `\"`, that is expected: the payload is encoding JSON text inside XML inside an outer JSON string.
 
 #### Method B, Option 2: Automated Graph import
 

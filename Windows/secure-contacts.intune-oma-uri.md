@@ -26,6 +26,13 @@ Notes:
 
 All policies are Device-scope and use String data type.
 
+Why some values look heavily escaped:
+- The Intune field stores one outer JSON string value.
+- Some Secure Contacts settings place XML in that string.
+- Some of those XML `value="..."` attributes then carry JSON text.
+- Because this is JSON -> XML -> JSON nesting, quotes and backslashes may appear as `\"` in exported Graph payloads.
+- The escaping is transport encoding, not a malformed policy value.
+
 Category path resolved from ADMX:
 - SecureContactsCategory -> SecContactsCategory
 
