@@ -26,9 +26,8 @@ Use this for normal Intune rollout.
 - `de.provectus.SecureContactsDesktop.plist`
 
 Important:
-- `de.provectus.SecureContactsDesktop.plist` is the blank template version for production use.
-- `de.provectus.SecureContactsDesktop.plist.demo` is the example version with filled sample values for reference only.
-- Enter your real production values in `de.provectus.SecureContactsDesktop.plist` before rollout.
+- `de.provectus.SecureContactsDesktop.plist` is the blank production template.
+- `de.provectus.SecureContactsDesktop.plist.demo` is the reference example with sample values.
 - Use the official policy documentation as source of truth:
   - https://docs.secure-contacts.com/documentation/app-configuration-policy-name-values-for-sca
 
@@ -37,19 +36,19 @@ Important:
 Use this checklist before assigning the profile to devices:
 
 1. Intune macOS preference file method
-  - Use `de.provectus.SecureContactsDesktop.plist` as the blank production template.
-  - Use `de.provectus.SecureContactsDesktop.plist.demo` only as a reference for valid sample formats.
-  - Enter your real production values in `de.provectus.SecureContactsDesktop.plist`.
-  - Then upload or paste the finished fragment into the Intune profile.
+    - Use `de.provectus.SecureContactsDesktop.plist` as the blank production template.
+    - Use `de.provectus.SecureContactsDesktop.plist.demo` only as a reference for valid sample formats.
+    - Enter your real production values in `de.provectus.SecureContactsDesktop.plist`.
+    - Then upload or paste the finished fragment into the Intune profile.
 
 2. Optional non-Intune MDM method
-  - Use `secure-contacts-manifest.json` as the schema reference.
-  - Build the vendor-specific payload in your MDM system with your real production values.
+    - Use `secure-contacts-manifest.json` as the schema reference.
+    - Build the vendor-specific payload in your MDM system with your real production values.
 
 3. For both methods
-  - Keep unused optional keys empty.
-  - Keep JSON values valid and compact.
-  - Validate on a test device before broad rollout.
+    - Keep unused optional keys empty.
+    - Keep JSON values valid and compact.
+    - Validate on a test device before broad rollout.
 
 ### Steps
 
