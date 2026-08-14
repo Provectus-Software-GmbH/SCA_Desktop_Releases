@@ -1,7 +1,7 @@
 {
   "@odata.type": "#microsoft.graph.windows10CustomConfiguration",
   "displayName": "Secure Contacts - OMA URI (Device)",
-  "description": "Custom OMA-URI profile for Secure Contacts ADMX-backed policies. Blank template version; see .example file for sample values.",
+  "description": "Custom OMA-URI profile for Secure Contacts ADMX-backed policies. Blank template version; see .ready file for embedded ADMX content and .example file for sample values.",
   "omaSettings": [
     {
       "@odata.type": "#microsoft.graph.omaSettingString",

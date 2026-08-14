@@ -93,7 +93,9 @@ Notes:
 
 ### Important
 
-- `secure-contacts.intune-omauri-profile.json` is the blank template version. Use `secure-contacts.intune-omauri-profile.example.json` when you want filled sample values.
+- `secure-contacts.intune-omauri-profile.json` is the blank template version.
+- `secure-contacts.intune-omauri-profile.ready.json` is the convenience version with the current ADMX XML already embedded.
+- Use `secure-contacts.intune-omauri-profile.example.json` when you want filled sample values.
 - `secure-contacts.intune-oma-uri.md` is the blank template version. Use `secure-contacts.intune-oma-uri.example.md` when you want filled sample values.
 - Most Secure Contacts OMA-URI String values must contain a JSON array string, not a comma-separated plain text value.
 - `SecContacts.Licenses` specifically uses JSON objects with `name` and `key`.
@@ -121,6 +123,7 @@ Use this checklist before assigning the profile.
 #### Method B, Option 2: Automated Graph import
 
 - Fill your real production values into `secure-contacts.intune-omauri-profile.json`.
+- Or start from `secure-contacts.intune-omauri-profile.ready.json` if you want the ADMXInstall payload already included.
 - Use `secure-contacts.intune-omauri-profile.example.json` only as a reference for valid sample formats.
 - Then run `import-secure-contacts-omauri.ps1`.
 

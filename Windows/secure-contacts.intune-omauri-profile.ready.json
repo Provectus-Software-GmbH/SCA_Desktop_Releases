@@ -1,0 +1,91 @@
+{
+  "@odata.type": "#microsoft.graph.windows10CustomConfiguration",
+  "displayName": "Secure Contacts - OMA URI (Device)",
+  "description": "Custom OMA-URI profile for Secure Contacts ADMX-backed policies. Blank template version; see .example file for sample values.",
+  "omaSettings": [
+    {
+      "@odata.type": "#microsoft.graph.omaSettingString",
+      "displayName": "ADMX Install - SecureContacts",
+      "description": "Ingest secure-contacts.admx before applying policy nodes.",
+      "omaUri": "./Device/Vendor/MSFT/Policy/ConfigOperations/ADMXInstall/SecureContacts/Policy/SecureContactsAdmx",
+      "value": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<policyDefinitions revision=\"1.2\" schemaVersion=\"1.0\">\r\n  <policyNamespaces>\r\n    <target prefix=\"SecureContacts\" namespace=\"Provectus.SecureContacts.v1.1\" />\r\n  </policyNamespaces>\r\n  <resources minRequiredRevision=\"1.0\" />\r\n\r\n  <supportedOn>\r\n    <definitions>\r\n      <definition name=\"SUPPORTED_Windows10\" displayName=\"$(string.SUPPORTED_Windows10)\" />\r\n    </definitions>\r\n  </supportedOn>\r\n  \r\n  <categories>\r\n    <category name=\"SecureContactsCategory\" displayName=\"$(string.SecureContactsCategory)\" />\r\n    <category name=\"SecContactsCategory\" displayName=\"$(string.SecContactsCategory)\">\r\n      <parentCategory ref=\"SecureContactsCategory\" />\r\n    </category>\r\n  </categories>\r\n\r\n  <policies>\r\n    <policy name=\"Pol_Defaults\" class=\"Machine\" displayName=\"$(string.Title_Defaults)\" explainText=\"$(string.Help_Defaults)\" presentation=\"$(presentation.Pol_Defaults)\" key=\"Software\\Policies\\ProvectusSoftwareGmbH\\SecureContactsDesktop\" valueName=\"SecContacts.Defaults\">\r\n      <parentCategory ref=\"SecContactsCategory\" />\r\n      <supportedOn ref=\"SUPPORTED_Windows10\" />\r\n      <elements>\r\n        <text id=\"Txt_Defaults\" valueName=\"SecContacts.Defaults\" required=\"false\" />\r\n      </elements>\r\n    </policy>\r\n\r\n    <policy name=\"Pol_DefaultsExtension\" class=\"Machine\" displayName=\"$(string.Title_DefaultsExtension)\" explainText=\"$(string.Help_DefaultsExtension)\" presentation=\"$(presentation.Pol_DefaultsExtension)\" key=\"Software\\Policies\\ProvectusSoftwareGmbH\\SecureContactsDesktop\" valueName=\"SecContacts.DefaultsExtension\">\r\n      <parentCategory ref=\"SecContactsCategory\" />\r\n      <supportedOn ref=\"SUPPORTED_Windows10\" />\r\n      <elements>\r\n        <text id=\"Txt_DefaultsExtension\" valueName=\"SecContacts.DefaultsExtension\" required=\"false\" />\r\n      </elements>\r\n    </policy>\r\n\r\n    <policy name=\"Pol_Licenses\" class=\"Machine\" displayName=\"$(string.Title_Licenses)\" explainText=\"$(string.Help_Licenses)\" presentation=\"$(presentation.Pol_Licenses)\" key=\"Software\\Policies\\ProvectusSoftwareGmbH\\SecureContactsDesktop\" valueName=\"SecContacts.Licenses\">\r\n      <parentCategory ref=\"SecContactsCategory\" />\r\n      <supportedOn ref=\"SUPPORTED_Windows10\" />\r\n      <elements>\r\n        <text id=\"Txt_Licenses\" valueName=\"SecContacts.Licenses\" required=\"false\" />\r\n      </elements>\r\n    </policy>\r\n\r\n    <policy name=\"Pol_AADGroups\" class=\"Machine\" displayName=\"$(string.Title_AADGroups)\" explainText=\"$(string.Help_AADGroups)\" presentation=\"$(presentation.Pol_AADGroups)\" key=\"Software\\Policies\\ProvectusSoftwareGmbH\\SecureContactsDesktop\" valueName=\"SecContacts.AADGroups\">\r\n      <parentCategory ref=\"SecContactsCategory\" />\r\n      <supportedOn ref=\"SUPPORTED_Windows10\" />\r\n      <elements>\r\n        <text id=\"Txt_AADGroups\" valueName=\"SecContacts.AADGroups\" required=\"false\" />\r\n      </elements>\r\n    </policy>\r\n\r\n    <policy name=\"Pol_AADCache\" class=\"Machine\" displayName=\"$(string.Title_AADCache)\" explainText=\"$(string.Help_AADCache)\" presentation=\"$(presentation.Pol_AADCache)\" key=\"Software\\Policies\\ProvectusSoftwareGmbH\\SecureContactsDesktop\" valueName=\"SecContacts.AADCache\">\r\n      <parentCategory ref=\"SecContactsCategory\" />\r\n      <supportedOn ref=\"SUPPORTED_Windows10\" />\r\n      <elements>\r\n        <text id=\"Txt_AADCache\" valueName=\"SecContacts.AADCache\" required=\"false\" />\r\n      </elements>\r\n    </policy>\r\n\r\n    <policy name=\"Pol_AADCacheList\" class=\"Machine\" displayName=\"$(string.Title_AADCacheList)\" explainText=\"$(string.Help_AADCacheList)\" presentation=\"$(presentation.Pol_AADCacheList)\" key=\"Software\\Policies\\ProvectusSoftwareGmbH\\SecureContactsDesktop\" valueName=\"SecContacts.AADCacheList\">\r\n      <parentCategory ref=\"SecContactsCategory\" />\r\n      <supportedOn ref=\"SUPPORTED_Windows10\" />\r\n      <elements>\r\n      <multiText id=\"Txt_AADCacheList\" valueName=\"SecContacts.AADCacheList\" required=\"false\" />\r\n      </elements>\r\n    </policy>\r\n\r\n    <policy name=\"Pol_ServiceUrls\" class=\"Machine\" displayName=\"$(string.Title_ServiceUrls)\" explainText=\"$(string.Help_ServiceUrls)\" presentation=\"$(presentation.Pol_ServiceUrls)\" key=\"Software\\Policies\\ProvectusSoftwareGmbH\\SecureContactsDesktop\" valueName=\"SecContacts.ServiceUrls\">\r\n      <parentCategory ref=\"SecContactsCategory\" />\r\n      <supportedOn ref=\"SUPPORTED_Windows10\" />\r\n      <elements>\r\n        <text id=\"Txt_ServiceUrls\" valueName=\"SecContacts.ServiceUrls\" required=\"false\" />\r\n      </elements>\r\n    </policy>\r\n\r\n    <policy name=\"Pol_AzureBlobStorage\" class=\"Machine\" displayName=\"$(string.Title_AzureBlobStorage)\" explainText=\"$(string.Help_AzureBlobStorage)\" presentation=\"$(presentation.Pol_AzureBlobStorage)\" key=\"Software\\Policies\\ProvectusSoftwareGmbH\\SecureContactsDesktop\" valueName=\"SecContacts.AzureBlobStorage\">\r\n      <parentCategory ref=\"SecContactsCategory\" />\r\n      <supportedOn ref=\"SUPPORTED_Windows10\" />\r\n      <elements>\r\n        <text id=\"Txt_AzureBlobStorage\" valueName=\"SecContacts.AzureBlobStorage\" required=\"false\" />\r\n      </elements>\r\n    </policy>\r\n\r\n    <policy name=\"Pol_AzureBlobStorageList\" class=\"Machine\" displayName=\"$(string.Title_AzureBlobStorageList)\" explainText=\"$(string.Help_AzureBlobStorageList)\" presentation=\"$(presentation.Pol_AzureBlobStorageList)\" key=\"Software\\Policies\\ProvectusSoftwareGmbH\\SecureContactsDesktop\" valueName=\"SecContacts.AzureBlobStorageList\">\r\n      <parentCategory ref=\"SecContactsCategory\" />\r\n      <supportedOn ref=\"SUPPORTED_Windows10\" />\r\n      <elements>\r\n        <multiText id=\"Txt_AzureBlobStorageList\" valueName=\"SecContacts.AzureBlobStorageList\" required=\"false\" />\r\n      </elements>\r\n    </policy>\r\n\r\n    <policy name=\"Pol_SharedMailboxContacts\" class=\"Machine\" displayName=\"$(string.Title_SharedMailboxContacts)\" explainText=\"$(string.Help_SharedMailboxContacts)\" presentation=\"$(presentation.Pol_SharedMailboxContacts)\" key=\"Software\\Policies\\ProvectusSoftwareGmbH\\SecureContactsDesktop\" valueName=\"SecContacts.SharedMailboxContacts\">\r\n      <parentCategory ref=\"SecContactsCategory\" />\r\n      <supportedOn ref=\"SUPPORTED_Windows10\" />\r\n      <elements>\r\n        <text id=\"Txt_SharedMailboxContacts\" valueName=\"SecContacts.SharedMailboxContacts\" required=\"false\" />\r\n      </elements>\r\n    </policy>\r\n\r\n    <policy name=\"Pol_CustomDatasourceNames\" class=\"Machine\" displayName=\"$(string.Title_CustomDatasourceNames)\" explainText=\"$(string.Help_CustomDatasourceNames)\" presentation=\"$(presentation.Pol_CustomDatasourceNames)\" key=\"Software\\Policies\\ProvectusSoftwareGmbH\\SecureContactsDesktop\" valueName=\"SecContacts.CustomDatasourceNames\">\r\n      <parentCategory ref=\"SecContactsCategory\" />\r\n      <supportedOn ref=\"SUPPORTED_Windows10\" />\r\n      <elements>\r\n        <text id=\"Txt_CustomDatasourceNames\" valueName=\"SecContacts.CustomDatasourceNames\" required=\"false\" />\r\n      </elements>\r\n    </policy>\r\n  </policies>\r\n</policyDefinitions>"
+    },
+    {
+      "@odata.type": "#microsoft.graph.omaSettingString",
+      "displayName": "Pol_Defaults",
+      "description": "SecContacts.Defaults",
+      "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_Defaults",
+      "value": "<enabled/><data id=\"Txt_Defaults\" value=\"\"/>"
+    },
+    {
+      "@odata.type": "#microsoft.graph.omaSettingString",
+      "displayName": "Pol_DefaultsExtension",
+      "description": "SecContacts.DefaultsExtension",
+      "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_DefaultsExtension",
+      "value": "<enabled/><data id=\"Txt_DefaultsExtension\" value=\"\"/>"
+    },
+    {
+      "@odata.type": "#microsoft.graph.omaSettingString",
+      "displayName": "Pol_Licenses",
+      "description": "SecContacts.Licenses",
+      "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_Licenses",
+      "value": "<enabled/><data id=\"Txt_Licenses\" value=\"\"/>"
+    },
+    {
+      "@odata.type": "#microsoft.graph.omaSettingString",
+      "displayName": "Pol_AADGroups",
+      "description": "SecContacts.AADGroups",
+      "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_AADGroups",
+      "value": "<enabled/><data id=\"Txt_AADGroups\" value=\"\"/>"
+    },
+    {
+      "@odata.type": "#microsoft.graph.omaSettingString",
+      "displayName": "Pol_AADCache",
+      "description": "SecContacts.AADCache",
+      "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_AADCache",
+      "value": "<enabled/><data id=\"Txt_AADCache\" value=\"\"/>"
+    },
+    {
+      "@odata.type": "#microsoft.graph.omaSettingString",
+      "displayName": "Pol_AADCacheList",
+      "description": "SecContacts.AADCacheList",
+      "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_AADCacheList",
+      "value": "<enabled/><data id=\"Txt_AADCacheList\" value=\"\"/>"
+    },
+    {
+      "@odata.type": "#microsoft.graph.omaSettingString",
+      "displayName": "Pol_ServiceUrls",
+      "description": "SecContacts.ServiceUrls",
+      "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_ServiceUrls",
+      "value": "<enabled/><data id=\"Txt_ServiceUrls\" value=\"\"/>"
+    },
+    {
+      "@odata.type": "#microsoft.graph.omaSettingString",
+      "displayName": "Pol_AzureBlobStorage",
+      "description": "SecContacts.AzureBlobStorage",
+      "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_AzureBlobStorage",
+      "value": "<enabled/><data id=\"Txt_AzureBlobStorage\" value=\"\"/>"
+    },
+    {
+      "@odata.type": "#microsoft.graph.omaSettingString",
+      "displayName": "Pol_AzureBlobStorageList",
+      "description": "SecContacts.AzureBlobStorageList",
+      "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_AzureBlobStorageList",
+      "value": "<enabled/><data id=\"Txt_AzureBlobStorageList\" value=\"\"/>"
+    },
+    {
+      "@odata.type": "#microsoft.graph.omaSettingString",
+      "displayName": "Pol_SharedMailboxContacts",
+      "description": "SecContacts.SharedMailboxContacts",
+      "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_SharedMailboxContacts",
+      "value": "<enabled/><data id=\"Txt_SharedMailboxContacts\" value=\"\"/>"
+    },
+    {
+      "@odata.type": "#microsoft.graph.omaSettingString",
+      "displayName": "Pol_CustomDatasourceNames",
+      "description": "SecContacts.CustomDatasourceNames",
+      "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_CustomDatasourceNames",
+      "value": "<enabled/><data id=\"Txt_CustomDatasourceNames\" value=\"\"/>"
+    }
+  ]
+}
