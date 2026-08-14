@@ -7,8 +7,15 @@ This guide shows how to configure Secure Contacts for macOS with Microsoft Intun
 This is a deployment manual, not a schema design document.
 
 Important:
+
 - For Intune on macOS, there is one primary method (plist-based custom profile).
 - A second path is included as optional for non-Intune MDM platforms.
+
+## Prerequisites
+
+- Microsoft Intune administrator permissions.
+- Managed macOS devices.
+- Access to the Secure Contacts deployment files.
 
 ## Platform scope
 
@@ -16,6 +23,11 @@ Important:
 - App bundle ID: `de.provectus.SecureContactsDesktop`
 - Managed device-level target file:
   - `/Library/Managed Preferences/de.provectus.SecureContactsDesktop.plist`
+
+## Deployment recommendation
+
+- Use Method A for Microsoft Intune deployments.
+- Use Method B only for Jamf, Kandji, or other non-Intune MDM platforms.
 
 ## Method A (Primary): Intune macOS custom profile with plist
 
@@ -26,6 +38,7 @@ Use this for normal Intune rollout.
 - `de.provectus.SecureContactsDesktop.plist`
 
 Important:
+
 - `de.provectus.SecureContactsDesktop.plist` is the blank production template.
 - `de.provectus.SecureContactsDesktop.plist.demo` is the reference example with sample values.
 - Use the official policy documentation as source of truth:
@@ -33,22 +46,25 @@ Important:
 
 ### Admin value-entry checklist
 
-Use this checklist before assigning the profile to devices:
+Use this checklist before assigning the profile to devices.
 
-1. Intune macOS preference file method
-    - Use `de.provectus.SecureContactsDesktop.plist` as the blank production template.
-    - Use `de.provectus.SecureContactsDesktop.plist.demo` only as a reference for valid sample formats.
-    - Enter your real production values in `de.provectus.SecureContactsDesktop.plist`.
-    - Then upload or paste the finished fragment into the Intune profile.
+#### Intune macOS preference file method
 
-2. Optional non-Intune MDM method
-    - Use `secure-contacts-manifest.json` as the schema reference.
-    - Build the vendor-specific payload in your MDM system with your real production values.
+- Use `de.provectus.SecureContactsDesktop.plist` as the blank production template.
+- Use `de.provectus.SecureContactsDesktop.plist.demo` only as a reference for valid sample formats.
+- Enter your production values in `de.provectus.SecureContactsDesktop.plist`.
+- Upload or paste the completed content into Intune.
 
-3. For both methods
-    - Keep unused optional keys empty.
-    - Keep JSON values valid and compact.
-    - Validate on a test device before broad rollout.
+#### Optional non-Intune MDM method
+
+- Use `secure-contacts-manifest.json` as the schema reference.
+- Build the vendor-specific payload in your MDM system with your real production values.
+
+#### For both methods
+
+- Keep unused optional keys empty.
+- Keep JSON values valid and compact.
+- Validate on a test device before broad rollout.
 
 ### Steps
 
@@ -84,6 +100,7 @@ All keys below are optional and can be left empty by default.
 | `SecContacts.CustomDatasourceNames` | `<string>` | JSON array of objects: `[ { "defaultid": "...", "customid": "...", "customname": "..." } ]` |
 
 Tip:
+
 - Keep JSON values compact and valid.
 - If you don't use a key, keep it empty in the template instead of adding demo payloads.
 
@@ -96,12 +113,13 @@ defaults read /Library/Managed\ Preferences/de.provectus.SecureContactsDesktop.p
 ```
 
 Note:
+
 - `defaults read <bundle-id>` reads user domain settings.
 - For MDM-applied policy, validate the managed preferences file path above.
 
 ## Method B (Optional): Non-Intune MDM using manifest schema
 
-Use this only for Jamf/Kandji/other MDM systems.
+Use this only for Jamf, Kandji, or other MDM systems.
 
 ### Required files
 
@@ -113,9 +131,9 @@ Use this only for Jamf/Kandji/other MDM systems.
 2. Build the vendor-specific payload in your MDM system.
 3. Map each `SecContacts.*` property to the target payload format.
 4. Deploy to managed macOS devices.
-5. Verify using the same command/path as Method A.
+5. Verify using the same command and file path as Method A.
 
-## Key configuration properties
+## Supported configuration properties
 
 - `SecContacts.Defaults`
 - `SecContacts.Licenses`
@@ -126,13 +144,24 @@ Use this only for Jamf/Kandji/other MDM systems.
 - `SecContacts.SharedMailboxContacts`
 - `SecContacts.CustomDatasourceNames`
 
+## Expected result
+
+After successful deployment:
+
+- Managed preferences are written to:
+  - `/Library/Managed Preferences/de.provectus.SecureContactsDesktop.plist`
+- Secure Contacts automatically reads the managed configuration.
+- No end-user configuration is required.
+- Intune and non-Intune MDM deployments can result in the same effective configuration being available to the application when configured with the same values.
+
 ## Common pitfalls
 
-- Treating macOS like Windows ADMX/OMA-URI policy flow.
+- Treating macOS like a Windows ADMX or OMA-URI policy workflow.
 - Validating only user defaults instead of managed preferences.
-- Assigning to wrong scope/group in MDM.
+- Assigning configuration to the wrong scope or device group.
 - Mixing old and new key formats across environments.
-- Deploying demo/template plist values to production tenants.
+- Deploying demo or template values to production tenants.
+- Uploading a complete XML plist document where an Intune Preference File profile expects only the key/value fragment.
 
 ## References
 
