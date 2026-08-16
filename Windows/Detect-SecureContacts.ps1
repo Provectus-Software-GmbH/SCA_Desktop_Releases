@@ -3,7 +3,7 @@
 .SYNOPSIS
     Custom Intune Win32 App Detection Script for SecureContacts.
 .DESCRIPTION
-    Checks HKLM Uninstall keys (64-bit and 32-bit/WOW6432Node) and HKCU for SecureContacts.
+    Checks HKLM Uninstall keys (64-bit and 32-bit/WOW6432Node) for SecureContacts.
     Evaluates presence and version compliance.
     
     Intune Requirements:
@@ -22,8 +22,7 @@ $ErrorActionPreference = 'SilentlyContinue'
 # 1. Define standard Windows Uninstall Registry paths
 $UninstallPaths = @(
     "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*",
-    "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*",
-    "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*"
+    "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
 )
 
 # 2. Query registry for matching DisplayName
