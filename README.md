@@ -2,7 +2,7 @@
 
 Secure Contacts App (SCA) is an enterprise contact management solution that lets organizations securely manage, synchronize, and distribute business contacts across managed devices. Learn more at [secure-contacts.com](https://secure-contacts.com).
 
-This repository publishes official SCA Desktop releases and the supporting files IT administrators need to configure and manage the app via Microsoft Intune or other MDM platforms on Windows and macOS.
+This repository publishes official SCA Desktop releases and the supporting files IT administrators need to configure and manage the app via Microsoft Intune, SCCM/MECM, or other MDM platforms on Windows and macOS.
 
 It contains:
 
@@ -23,7 +23,7 @@ The Secure Contacts App source code is maintained in a separate private reposito
 1. Download the latest SCA Desktop release package and deployment files.
 2. Review the appropriate deployment guide:
    - Windows configuration: [SCA-Intune-Config-Manual-Win.md](Windows/SCA-Intune-Config-Manual-Win.md)
-   - Windows app deployment: [SCA-Intune-Win32-Deploy-Manual-Win.md](Windows/SCA-Intune-Win32-Deploy-Manual-Win.md)
+   - Windows app deployment: [SCA-Intune-Win32-Deploy-Manual-Win.md](Windows/SCA-Intune-Win32-Deploy-Manual-Win.md) for Intune Win32 packaging and SCCM/MECM-compatible scripted deployment
    - macOS: [SCA-Intune-Config-Manual-Mac.md](MacOS/SCA-Intune-Config-Manual-Mac.md)
 3. Configure Secure Contacts for your environment.
 4. Deploy the application and assign the configuration through your device management platform.
@@ -45,7 +45,7 @@ See the repository Releases page for the latest version.
 | File | Role |
 |---|---|
 | [`SCA-Intune-Config-Manual-Win.md`](Windows/SCA-Intune-Config-Manual-Win.md) | Full Intune configuration guide (Method A: ADMX, Method B: OMA-URI) |
-| [`SCA-Intune-Win32-Deploy-Manual-Win.md`](Windows/SCA-Intune-Win32-Deploy-Manual-Win.md) | Intune Win32 app deployment guide — packaging, install/detect scripts, uninstall |
+| [`SCA-Intune-Win32-Deploy-Manual-Win.md`](Windows/SCA-Intune-Win32-Deploy-Manual-Win.md) | Windows app deployment guide — Intune Win32 packaging, SCCM/MECM-compatible scripted deployment, install/detect scripts, uninstall |
 | [`secure-contacts.admx`](Windows/secure-contacts.admx) | ADMX policy schema — required for both Intune methods |
 | [`secure-contacts.adml`](Windows/secure-contacts.adml) | Matching ADML locale labels for the ADMX |
 | [`secure-contacts.intune-oma-uri.md`](Windows/secure-contacts.intune-oma-uri.md) | Blank OMA-URI row template for manual Intune entry |
@@ -55,7 +55,7 @@ See the repository Releases page for the latest version.
 | [`secure-contacts.intune-omauri-profile.example.json`](Windows/secure-contacts.intune-omauri-profile.example.json) | Filled Graph payload reference showing valid sample values |
 | [`import-secure-contacts-omauri.ps1`](Windows/import-secure-contacts-omauri.ps1) | PowerShell script — creates the Intune profile via Microsoft Graph |
 | [`README.intune-omauri-import.md`](Windows/README.intune-omauri-import.md) | Quick-start guide for the PowerShell importer |
-| [`Deploy-SecureContacts.ps1`](Windows/Deploy-SecureContacts.ps1) | Intune Win32 app install/update script — downloads and installs the latest MSI from GitHub Releases |
+| [`Deploy-SecureContacts.ps1`](Windows/Deploy-SecureContacts.ps1) | Windows install/update script — default GitHub-download mode or optional packaged-local MSI mode for Intune/SCCM deployments |
 | [`Detect-SecureContacts.ps1`](Windows/Detect-SecureContacts.ps1) | Intune Win32 app detection script — checks registry for installed version compliance |
 
 ## macOS deployment files
