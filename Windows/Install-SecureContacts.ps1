@@ -14,6 +14,8 @@
     - Any other non-zero exit code from msiexec will be propagated as-is
 
     Parameters:
+    - AppName           : Display name used to identify the installed app in registry
+                          (default: Secure Contacts).
     - PublicReleaseRepo : GitHub owner/repo slug (default: Provectus-Software-GmbH/SCA_Desktop_Releases)
     - FileNamePattern   : Glob pattern to select the MSI asset from the release (default: *.msi)
     - GitHubToken       : Optional. For most deployments this parameter is not needed.
@@ -34,7 +36,7 @@
                             5. Copy the token value (it starts with github_pat_).
 
                           Pass the token in the Intune Win32 app Install command:
-                            powershell.exe -ExecutionPolicy Bypass -File Deploy-SecureContacts.ps1 -GitHubToken "github_pat_xxx"
+                            powershell.exe -ExecutionPolicy Bypass -File Install-SecureContacts.ps1 -GitHubToken "github_pat_xxx"
 
                           The Intune portal encrypts the install command — the token is not
                           visible to end users or shown in plain text on managed devices.
@@ -47,6 +49,8 @@
 #>
 [CmdletBinding(DefaultParameterSetName = 'GitHub')]
 param(
+    [string]$AppName = "Secure Contacts",
+
     [Parameter(ParameterSetName = 'GitHub')]
     [string]$PublicReleaseRepo = "Provectus-Software-GmbH/SCA_Desktop_Releases",
 
@@ -172,7 +176,7 @@ try {
         "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
     )
     $InstalledApp = Get-ItemProperty -Path $UninstallPaths -ErrorAction SilentlyContinue |
-        Where-Object { $_.DisplayName -like "*Secure Contacts*" } | Select-Object -First 1
+        Where-Object { $_.DisplayName -eq $AppName } | Select-Object -First 1
     if ($InstalledApp -and $InstalledApp.DisplayVersion) {
         try {
             # Compare Major.Minor.Build only so GitHub tags like v0.8.2 and MSI/registry versions like 0.8.2.0 compare equally.

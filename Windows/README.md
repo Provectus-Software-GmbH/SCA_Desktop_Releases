@@ -21,5 +21,6 @@ This folder contains the files IT administrators need to configure and manage SC
 | [secure-contacts.intune-omauri-profile.example.json](secure-contacts.intune-omauri-profile.example.json) | Filled Graph payload reference showing valid sample values |
 | [import-secure-contacts-omauri.ps1](import-secure-contacts-omauri.ps1) | PowerShell script — creates the Intune profile via Microsoft Graph |
 | [README.intune-omauri-import.md](README.intune-omauri-import.md) | Quick-start guide for the PowerShell importer |
-| [Deploy-SecureContacts.ps1](Deploy-SecureContacts.ps1) | Windows install/update script — default GitHub-download mode or optional packaged-local MSI mode for Intune/SCCM |
-| [Detect-SecureContacts.ps1](Detect-SecureContacts.ps1) | Intune Win32 app detection script — checks registry for installed version compliance |
+| [Install-SecureContacts.ps1](Install-SecureContacts.ps1) | Windows install/update script — default GitHub-download mode or optional packaged-local MSI mode for Intune/SCCM |
+| [Test-SecureContactsInstalled.ps1](Test-SecureContactsInstalled.ps1) | Intune Win32 app detection script — checks registry for installed version compliance |
+| [Test-SecureContactsUpToDate.ps1](Test-SecureContactsUpToDate.ps1) | Intune Win32 app detection script — compares the installed version with the latest eligible GitHub release |

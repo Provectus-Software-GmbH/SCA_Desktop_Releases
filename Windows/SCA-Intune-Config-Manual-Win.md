@@ -20,7 +20,7 @@ You can configure the app using either of these methods:
 - Access to the Secure Contacts deployment files.
 - Microsoft Graph PowerShell module (Method B Option 2 only).
 
-> **App installation:** This guide covers app *configuration* only. To install Secure Contacts as an Intune Win32 app, use [`Deploy-SecureContacts.ps1`](Deploy-SecureContacts.ps1) as the install script and [`Detect-SecureContacts.ps1`](Detect-SecureContacts.ps1) as the detection rule. See [`SCA-Intune-Win32-Deploy-Manual-Win.md`](SCA-Intune-Win32-Deploy-Manual-Win.md) for the full deployment walkthrough.
+> **App installation:** This guide covers app *configuration* only. To install Secure Contacts as an Intune Win32 app, use [`Install-SecureContacts.ps1`](Install-SecureContacts.ps1) as the install script and [`Test-SecureContactsInstalled.ps1`](Test-SecureContactsInstalled.ps1) as the detection rule. See [`SCA-Intune-Win32-Deploy-Manual-Win.md`](SCA-Intune-Win32-Deploy-Manual-Win.md) for the full deployment walkthrough.
 
 ## Choosing a setup path
 
@@ -190,5 +190,6 @@ After successful deployment:
 - `secure-contacts.intune-oma-uri.md`
 - `import-secure-contacts-omauri.ps1`
 - `README.intune-omauri-import.md`
-- `Deploy-SecureContacts.ps1` — Win32 app install/update script
-- `Detect-SecureContacts.ps1` — Win32 app detection script
+- `Install-SecureContacts.ps1` — Win32 app install/update script
+- `Test-SecureContactsInstalled.ps1` — Win32 app detection script
+- `Test-SecureContactsUpToDate.ps1` — Win32 app up-to-date detection script
