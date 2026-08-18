@@ -214,7 +214,13 @@ try {
 
         # 4. Verify file integrity against a companion .sha256 asset if one is published
         if ($HashAsset) {
-            $HashContent  = (Invoke-WebRequest -Uri $HashAsset.browser_download_url -UseBasicParsing -Headers $ApiHeaders).Content.Trim()
+            $HashResponse = Invoke-WebRequest -Uri $HashAsset.browser_download_url -UseBasicParsing -Headers $ApiHeaders
+            if ($HashResponse.Content -is [byte[]]) {
+                $HashContent = [System.Text.Encoding]::UTF8.GetString($HashResponse.Content).Trim()
+            } else {
+                $HashContent = [string]$HashResponse.Content
+                $HashContent = $HashContent.Trim()
+            }
             $ExpectedHash = ($HashContent -split '\s+')[0].ToUpper()  # handle both bare-hash and 'hash  filename' formats
             $ActualHash   = (Get-FileHash -Path $TempPath -Algorithm SHA256).Hash.ToUpper()
             if ($ActualHash -ne $ExpectedHash) {
