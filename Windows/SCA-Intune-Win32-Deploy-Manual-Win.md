@@ -193,7 +193,16 @@ powershell.exe -ExecutionPolicy Bypass -Command "& { $appName = 'Secure Contacts
 
 Set **Install behavior** to **System** (the script requires administrator privileges to install to `C:\Program Files\`).
 
-## Step 4 — Configure the detection rule
+## Step 4 — Set requirements
+
+| Setting | Value |
+|---|---|
+| Operating system architecture | 64-bit |
+| Minimum operating system | Windows 10 |
+
+Add any additional requirements (disk space, RAM) as needed for your environment.
+
+## Step 5 — Configure the detection rule
 
 1. Under **Detection rules**, select **Rule format: Use a custom detection script**.
 2. Upload the detection script for your chosen mode:
@@ -204,19 +213,10 @@ Set **Install behavior** to **System** (the script requires administrator privil
 
 Detection behavior differs by script:
 
-- **`Test-SecureContactsInstalled.ps1` (static):** exits 0 with output when the app is detected at or above `$MinimumVersion`. Update `$MinimumVersion` before deploying if you want to enforce a minimum release.
 - **`Test-SecureContactsUpToDate.ps1` (dynamic):** compares installed version to latest eligible GitHub release and returns non-compliant when an update is available.
+- **`Test-SecureContactsInstalled.ps1` (static):** exits 0 with output when the app is detected at or above `$MinimumVersion`. Update `$MinimumVersion` before deploying if you want to enforce a minimum release.
 
 If you enable script signature enforcement, ensure the selected detection script is signed with a certificate trusted by the managed devices.
-
-## Step 5 — Set requirements
-
-| Setting | Value |
-|---|---|
-| Operating system architecture | 64-bit |
-| Minimum operating system | Windows 10 |
-
-Add any additional requirements (disk space, RAM) as needed for your environment.
 
 ## Step 6 — Assign the app
 
@@ -236,8 +236,8 @@ On a test device, trigger an Intune sync and confirm:
    ```
    > Note: `{ProductCode}` is the MSI ProductCode assigned by Windows Installer and may vary between releases.
 3. Run your selected detection script manually:
-   - `Test-SecureContactsInstalled.ps1` for static minimum-version detection
    - `Test-SecureContactsUpToDate.ps1` for dynamic GitHub-update detection
+   - `Test-SecureContactsInstalled.ps1` for static minimum-version detection
 4. Check the install log if needed: `%TEMP%\SecureContacts_*_install.log` (kept on failure only). When the script runs from Intune as `SYSTEM`, `%TEMP%` refers to the system temp directory, typically `C:\Windows\Temp`.
 
 ## Exit codes
