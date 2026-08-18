@@ -12,7 +12,7 @@ Create one custom setting in Intune:
 - Data type:
   - String (XML file)
 - Value:
-  - Paste the full contents of secure-contacts.admx
+  - Paste the full contents of ..\ADMX\secure-contacts.admx
 
 Notes:
 - Upload the matching ADML file in Intune when prompted (locale-specific).

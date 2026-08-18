@@ -8,7 +8,6 @@ It contains:
 
 - Windows installers (.exe/.msi)
 - macOS installation packages (.pkg/.dmg)
-- Release notes
 - Intune configuration manuals (Windows and macOS)
 - ADMX/ADML administrative template files (Windows)
 - OMA-URI templates and Graph API JSON payloads (Windows)
@@ -46,18 +45,18 @@ See the repository Releases page for the latest version.
 |---|---|
 | [`SCA-Intune-Config-Manual-Win.md`](Windows/SCA-Intune-Config-Manual-Win.md) | Full Intune configuration guide (Method A: ADMX, Method B: OMA-URI) |
 | [`SCA-Intune-Win32-Deploy-Manual-Win.md`](Windows/SCA-Intune-Win32-Deploy-Manual-Win.md) | Windows app deployment guide — Intune Win32 packaging, SCCM/MECM-compatible scripted deployment, install/detect scripts, uninstall |
-| [`secure-contacts.admx`](Windows/secure-contacts.admx) | ADMX policy schema — required for both Intune methods |
-| [`secure-contacts.adml`](Windows/secure-contacts.adml) | Matching ADML locale labels for the ADMX |
-| [`secure-contacts.intune-oma-uri.md`](Windows/secure-contacts.intune-oma-uri.md) | Blank OMA-URI row template for manual Intune entry |
-| [`secure-contacts.intune-oma-uri.example.md`](Windows/secure-contacts.intune-oma-uri.example.md) | Filled OMA-URI reference showing valid sample values |
-| [`secure-contacts.intune-omauri-profile.json`](Windows/secure-contacts.intune-omauri-profile.json) | Blank Graph API payload for the PowerShell importer |
-| [`secure-contacts.intune-omauri-profile.ready.json`](Windows/secure-contacts.intune-omauri-profile.ready.json) | Ready-to-use Graph payload with the current ADMX content already embedded |
-| [`secure-contacts.intune-omauri-profile.example.json`](Windows/secure-contacts.intune-omauri-profile.example.json) | Filled Graph payload reference showing valid sample values |
-| [`import-secure-contacts-omauri.ps1`](Windows/import-secure-contacts-omauri.ps1) | PowerShell script — creates the Intune profile via Microsoft Graph |
-| [`README.intune-omauri-import.md`](Windows/README.intune-omauri-import.md) | Quick-start guide for the PowerShell importer |
 | [`Install-SecureContacts.ps1`](Windows/Install-SecureContacts.ps1) | Windows install/update script — default GitHub-download mode or optional packaged-local MSI mode for Intune/SCCM deployments |
 | [`Test-SecureContactsInstalled.ps1`](Windows/Test-SecureContactsInstalled.ps1) | Intune Win32 app detection script — checks registry for installed version compliance |
 | [`Test-SecureContactsUpToDate.ps1`](Windows/Test-SecureContactsUpToDate.ps1) | Intune Win32 app detection script — compares the installed version with the latest eligible GitHub release |
+| [`ADMX/secure-contacts.admx`](Windows/ADMX/secure-contacts.admx) | ADMX policy schema — required for both Intune methods |
+| [`ADMX/secure-contacts.adml`](Windows/ADMX/secure-contacts.adml) | Matching ADML locale labels for the ADMX |
+| [`OMA-URI/secure-contacts.intune-oma-uri.md`](Windows/OMA-URI/secure-contacts.intune-oma-uri.md) | Blank OMA-URI row template for manual Intune entry |
+| [`OMA-URI/secure-contacts.intune-oma-uri.example.md`](Windows/OMA-URI/secure-contacts.intune-oma-uri.example.md) | Filled OMA-URI reference showing valid sample values |
+| [`OMA-URI/secure-contacts.intune-omauri-profile.json`](Windows/OMA-URI/secure-contacts.intune-omauri-profile.json) | Blank Graph API payload for the PowerShell importer |
+| [`OMA-URI/secure-contacts.intune-omauri-profile.ready.json`](Windows/OMA-URI/secure-contacts.intune-omauri-profile.ready.json) | Ready-to-use Graph payload with the current ADMX content already embedded |
+| [`OMA-URI/secure-contacts.intune-omauri-profile.example.json`](Windows/OMA-URI/secure-contacts.intune-omauri-profile.example.json) | Filled Graph payload reference showing valid sample values |
+| [`OMA-URI/import-secure-contacts-omauri.ps1`](Windows/OMA-URI/import-secure-contacts-omauri.ps1) | PowerShell script — creates the Intune profile via Microsoft Graph |
+| [`OMA-URI/README.intune-omauri-import.md`](Windows/OMA-URI/README.intune-omauri-import.md) | Quick-start guide for the PowerShell importer |
 
 ## macOS deployment files
 

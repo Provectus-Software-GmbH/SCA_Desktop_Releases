@@ -1,10 +1,18 @@
 param(
-  [string]$ProfileJsonPath = ".\\secure-contacts.intune-omauri-profile.json",
-  [string]$AdmxPath = ".\\secure-contacts.admx",
+  [string]$ProfileJsonPath = "",
+  [string]$AdmxPath = "",
   [string]$ResolvedProfileJsonPath,
   [switch]$WriteResolvedProfileOnly,
   [switch]$UseBeta
 )
+
+if (-not $ProfileJsonPath) {
+  $ProfileJsonPath = Join-Path $PSScriptRoot "secure-contacts.intune-omauri-profile.json"
+}
+
+if (-not $AdmxPath) {
+  $AdmxPath = Join-Path $PSScriptRoot "..\ADMX\secure-contacts.admx"
+}
 
 # Requires: Microsoft.Graph PowerShell SDK
 # Install once: Install-Module Microsoft.Graph -Scope CurrentUser

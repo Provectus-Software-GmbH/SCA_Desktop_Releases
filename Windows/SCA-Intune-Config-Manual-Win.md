@@ -45,12 +45,12 @@ Use this when you want a policy UI experience in Intune without managing OMA-URI
 
 ### Required files
 
-- `secure-contacts.admx`
-- `secure-contacts.adml`
+- `ADMX/secure-contacts.admx`
+- `ADMX/secure-contacts.adml`
 
 Important:
 
-- `secure-contacts.admx` and `secure-contacts.adml` define the policy schema and policy UI labels.
+- `ADMX/secure-contacts.admx` and `ADMX/secure-contacts.adml` define the policy schema and policy UI labels.
 - Enter your production values directly in the Intune Administrative Templates UI during configuration.
 - Use the official policy documentation as the source of truth:
   - https://docs.secure-contacts.com/documentation/app-configuration-policy-name-values-for-sca
@@ -59,7 +59,7 @@ Important:
 
 1. In Intune Admin Center, go to Devices -> Configuration -> Profiles.
 2. Create an Imported Administrative Templates profile for Windows.
-3. Import `secure-contacts.admx` and the matching `secure-contacts.adml`.
+3. Import `ADMX/secure-contacts.admx` and the matching `ADMX/secure-contacts.adml`.
 4. Configure Secure Contacts settings in the profile UI.
 5. Assign the profile according to the Assignment Recommendation section above.
 6. Validate on a test device in the registry:
@@ -73,32 +73,32 @@ Use this when you want full Policy CSP control, scripting, or repeatable Graph-b
 
 #### Common (both options)
 
-- `secure-contacts.admx`
+- `ADMX/secure-contacts.admx`
 
 #### Option 1: Manual OMA-URI rows
 
-- `secure-contacts.intune-oma-uri.md`
+- `OMA-URI/secure-contacts.intune-oma-uri.md`
 
 #### Option 2: Automated Graph import
 
-- `secure-contacts.intune-omauri-profile.json`
-- `import-secure-contacts-omauri.ps1`
+- `OMA-URI/secure-contacts.intune-omauri-profile.json`
+- `OMA-URI/import-secure-contacts-omauri.ps1`
 
 #### Additional file
 
-- `secure-contacts.adml`
+- `ADMX/secure-contacts.adml`
 
 Notes:
 
-- `secure-contacts.adml` is required for Administrative Template import.
-- `secure-contacts.adml` may also be requested during ADMX ingestion workflows in Intune.
+- `ADMX/secure-contacts.adml` is required for Administrative Template import.
+- `ADMX/secure-contacts.adml` may also be requested during ADMX ingestion workflows in Intune.
 
 ### Important
 
-- `secure-contacts.intune-omauri-profile.json` is the blank template version.
-- `secure-contacts.intune-omauri-profile.ready.json` is the convenience version with the current ADMX XML already embedded.
-- Use `secure-contacts.intune-omauri-profile.example.json` when you want filled sample values.
-- `secure-contacts.intune-oma-uri.md` is the blank template version. Use `secure-contacts.intune-oma-uri.example.md` when you want filled sample values.
+- `OMA-URI/secure-contacts.intune-omauri-profile.json` is the blank template version.
+- `OMA-URI/secure-contacts.intune-omauri-profile.ready.json` is the convenience version with the current ADMX XML already embedded.
+- Use `OMA-URI/secure-contacts.intune-omauri-profile.example.json` when you want filled sample values.
+- `OMA-URI/secure-contacts.intune-oma-uri.md` is the blank template version. Use `OMA-URI/secure-contacts.intune-oma-uri.example.md` when you want filled sample values.
 - Most Secure Contacts OMA-URI String values must contain a JSON array string, not a comma-separated plain text value.
 - `SecContacts.Licenses` specifically uses JSON objects with `name` and `key`.
 - Most other JSON-backed settings use `name` and `value`.
@@ -118,17 +118,17 @@ Use this checklist before assigning the profile.
 
 #### Method B, Option 1: Manual OMA-URI rows
 
-- Use `secure-contacts.intune-oma-uri.md` as the blank structure template.
-- Use `secure-contacts.intune-oma-uri.example.md` only as a reference for valid sample formats.
+- Use `OMA-URI/secure-contacts.intune-oma-uri.md` as the blank structure template.
+- Use `OMA-URI/secure-contacts.intune-oma-uri.example.md` only as a reference for valid sample formats.
 - Paste your real production values into the Intune OMA-URI value fields.
 - If exported JSON examples show sequences like `\"`, that is expected: the payload is encoding JSON text inside XML inside an outer JSON string.
 
 #### Method B, Option 2: Automated Graph import
 
-- Fill your real production values into `secure-contacts.intune-omauri-profile.json`.
-- Or start from `secure-contacts.intune-omauri-profile.ready.json` if you want the ADMXInstall payload already included.
-- Use `secure-contacts.intune-omauri-profile.example.json` only as a reference for valid sample formats.
-- Then run `import-secure-contacts-omauri.ps1`.
+- Fill your real production values into `OMA-URI/secure-contacts.intune-omauri-profile.json`.
+- Or start from `OMA-URI/secure-contacts.intune-omauri-profile.ready.json` if you want the ADMXInstall payload already included.
+- Use `OMA-URI/secure-contacts.intune-omauri-profile.example.json` only as a reference for valid sample formats.
+- Then run `OMA-URI/import-secure-contacts-omauri.ps1`.
 
 #### For both Method B options
 
@@ -143,7 +143,7 @@ Use this checklist before assigning the profile.
 1. Create a Windows Custom profile in Intune.
 2. Add the ADMX ingest row first:
    - `./Device/Vendor/MSFT/Policy/ConfigOperations/ADMXInstall/SecureContacts/Policy/SecureContactsAdmx`
-3. Add the Secure Contacts policy rows from `secure-contacts.intune-oma-uri.md`.
+3. Add the Secure Contacts policy rows from `OMA-URI/secure-contacts.intune-oma-uri.md`.
 4. Assign the profile according to the Assignment Recommendation section.
 
 #### Option 2: Automated Graph import
@@ -157,7 +157,7 @@ Install-Module Microsoft.Graph -Scope CurrentUser
 2. Run the importer from this folder:
 
 ```powershell
-.\import-secure-contacts-omauri.ps1
+.\OMA-URI\import-secure-contacts-omauri.ps1
 ```
 
 3. The script replaces the ADMX placeholder in the JSON file with the actual ADMX content and creates the profile via Microsoft Graph.
@@ -187,9 +187,9 @@ After successful deployment:
 ## Detailed references
 
 - Official policy documentation: https://docs.secure-contacts.com/documentation/app-configuration-policy-name-values-for-sca
-- `secure-contacts.intune-oma-uri.md`
-- `import-secure-contacts-omauri.ps1`
-- `README.intune-omauri-import.md`
+- `OMA-URI/secure-contacts.intune-oma-uri.md`
+- `OMA-URI/import-secure-contacts-omauri.ps1`
+- `OMA-URI/README.intune-omauri-import.md`
 - `Install-SecureContacts.ps1` — Win32 app install/update script
 - `Test-SecureContactsInstalled.ps1` — Win32 app detection script
 - `Test-SecureContactsUpToDate.ps1` — Win32 app up-to-date detection script

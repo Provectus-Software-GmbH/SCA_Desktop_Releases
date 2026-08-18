@@ -16,9 +16,9 @@ Use the included Graph payload + PowerShell importer.
 - import-secure-contacts-omauri.ps1
   - Creates the profile in Intune via Microsoft Graph.
   - Can also write a resolved JSON file before upload.
-- secure-contacts.admx
+- ..\ADMX\secure-contacts.admx
   - Required for ADMX ingestion setting value.
-- secure-contacts.adml
+- ..\ADMX\secure-contacts.adml
   - Matching locale resource file required by ADMX-backed policy processing.
 
 ## Usage
@@ -44,7 +44,7 @@ Optional (beta endpoint):
 
 ## What it creates
 
-- One ADMX ingest OMA-URI setting (value is read from secure-contacts.admx at runtime)
+- One ADMX ingest OMA-URI setting (value is read from ..\ADMX\secure-contacts.admx at runtime)
 - Eleven Secure Contacts policy OMA-URI settings
 
 ## After creation
