@@ -184,7 +184,7 @@ powershell.exe -ExecutionPolicy Bypass -File Install-SecureContacts.ps1 -MsiPath
 Use the following dynamic uninstall command. It looks up the installed product code from the registry at uninstall time:
 
 ```
-powershell.exe -ExecutionPolicy Bypass -Command "& { $appName = 'Secure Contacts'; $app = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -eq $appName } | Select-Object -First 1; if ($app) { Start-Process msiexec.exe -ArgumentList \"/x $($app.PSChildName) /qn /norestart\" -Wait } }"
+powershell.exe -ExecutionPolicy Bypass -Command "& { `$appName = 'Secure Contacts'; `$app = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' -ErrorAction SilentlyContinue | Where-Object { `$_.DisplayName -eq `$appName } | Select-Object -First 1; if (`$app) { Start-Process msiexec.exe -ArgumentList '/x', `$app.PSChildName, '/qn', '/norestart' -Wait } else { Write-Host 'Not installed' } }"
 ```
 
 > The uninstall command automatically discovers the currently installed MSI ProductCode and therefore remains valid across Secure Contacts versions.
