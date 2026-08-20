@@ -1,0 +1,27 @@
+Identifier: de.provectus.securecontacts.download
+Description: Downloads the latest stable Secure Contacts ARM64 installer package from the official GitHub release and verifies its Provectus Developer ID Installer certificate chain.
+MinimumVersion: '2.3'
+Input:
+  NAME: SecureContacts
+  GITHUB_REPO: Provectus-Software-GmbH/SCA_Desktop_Releases
+  PACKAGE_FILENAME: 'SecureContacts-%version%-arm64.pkg'
+Process:
+- Processor: GitHubReleasesInfoProvider
+  Arguments:
+    github_repo: '%GITHUB_REPO%'
+    latest_only: true
+    asset_regex: '^SecureContacts-[0-9]+(?:\.[0-9]+)*-arm64\.pkg$'
+
+- Processor: URLDownloader
+  Arguments:
+    filename: '%PACKAGE_FILENAME%'
+
+- Processor: EndOfCheckPhase
+
+- Processor: CodeSignatureVerifier
+  Arguments:
+    input_path: '%pathname%'
+    expected_authority_names:
+      - 'Developer ID Installer: Provectus Software GmbH (572S9T76X8)'
+      - 'Developer ID Certification Authority'
+      - 'Apple Root CA'

@@ -1,0 +1,60 @@
+Identifier: de.provectus.securecontacts.intune
+ParentRecipe: de.provectus.securecontacts.download
+Description: Prepares Secure Contacts macOS package for Intune deployment. Inherits download and signature verification from parent recipe. Stages output for manual Intune upload (local or CI/CD).
+MinimumVersion: '2.3'
+
+Input:
+  NAME: SecureContacts
+  DISPLAY_NAME: Secure Contacts Enterprise
+  DESCRIPTION: 'Enterprise contact management solution for secure business contact synchronization and distribution across managed devices.'
+  DEVELOPER: Provectus Software GmbH
+  BUNDLE_ID: de.provectus.SecureContactsDesktop
+  CATEGORIES:
+    - Business Applications
+  OUTPUT_PATH: '%RECIPE_CACHE_DIR%'
+  PACKAGE_FILENAME: 'SecureContacts-%version%-arm64.pkg'
+
+Process:
+  # All parent recipe processors run first:
+  # 1. GitHubReleasesInfoProvider — extracts latest version and download URL
+  # 2. URLDownloader — downloads the .pkg file
+  # 3. EndOfCheckPhase — marks download phase complete
+  # 4. CodeSignatureVerifier — verifies Provectus Developer ID signature (572S9T76X8)
+  #
+  # Result: %pathname% = verified, signed .pkg file ready for Intune deployment
+  
+  # Stage output to the configured path (local cache or CI/CD artifact folder)
+  - Processor: Copier
+    Arguments:
+      source_path: '%pathname%'
+      destination_path: '%OUTPUT_PATH%/%PACKAGE_FILENAME%'
+      overwrite: true
+
+  # Download the official checksum next to the package. Keeping the original
+  # package filename allows standard tools such as `shasum -a 256 -c` to use it.
+  - Processor: URLDownloader
+    Arguments:
+      url: 'https://github.com/%GITHUB_REPO%/releases/download/v%version%/%PACKAGE_FILENAME%.sha256'
+      filename: '%PACKAGE_FILENAME%.sha256'
+      download_dir: '%OUTPUT_PATH%'
+
+# USAGE INSTRUCTIONS
+#
+# LOCAL ADMIN WORKFLOW:
+#   1. Run recipe: autopkg run de.provectus.securecontacts.intune
+#   2. Output location: ~/Library/AutoPkg/Cache/de.provectus.securecontacts.intune/
+#   3. Upload the staged .pkg to Intune Admin Center → Apps → macOS → Add
+#
+# CI/CD PIPELINE WORKFLOW:
+#   1. Create the artifact directory: mkdir -p ./artifacts
+#   2. Run recipe with output override:
+#      autopkg run de.provectus.securecontacts.intune -k OUTPUT_PATH=./artifacts/
+#   3. Output location: ./artifacts/SecureContacts-<version>-arm64.pkg
+#   4. Verify with: cd ./artifacts && shasum -a 256 -c SecureContacts-<version>-arm64.pkg.sha256
+#   5. Artifact is available for downstream deployment job to upload to Intune
+#
+# SECURITY VERIFICATION:
+#   - All packages are verified against Provectus Developer ID certificate (572S9T76X8)
+#   - Signature chain validated: Developer ID Installer → Apple Intermediate CA → Apple Root CA
+#   - The official release checksum is staged for an explicit shasum comparison
+#   - Notarization is not enforced by this recipe; validate it separately with spctl before deployment
