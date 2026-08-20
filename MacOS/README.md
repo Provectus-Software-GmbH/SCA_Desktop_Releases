@@ -8,12 +8,15 @@ This folder contains the files IT administrators need to deploy, configure, and 
 
 1. Deploy the app with [SCA-Intune-Deploy-Manual-MacOS.md](SCA-Intune-Deploy-Manual-MacOS.md).
 2. Configure managed preferences with [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md).
+3. For optional customer-owned polling and Graph publishing, use [SCA-AutoUpdate-Pipeline-Manual-MacOS.md](SCA-AutoUpdate-Pipeline-Manual-MacOS.md).
 
 ## Files in this folder
 
 | File | Role |
 |---|---|
 | [SCA-Intune-Deploy-Manual-MacOS.md](SCA-Intune-Deploy-Manual-MacOS.md) | Intune PKG app deployment, verification, detection, assignment, update, and rollback guide |
+| [SCA-AutoUpdate-Pipeline-Manual-MacOS.md](SCA-AutoUpdate-Pipeline-Manual-MacOS.md) | Manual and optional customer-owned AutoPkg, validation, approval, and Graph publishing workflow |
+| [Invoke-SecureContactsAutoUpdate.sh](Invoke-SecureContactsAutoUpdate.sh) | Validation-only runner for staged ARM64 PKG artifacts; never writes to Graph |
 | [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
 | [de.provectus.SecureContactsDesktop.plist](de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
 | [de.provectus.SecureContactsDesktop.plist.demo](de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |
@@ -85,6 +88,8 @@ cd ./artifacts
 shasum -a 256 -c SecureContacts-<version>-arm64.pkg.sha256
 spctl --assess --type install --verbose=4 SecureContacts-<version>-arm64.pkg
 ```
+
+For the complete manual and optional customer-owned polling workflow, see [SCA-AutoUpdate-Pipeline-Manual-MacOS.md](SCA-AutoUpdate-Pipeline-Manual-MacOS.md). The validation runner is intentionally Graph-free; on macOS, make it executable once with `chmod +x ./MacOS/Invoke-SecureContactsAutoUpdate.sh`.
 
 The signature check enforces publisher identity and package integrity. The SHA256 comparison detects transfer or storage corruption. The `spctl` command separately checks the current Gatekeeper/notarization assessment.
 

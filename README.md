@@ -25,6 +25,7 @@ The Secure Contacts App source code is maintained in a separate private reposito
    - Windows app deployment: [SCA-Intune-Win32-Deploy-Manual-Win.md](Windows/SCA-Intune-Win32-Deploy-Manual-Win.md) for Intune Win32 packaging and SCCM/MECM-compatible scripted deployment
    - macOS app deployment: [SCA-Intune-Deploy-Manual-MacOS.md](MacOS/SCA-Intune-Deploy-Manual-MacOS.md) for Intune PKG deployment
    - macOS configuration: [SCA-Intune-Config-Manual-Mac.md](MacOS/SCA-Intune-Config-Manual-Mac.md)
+   - optional macOS update automation: [SCA-AutoUpdate-Pipeline-Manual-MacOS.md](MacOS/SCA-AutoUpdate-Pipeline-Manual-MacOS.md) for customer-owned polling, validation, and Graph publishing design
 3. Configure Secure Contacts for your environment.
 4. Deploy the application and assign the configuration through your device management platform.
 5. Validate the deployment on a test device.
@@ -64,6 +65,8 @@ See the repository Releases page for the latest version.
 | File | Role |
 |---|---|
 | [`SCA-Intune-Deploy-Manual-MacOS.md`](MacOS/SCA-Intune-Deploy-Manual-MacOS.md) | macOS app deployment guide - PKG verification, Intune upload, detection, assignment, updates, and rollback planning |
+| [`SCA-AutoUpdate-Pipeline-Manual-MacOS.md`](MacOS/SCA-AutoUpdate-Pipeline-Manual-MacOS.md) | Manual and optional customer-owned macOS update pipeline, validation, approval, and Graph publishing design |
+| [`Invoke-SecureContactsAutoUpdate.sh`](MacOS/Invoke-SecureContactsAutoUpdate.sh) | Validation-only macOS runner for AutoPkg-staged artifacts; Graph publishing is disabled |
 | [`SCA-Intune-Config-Manual-Mac.md`](MacOS/SCA-Intune-Config-Manual-Mac.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
 | [`de.provectus.SecureContactsDesktop.plist`](MacOS/de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
 | [`de.provectus.SecureContactsDesktop.plist.demo`](MacOS/de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |

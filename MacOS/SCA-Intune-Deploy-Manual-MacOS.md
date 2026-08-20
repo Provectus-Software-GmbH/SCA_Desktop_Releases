@@ -2,7 +2,7 @@
 
 This guide covers deploying Secure Contacts to managed Apple silicon Macs as an Intune **macOS app (PKG)**. It uses the signed ARM64 package published in this repository's GitHub Releases.
 
-> **Related:** Configure Secure Contacts policies after app deployment using [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md).
+> **Related:** Configure Secure Contacts policies after app deployment using [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md). For an optional customer-owned polling and publishing workflow, see [SCA-AutoUpdate-Pipeline-Manual-MacOS.md](SCA-AutoUpdate-Pipeline-Manual-MacOS.md).
 
 ## Scope
 
@@ -263,6 +263,7 @@ For removal, obtain or build a vendor-approved uninstall procedure that removes 
 ## Related files and references
 
 - [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md) - managed-preferences configuration guide
+- [SCA-AutoUpdate-Pipeline-Manual-MacOS.md](SCA-AutoUpdate-Pipeline-Manual-MacOS.md) - manual and optional customer-owned update pipeline
 - [README.md](README.md) - AutoPkg staging and verification workflow
 - [de.provectus.securecontacts.download.recipe.yaml](de.provectus.securecontacts.download.recipe.yaml) - package download and signer verification
 - [de.provectus.securecontacts.intune.recipe.yaml](de.provectus.securecontacts.intune.recipe.yaml) - verified PKG and checksum staging
