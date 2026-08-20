@@ -30,7 +30,7 @@ Use this path when a customer wants a human approval and portal upload:
 
    ```bash
    mkdir -p ./artifacts
-   autopkg run ./MacOS/de.provectus.securecontacts.intune.recipe.yaml \\
+   autopkg run ./MacOS/de.provectus.securecontacts.intune.recipe.yaml \
      -k OUTPUT_PATH=./artifacts
    ```
 
@@ -38,7 +38,7 @@ Use this path when a customer wants a human approval and portal upload:
 
    ```bash
    chmod +x ./MacOS/Invoke-SecureContactsAutoUpdate.sh
-   ./MacOS/Invoke-SecureContactsAutoUpdate.sh --output ./artifacts
+   ./MacOS/Invoke-SecureContactsAutoUpdate.sh --output ./artifacts --skip-recipe
    ```
 
 4. Record the release version, package SHA256, signer, validation date, and change reference.
@@ -61,7 +61,7 @@ GitHub Releases -> AutoPkg -> local validation -> artifact retention -> approval
                                            pilot health check -> production approval
 ```
 
-The first implementation in this repository is validation-only. A customer publishing job may be added around it, but it must keep Graph write operations outside the validation script and behind an explicit approval gate.
+The first implementation in this repository is Graph-free staging and validation. A customer publishing job may be added around it, but it must keep Graph write operations outside the validation script and behind an explicit approval gate.
 
 ### Required pipeline stages
 

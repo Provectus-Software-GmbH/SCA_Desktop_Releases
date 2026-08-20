@@ -66,7 +66,7 @@ See the repository Releases page for the latest version.
 |---|---|
 | [`SCA-Intune-Deploy-Manual-MacOS.md`](MacOS/SCA-Intune-Deploy-Manual-MacOS.md) | macOS app deployment guide - PKG verification, Intune upload, detection, assignment, updates, and rollback planning |
 | [`SCA-AutoUpdate-Pipeline-Manual-MacOS.md`](MacOS/SCA-AutoUpdate-Pipeline-Manual-MacOS.md) | Manual and optional customer-owned macOS update pipeline, validation, approval, and Graph publishing design |
-| [`Invoke-SecureContactsAutoUpdate.sh`](MacOS/Invoke-SecureContactsAutoUpdate.sh) | Validation-only macOS runner for AutoPkg-staged artifacts; Graph publishing is disabled |
+| [`Invoke-SecureContactsAutoUpdate.sh`](MacOS/Invoke-SecureContactsAutoUpdate.sh) | Graph-free macOS runner that stages and validates ARM64 artifacts; Graph publishing is disabled |
 | [`SCA-Intune-Config-Manual-Mac.md`](MacOS/SCA-Intune-Config-Manual-Mac.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
 | [`de.provectus.SecureContactsDesktop.plist`](MacOS/de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
 | [`de.provectus.SecureContactsDesktop.plist.demo`](MacOS/de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |

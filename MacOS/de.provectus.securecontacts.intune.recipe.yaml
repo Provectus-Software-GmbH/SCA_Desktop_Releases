@@ -55,6 +55,6 @@ Process:
 #
 # SECURITY VERIFICATION:
 #   - All packages are verified against Provectus Developer ID certificate (572S9T76X8)
-#   - Signature chain validated: Developer ID Installer → Apple Intermediate CA → Apple Root CA
+#   - Signature chain validated: Developer ID Installer → Developer ID Certification Authority → Apple Root CA
 #   - The official release checksum is staged for an explicit shasum comparison
 #   - Notarization is not enforced by this recipe; validate it separately with spctl before deployment

@@ -44,6 +44,8 @@ mkdir -p "$OUTPUT_PATH"
 command -v shasum >/dev/null || { echo "shasum is required" >&2; exit 1; }
 command -v pkgutil >/dev/null || { echo "pkgutil is required" >&2; exit 1; }
 command -v spctl >/dev/null || { echo "spctl is required" >&2; exit 1; }
+command -v file >/dev/null || { echo "file is required" >&2; exit 1; }
+[ -x /usr/libexec/PlistBuddy ] || { echo "/usr/libexec/PlistBuddy is required" >&2; exit 1; }
 
 if [ "$SKIP_RECIPE" != true ]; then
   command -v autopkg >/dev/null || { echo "autopkg is required unless --skip-recipe is used" >&2; exit 1; }
@@ -85,7 +87,7 @@ expanded_path=$(mktemp -d)
 trap 'rm -rf "$expanded_path"' EXIT
 pkgutil --expand-full "$pkg_path" "$expanded_path/package"
 
-info_path=$(find "$expanded_path/package" -type f -path '*/Contents/Info.plist' -print | head -n 1)
+info_path=$(find "$expanded_path/package" -type f -path '*/Contents/Info.plist' -not -path '*/Frameworks/*' -print | head -n 1)
 [ -n "$info_path" ] || { echo "No application Info.plist found in package" >&2; exit 1; }
 
 bundle_id=$(/usr/libexec/PlistBuddy -c 'Print:CFBundleIdentifier' "$info_path")
