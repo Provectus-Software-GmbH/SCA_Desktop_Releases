@@ -23,7 +23,8 @@ The Secure Contacts App source code is maintained in a separate private reposito
 2. Review the appropriate deployment guide:
    - Windows configuration: [SCA-Intune-Config-Manual-Win.md](Windows/SCA-Intune-Config-Manual-Win.md)
    - Windows app deployment: [SCA-Intune-Win32-Deploy-Manual-Win.md](Windows/SCA-Intune-Win32-Deploy-Manual-Win.md) for Intune Win32 packaging and SCCM/MECM-compatible scripted deployment
-   - macOS: [SCA-Intune-Config-Manual-Mac.md](MacOS/SCA-Intune-Config-Manual-Mac.md)
+   - macOS app deployment: [SCA-Intune-Deploy-Manual-MacOS.md](MacOS/SCA-Intune-Deploy-Manual-MacOS.md) for Intune PKG deployment
+   - macOS configuration: [SCA-Intune-Config-Manual-Mac.md](MacOS/SCA-Intune-Config-Manual-Mac.md)
 3. Configure Secure Contacts for your environment.
 4. Deploy the application and assign the configuration through your device management platform.
 5. Validate the deployment on a test device.
@@ -62,13 +63,18 @@ See the repository Releases page for the latest version.
 
 | File | Role |
 |---|---|
+| [`SCA-Intune-Deploy-Manual-MacOS.md`](MacOS/SCA-Intune-Deploy-Manual-MacOS.md) | macOS app deployment guide - PKG verification, Intune upload, detection, assignment, updates, and rollback planning |
 | [`SCA-Intune-Config-Manual-Mac.md`](MacOS/SCA-Intune-Config-Manual-Mac.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
 | [`de.provectus.SecureContactsDesktop.plist`](MacOS/de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
 | [`de.provectus.SecureContactsDesktop.plist.demo`](MacOS/de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |
 | [`secure-contacts-manifest.json`](MacOS/secure-contacts-manifest.json) | Manifest schema reference for non-Intune MDM platforms (Jamf, Kandji) |
+| [`de.provectus.securecontacts.download.recipe.yaml`](MacOS/de.provectus.securecontacts.download.recipe.yaml) | AutoPkg download and Developer ID signature verification recipe |
+| [`de.provectus.securecontacts.intune.recipe.yaml`](MacOS/de.provectus.securecontacts.intune.recipe.yaml) | AutoPkg staging recipe for the ARM64 package and official checksum |
+| [`de.provectus.securecontacts.config.recipe.yaml`](MacOS/de.provectus.securecontacts.config.recipe.yaml) | AutoPkg staging recipe for macOS configuration templates |
 
 ## Additional documentation
 
 - Windows deployment and configuration: [`Windows/SCA-Intune-Config-Manual-Win.md`](Windows/SCA-Intune-Config-Manual-Win.md)
-- macOS deployment and configuration: [`MacOS/SCA-Intune-Config-Manual-Mac.md`](MacOS/SCA-Intune-Config-Manual-Mac.md)
+- macOS app deployment: [`MacOS/SCA-Intune-Deploy-Manual-MacOS.md`](MacOS/SCA-Intune-Deploy-Manual-MacOS.md)
+- macOS configuration: [`MacOS/SCA-Intune-Config-Manual-Mac.md`](MacOS/SCA-Intune-Config-Manual-Mac.md)
 - Official policy documentation: [Secure Contacts Policy Documentation](https://docs.secure-contacts.com/documentation/app-configuration-policy-name-values-for-sca)
