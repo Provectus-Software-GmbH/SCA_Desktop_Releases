@@ -4,7 +4,7 @@ This document provides OMA-URI entries for Microsoft Intune custom profiles.
 
 Note:
 - This file is the blank template version.
-- Use `secure-contacts.intune-oma-uri.example.md` when you want filled sample values.
+- Use `README.Intune-OMA-URI.Example.md` when you want filled sample values.
 
 ## 1) Ingest the ADMX (required first)
 

@@ -57,13 +57,13 @@ See the repository Releases page for the latest version.
 | [`Test-SecureContactsUpToDate.ps1`](Windows/Test-SecureContactsUpToDate.ps1) | Intune Win32 app detection script — compares the installed version with the latest eligible GitHub release |
 | [`ADMX/secure-contacts.admx`](Windows/ADMX/secure-contacts.admx) | ADMX policy schema — required for both Intune methods |
 | [`ADMX/secure-contacts.adml`](Windows/ADMX/secure-contacts.adml) | Matching ADML locale labels for the ADMX |
-| [`OMA-URI/secure-contacts.intune-oma-uri.md`](Windows/OMA-URI/secure-contacts.intune-oma-uri.md) | Blank OMA-URI row template for manual Intune entry |
-| [`OMA-URI/secure-contacts.intune-oma-uri.example.md`](Windows/OMA-URI/secure-contacts.intune-oma-uri.example.md) | Filled OMA-URI reference showing valid sample values |
+| [`OMA-URI/README.Intune-OMA-URI.md`](Windows/OMA-URI/README.Intune-OMA-URI.md) | Blank OMA-URI row template for manual Intune entry |
+| [`OMA-URI/README.Intune-OMA-URI.Example.md`](Windows/OMA-URI/README.Intune-OMA-URI.Example.md) | Filled OMA-URI reference showing valid sample values |
 | [`OMA-URI/secure-contacts.intune-omauri-profile.json`](Windows/OMA-URI/secure-contacts.intune-omauri-profile.json) | Blank Graph API payload for the PowerShell importer |
 | [`OMA-URI/secure-contacts.intune-omauri-profile.ready.json`](Windows/OMA-URI/secure-contacts.intune-omauri-profile.ready.json) | Ready-to-use Graph payload with the current ADMX content already embedded |
 | [`OMA-URI/secure-contacts.intune-omauri-profile.example.json`](Windows/OMA-URI/secure-contacts.intune-omauri-profile.example.json) | Filled Graph payload reference showing valid sample values |
 | [`OMA-URI/import-secure-contacts-omauri.ps1`](Windows/OMA-URI/import-secure-contacts-omauri.ps1) | PowerShell script — creates the Intune profile via Microsoft Graph |
-| [`OMA-URI/README.intune-omauri-import.md`](Windows/OMA-URI/README.intune-omauri-import.md) | Quick-start guide for the PowerShell importer |
+| [`OMA-URI/README.Intune-OMA-URI-Import.md`](Windows/OMA-URI/README.Intune-OMA-URI-Import.md) | Quick-start guide for the PowerShell importer |
 | [`README.Intune-Uninstall.md`](Windows/README.Intune-Uninstall.md) | Windows uninstall modes, safety scope, Intune usage, and exit codes |
 
 ## macOS deployment files

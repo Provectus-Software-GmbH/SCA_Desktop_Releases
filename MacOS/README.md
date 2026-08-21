@@ -27,13 +27,13 @@ For the detailed comparison and decision guidance, see [README.AutoUpdate-Pipeli
 
 | File | Role |
 |---|---|
+| [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
 | [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md) | Intune PKG app deployment, verification, detection, assignment, update, and rollback guide |
 | [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) | Optional macOS application-only uninstall or complete per-user data purge guide |
-| [Uninstall-SecureContacts.sh](Uninstall-SecureContacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
 | [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md) | Four macOS update paths: manual GitHub, manual AutoPkg, customer-owned Graph publishing, and direct endpoint updating |
-| [Invoke-SecureContactsAutoUpdate.sh](Invoke-SecureContactsAutoUpdate.sh) | Graph-free ARM64 PKG staging and validation runner; never writes to Graph |
 | [Install-SecureContacts.sh](Install-SecureContacts.sh) | Optional customer-owned endpoint updater; downloads, validates, and installs a newer ARM64 PKG |
-| [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
+| [Uninstall-SecureContacts.sh](Uninstall-SecureContacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
+| [Invoke-SecureContactsAutoUpdate.sh](Invoke-SecureContactsAutoUpdate.sh) | Graph-free ARM64 PKG staging and validation runner; never writes to Graph |
 | [de.provectus.SecureContactsDesktop.plist](de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
 | [de.provectus.SecureContactsDesktop.plist.demo](de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |
 | [secure-contacts-manifest.json](secure-contacts-manifest.json) | Manifest schema reference for non-Intune MDM platforms |
