@@ -37,9 +37,9 @@ For the detailed comparison and decision guidance, see [README.AutoUpdate-Pipeli
 | [de.provectus.SecureContactsDesktop.plist](de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
 | [de.provectus.SecureContactsDesktop.plist.demo](de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |
 | [secure-contacts-manifest.json](secure-contacts-manifest.json) | Manifest schema reference for non-Intune MDM platforms |
-| [de.provectus.securecontacts.download.recipe.yaml](de.provectus.securecontacts.download.recipe.yaml) | Downloads the latest stable ARM64 package and verifies the Provectus signing chain |
-| [de.provectus.securecontacts.intune.recipe.yaml](de.provectus.securecontacts.intune.recipe.yaml) | Stages the verified package and official SHA256 file for Intune or CI |
-| [de.provectus.securecontacts.config.recipe.yaml](de.provectus.securecontacts.config.recipe.yaml) | Stages the production, demo, and manifest configuration files |
+| [de.provectus.securecontacts.download.recipe.yaml](AutoPkg/de.provectus.securecontacts.download.recipe.yaml) | Downloads the latest stable ARM64 package and verifies the Provectus signing chain |
+| [de.provectus.securecontacts.intune.recipe.yaml](AutoPkg/de.provectus.securecontacts.intune.recipe.yaml) | Stages the verified package and official SHA256 file for Intune or CI |
+| [de.provectus.securecontacts.config.recipe.yaml](AutoPkg/de.provectus.securecontacts.config.recipe.yaml) | Stages the production, demo, and manifest configuration files |
 
 ## AutoPkg recipes
 
@@ -55,7 +55,7 @@ Run the recipes from a clone of this repository by passing their paths directly,
 ### Download and signature verification
 
 ```bash
-autopkg run ./MacOS/de.provectus.securecontacts.download.recipe.yaml
+autopkg run ./MacOS/AutoPkg/de.provectus.securecontacts.download.recipe.yaml
 ```
 
 The download recipe selects the latest non-prerelease GitHub release marked as latest, downloads `SecureContacts-<version>-arm64.pkg`, and fails unless `pkgutil --check-signature` returns this exact certificate chain:
@@ -73,7 +73,7 @@ Do not set `DISABLE_CODE_SIGNATURE_VERIFICATION` in production automation.
 Default cache output:
 
 ```bash
-autopkg run ./MacOS/de.provectus.securecontacts.intune.recipe.yaml
+autopkg run ./MacOS/AutoPkg/de.provectus.securecontacts.intune.recipe.yaml
 ```
 
 The default output directory is:
@@ -86,7 +86,7 @@ CI or a custom local directory:
 
 ```bash
 mkdir -p ./artifacts
-autopkg run ./MacOS/de.provectus.securecontacts.intune.recipe.yaml \
+autopkg run ./MacOS/AutoPkg/de.provectus.securecontacts.intune.recipe.yaml \
 	-k OUTPUT_PATH=./artifacts
 ```
 
@@ -114,7 +114,7 @@ The signature check enforces publisher identity and package integrity. The SHA25
 ### Stage configuration files
 
 ```bash
-autopkg run ./MacOS/de.provectus.securecontacts.config.recipe.yaml
+autopkg run ./MacOS/AutoPkg/de.provectus.securecontacts.config.recipe.yaml
 ```
 
 The default output directory is:
@@ -129,7 +129,7 @@ For custom output:
 
 ```bash
 mkdir -p ./artifacts/config
-autopkg run ./MacOS/de.provectus.securecontacts.config.recipe.yaml \
+autopkg run ./MacOS/AutoPkg/de.provectus.securecontacts.config.recipe.yaml \
 	-k OUTPUT_PATH=./artifacts/config
 ```
 

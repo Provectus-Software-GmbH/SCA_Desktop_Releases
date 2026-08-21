@@ -71,7 +71,7 @@ Use this path when a customer wants repeatable package acquisition with a human 
 
    ```bash
    mkdir -p ./artifacts
-   autopkg run ./MacOS/de.provectus.securecontacts.intune.recipe.yaml \
+   autopkg run ./MacOS/AutoPkg/de.provectus.securecontacts.intune.recipe.yaml \
      -k OUTPUT_PATH=./artifacts
    ```
 

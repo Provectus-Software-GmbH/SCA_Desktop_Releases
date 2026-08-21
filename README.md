@@ -80,9 +80,9 @@ See the repository Releases page for the latest version.
 | [`de.provectus.SecureContactsDesktop.plist`](MacOS/de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
 | [`de.provectus.SecureContactsDesktop.plist.demo`](MacOS/de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |
 | [`secure-contacts-manifest.json`](MacOS/secure-contacts-manifest.json) | Manifest schema reference for non-Intune MDM platforms (Jamf, Kandji) |
-| [`de.provectus.securecontacts.download.recipe.yaml`](MacOS/de.provectus.securecontacts.download.recipe.yaml) | AutoPkg download and Developer ID signature verification recipe |
-| [`de.provectus.securecontacts.intune.recipe.yaml`](MacOS/de.provectus.securecontacts.intune.recipe.yaml) | AutoPkg staging recipe for the ARM64 package and official checksum |
-| [`de.provectus.securecontacts.config.recipe.yaml`](MacOS/de.provectus.securecontacts.config.recipe.yaml) | AutoPkg staging recipe for macOS configuration templates |
+| [`de.provectus.securecontacts.download.recipe.yaml`](MacOS/AutoPkg/de.provectus.securecontacts.download.recipe.yaml) | AutoPkg download and Developer ID signature verification recipe |
+| [`de.provectus.securecontacts.intune.recipe.yaml`](MacOS/AutoPkg/de.provectus.securecontacts.intune.recipe.yaml) | AutoPkg staging recipe for the ARM64 package and official checksum |
+| [`de.provectus.securecontacts.config.recipe.yaml`](MacOS/AutoPkg/de.provectus.securecontacts.config.recipe.yaml) | AutoPkg staging recipe for macOS configuration templates |
 
 ## Additional documentation
 

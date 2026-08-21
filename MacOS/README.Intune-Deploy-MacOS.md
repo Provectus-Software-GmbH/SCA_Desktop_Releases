@@ -63,7 +63,7 @@ On a macOS workstation with AutoPkg 2.3 or later:
 
 ```bash
 mkdir -p ./artifacts
-autopkg run ./MacOS/de.provectus.securecontacts.intune.recipe.yaml \
+autopkg run ./MacOS/AutoPkg/de.provectus.securecontacts.intune.recipe.yaml \
   -k OUTPUT_PATH=./artifacts
 ```
 
@@ -292,7 +292,7 @@ Do not remove `/Library/Managed Preferences/de.provectus.SecureContactsDesktop.p
 - [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md) - managed-preferences configuration guide
 - [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md) - manual and optional customer-owned update pipeline
 - [README.md](README.md) - AutoPkg staging and verification workflow
-- [de.provectus.securecontacts.download.recipe.yaml](de.provectus.securecontacts.download.recipe.yaml) - package download and signer verification
-- [de.provectus.securecontacts.intune.recipe.yaml](de.provectus.securecontacts.intune.recipe.yaml) - verified PKG and checksum staging
+- [de.provectus.securecontacts.download.recipe.yaml](AutoPkg/de.provectus.securecontacts.download.recipe.yaml) - package download and signer verification
+- [de.provectus.securecontacts.intune.recipe.yaml](AutoPkg/de.provectus.securecontacts.intune.recipe.yaml) - verified PKG and checksum staging
 - [Microsoft: Add an unmanaged macOS PKG app to Intune](https://learn.microsoft.com/mem/intune/apps/macos-unmanaged-pkg)
 - [Microsoft: Add macOS line-of-business apps to Intune](https://learn.microsoft.com/mem/intune/apps/lob-apps-macos)
