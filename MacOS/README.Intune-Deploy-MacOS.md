@@ -258,7 +258,7 @@ For rollback:
 3. Test the downgrade on a non-production Mac, including application data and managed preferences.
 4. Deploy the approved rollback package only after successful testing.
 
-For removal, use the separately tested [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) and [uninstall-secure-contacts.sh](uninstall-secure-contacts.sh) workflow. It runs as an Intune macOS Shell script rather than as a PKG app Uninstall assignment. Use `application-only` for the conservative removal path; treat `complete-purge` as a separate destructive workflow requiring explicit review, controlled assignment, and acceptance testing.
+For removal, use the separately tested [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) and [Uninstall-SecureContacts.sh](Uninstall-SecureContacts.sh) workflow. It runs as an Intune macOS Shell script rather than as a PKG app Uninstall assignment. Use `application-only` for the conservative removal path; treat `complete-purge` as a separate destructive workflow requiring explicit review, controlled assignment, and acceptance testing.
 
 The PKG app type still has no general Uninstall assignment. Removing an app assignment or retiring a device must not be treated as proof that the application or its user data was removed. The standalone uninstall guide defines the production identity gate, dry-run process, safety checks, preserved managed preferences and Keychain state, best-effort login-item cleanup, and exit codes.
 

@@ -27,7 +27,7 @@ The script remains compatible with the system Bash shipped by macOS, but compati
 
 ## Files
 
-- Deployment script: `uninstall-secure-contacts.sh`
+- Deployment script: `Uninstall-SecureContacts.sh`
 - Managed configuration that must remain untouched: `/Library/Managed Preferences/de.provectus.SecureContactsDesktop.plist`
 - Intune-captured operation output: standard output
 
@@ -58,7 +58,7 @@ Copy only reviewed values from a notarized production artifact. Do not use the M
 ### Application Only
 
 ```bash
-sudo ./uninstall-secure-contacts.sh application-only
+sudo ./Uninstall-SecureContacts.sh application-only
 ```
 
 This mode:
@@ -74,7 +74,7 @@ Removing the application while preserving its login item can leave a stale macOS
 ### Complete Purge
 
 ```bash
-sudo ./uninstall-secure-contacts.sh complete-purge
+sudo ./Uninstall-SecureContacts.sh complete-purge
 ```
 
 This mode additionally enumerates eligible local users through directory services and removes these exact paths from each validated home:
@@ -91,7 +91,7 @@ Deleting `Data` removes the application-owned settings, Level stores, SCACore ca
 Use dry-run before destructive deployment:
 
 ```bash
-./uninstall-secure-contacts.sh complete-purge --dry-run
+./Uninstall-SecureContacts.sh complete-purge --dry-run
 ```
 
 Dry-run performs validation and reports planned operations without sending signals, changing login items, or deleting files. Production identity constants are still required so dry-run cannot give approval to an unconfigured script.
@@ -143,7 +143,7 @@ File deletion removes application-owned encrypted files, but it does not claim t
 
 1. Populate and review the production signing identity constants.
 2. Set `INTUNE_MODE` to the selected mode and review the resulting fixed deployment artifact.
-3. Upload `uninstall-secure-contacts.sh` under Devices -> macOS -> Shell scripts.
+3. Upload `Uninstall-SecureContacts.sh` under Devices -> macOS -> Shell scripts.
 4. Configure the script to run as the signed-in user: **No**.
 5. Assign the script to the intended device group.
 6. Test an explicitly invoked `--dry-run` artifact on controlled devices before assigning the fixed destructive version. Do not source mode values from user-writable files.

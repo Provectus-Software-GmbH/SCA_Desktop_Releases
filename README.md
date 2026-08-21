@@ -72,7 +72,7 @@ See the repository Releases page for the latest version.
 |---|---|
 | [`README.Intune-Deploy-MacOS.md`](MacOS/README.Intune-Deploy-MacOS.md) | macOS app deployment guide - PKG verification, Intune upload, detection, assignment, updates, and rollback planning |
 | [`README.Intune-Uninstall.MacOS.md`](MacOS/README.Intune-Uninstall.MacOS.md) | Optional macOS application-only uninstall or complete per-user data purge guide |
-| [`uninstall-secure-contacts.sh`](MacOS/uninstall-secure-contacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
+| [`Uninstall-SecureContacts.sh`](MacOS/Uninstall-SecureContacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
 | [`README.AutoUpdate-Pipeline-MacOS.md`](MacOS/README.AutoUpdate-Pipeline-MacOS.md) | Manual and optional customer-owned macOS update pipeline, validation, approval, and Graph publishing design |
 | [`Invoke-SecureContactsAutoUpdate.sh`](MacOS/Invoke-SecureContactsAutoUpdate.sh) | Graph-free macOS runner that stages and validates ARM64 artifacts; Graph publishing is disabled |
 | [`Install-SecureContacts.sh`](MacOS/Install-SecureContacts.sh) | Optional customer-owned macOS endpoint updater that downloads, validates, and installs a newer ARM64 PKG |

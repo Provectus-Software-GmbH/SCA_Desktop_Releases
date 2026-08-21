@@ -8,7 +8,7 @@ This folder contains the files IT administrators need to deploy, configure, and 
 
 1. Deploy the app with [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md).
 2. Configure managed preferences with [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md).
-3. For optional application removal or complete data cleanup, use [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) and [uninstall-secure-contacts.sh](uninstall-secure-contacts.sh).
+3. For optional application removal or complete data cleanup, use [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) and [Uninstall-SecureContacts.sh](Uninstall-SecureContacts.sh).
 4. To compare or operate any of the four macOS update paths, use [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md).
 5. For the optional direct endpoint updater, review [Install-SecureContacts.sh](Install-SecureContacts.sh) and the updater section in [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md).
 
@@ -29,7 +29,7 @@ For the detailed comparison and decision guidance, see [README.AutoUpdate-Pipeli
 |---|---|
 | [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md) | Intune PKG app deployment, verification, detection, assignment, update, and rollback guide |
 | [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) | Optional macOS application-only uninstall or complete per-user data purge guide |
-| [uninstall-secure-contacts.sh](uninstall-secure-contacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
+| [Uninstall-SecureContacts.sh](Uninstall-SecureContacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
 | [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md) | Four macOS update paths: manual GitHub, manual AutoPkg, customer-owned Graph publishing, and direct endpoint updating |
 | [Invoke-SecureContactsAutoUpdate.sh](Invoke-SecureContactsAutoUpdate.sh) | Graph-free ARM64 PKG staging and validation runner; never writes to Graph |
 | [Install-SecureContacts.sh](Install-SecureContacts.sh) | Optional customer-owned endpoint updater; downloads, validates, and installs a newer ARM64 PKG |
