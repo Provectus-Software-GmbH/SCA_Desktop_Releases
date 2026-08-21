@@ -2,7 +2,7 @@
 
 This guide covers deploying Secure Contacts to managed Apple silicon Macs as an Intune **macOS app (PKG)**. It uses the signed ARM64 package published in this repository's GitHub Releases.
 
-> **Related:** Configure Secure Contacts policies after app deployment using [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md). For customer-owned AutoPkg/Graph automation, see [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md). The separate direct endpoint updater is documented below and implemented in [Install-SecureContacts.sh](Install-SecureContacts.sh).
+> **Related:** Configure Secure Contacts policies after app deployment using [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md). For customer-owned AutoPkg/Graph automation, see [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md). The separate direct endpoint updater is documented below and implemented in [Scripts/Install-SecureContacts.sh](Scripts/Install-SecureContacts.sh).
 
 ## Scope
 
@@ -226,7 +226,7 @@ Do not enable **Ignore app version** merely to bypass a version or detection mis
 
 ## Optional direct endpoint updater
 
-The repository also includes [Install-SecureContacts.sh](Install-SecureContacts.sh), an opt-in customer-owned updater for environments that want devices to download approved releases directly from GitHub. This is a separate Intune macOS shell-script workflow; it does not replace the uploaded PKG app, update the Intune app object, or publish through Microsoft Graph.
+The repository also includes [Scripts/Install-SecureContacts.sh](Scripts/Install-SecureContacts.sh), an opt-in customer-owned updater for environments that want devices to download approved releases directly from GitHub. This is a separate Intune macOS shell-script workflow; it does not replace the uploaded PKG app, update the Intune app object, or publish through Microsoft Graph.
 
 Deploy the script only to a pilot group after reviewing it for your organization's change-control requirements. It runs as a machine-level script and:
 
@@ -258,7 +258,7 @@ For rollback:
 3. Test the downgrade on a non-production Mac, including application data and managed preferences.
 4. Deploy the approved rollback package only after successful testing.
 
-For removal, use the separately tested [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) and [Uninstall-SecureContacts.sh](Uninstall-SecureContacts.sh) workflow. It runs as an Intune macOS Shell script rather than as a PKG app Uninstall assignment. Use `application-only` for the conservative removal path; treat `complete-purge` as a separate destructive workflow requiring explicit review, controlled assignment, and acceptance testing.
+For removal, use the separately tested [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) and [Scripts/Uninstall-SecureContacts.sh](Scripts/Uninstall-SecureContacts.sh) workflow. It runs as an Intune macOS Shell script rather than as a PKG app Uninstall assignment. Use `application-only` for the conservative removal path; treat `complete-purge` as a separate destructive workflow requiring explicit review, controlled assignment, and acceptance testing.
 
 The PKG app type still has no general Uninstall assignment. Removing an app assignment or retiring a device must not be treated as proof that the application or its user data was removed. The standalone uninstall guide defines the production identity gate, dry-run process, safety checks, preserved managed preferences and Keychain state, best-effort login-item cleanup, and exit codes.
 

@@ -18,7 +18,7 @@ Choose one update path per customer operating model. The first two paths both en
 | **1. Manual GitHub download and Intune upload** | Administrator downloads the PKG and matching checksum from GitHub, verifies the package on a Mac, and uploads the PKG in the Intune portal. | Simplest setup; no AutoPkg, CI, Graph permissions, credentials, or endpoint script; Intune remains the deployment and reporting system. | Administrator repeats the process for every release; no automatic release discovery or upload; validation and approval are manual. |
 | **2. Manual AutoPkg staging and Intune upload** | Administrator runs the Intune AutoPkg recipe, validates the staged PKG, and uploads the PKG in the Intune portal. | Repeatable acquisition and recipe-based signer verification; less manual asset handling; checksum and package naming are standardized. | Requires a Mac with AutoPkg; upload and approval remain manual; AutoPkg does not publish to Intune by itself. |
 | **3. Customer-owned AutoPkg and Graph pipeline** | A customer macOS runner or CI job stages and validates the PKG, waits for approval, and publishes it to an existing Intune app object through Microsoft Graph. | Reduces recurring administrator work; supports scheduled polling, audit evidence, approval gates, pilot promotion, and retained rollback artifacts. | Highest setup and maintenance cost; requires customer-owned Graph identity, permissions, CI, app IDs, upload implementation, and test tenant; Graph publishing is not provided here. |
-| **4. Intune direct endpoint updater** | Intune deploys [Install-SecureContacts.sh](Install-SecureContacts.sh) as a macOS shell script. Each Mac checks GitHub, validates a newer PKG, and installs it locally. | Closest to the Windows self-updating model; no per-release Intune upload or Graph publisher; uses the existing PKG checksum and signature controls. | Intune does not show the endpoint update as a new PKG app version; depends on scheduled shell-script execution, root context, GitHub access, process handling, and endpoint logs; requires real Mac pilot testing. |
+| **4. Intune direct endpoint updater** | Intune deploys [Scripts/Install-SecureContacts.sh](Scripts/Install-SecureContacts.sh) as a macOS shell script. Each Mac checks GitHub, validates a newer PKG, and installs it locally. | Closest to the Windows self-updating model; no per-release Intune upload or Graph publisher; uses the existing PKG checksum and signature controls. | Intune does not show the endpoint update as a new PKG app version; depends on scheduled shell-script execution, root context, GitHub access, process handling, and endpoint logs; requires real Mac pilot testing. |
 
 ### Decision guide
 
@@ -78,8 +78,8 @@ Use this path when a customer wants repeatable package acquisition with a human 
 3. Run the validation-only runner:
 
    ```bash
-   chmod +x ./MacOS/Invoke-SecureContactsAutoUpdate.sh
-   ./MacOS/Invoke-SecureContactsAutoUpdate.sh --output ./artifacts --skip-recipe
+   chmod +x ./MacOS/Scripts/Invoke-SecureContactsAutoUpdate.sh
+   ./MacOS/Scripts/Invoke-SecureContactsAutoUpdate.sh --output ./artifacts --skip-recipe
    ```
 
 4. Record the release version, package SHA256, signer, validation date, and change reference.
@@ -216,5 +216,5 @@ Before enabling a production publisher, test at least one stable release in a cu
 - [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md)
 - [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md)
 - [MacOS README](README.md)
-- [Validation runner](Invoke-SecureContactsAutoUpdate.sh)
-- [Direct endpoint updater](Install-SecureContacts.sh)
+- [Validation runner](Scripts/Invoke-SecureContactsAutoUpdate.sh)
+- [Direct endpoint updater](Scripts/Install-SecureContacts.sh)

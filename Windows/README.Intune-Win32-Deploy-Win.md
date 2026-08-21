@@ -8,10 +8,10 @@ This guide covers deploying Secure Contacts as an Intune **Win32 app** with the 
 
 | Script | Role in Intune |
 |---|---|
-| [`Install-SecureContacts.ps1`](Install-SecureContacts.ps1) | Install command — default GitHub-download mode or optional packaged-local MSI mode, both with silent install behavior |
-| [`Uninstall-SecureContacts.ps1`](Uninstall-SecureContacts.ps1) | Uninstall command — application-only removal by default, with an optional complete data purge mode |
-| [`Test-SecureContactsInstalled.ps1`](Test-SecureContactsInstalled.ps1) | Detection rule (static) — checks registry for Secure Contacts presence and minimum version compliance |
-| [`Test-SecureContactsUpToDate.ps1`](Test-SecureContactsUpToDate.ps1) | Detection rule (dynamic) — compares installed version with the latest eligible GitHub release |
+| [`Scripts/Install-SecureContacts.ps1`](Scripts/Install-SecureContacts.ps1) | Install command — default GitHub-download mode or optional packaged-local MSI mode, both with silent install behavior |
+| [`Scripts/Uninstall-SecureContacts.ps1`](Scripts/Uninstall-SecureContacts.ps1) | Uninstall command — application-only removal by default, with an optional complete data purge mode |
+| [`Scripts/Test-SecureContactsInstalled.ps1`](Scripts/Test-SecureContactsInstalled.ps1) | Detection rule (static) — checks registry for Secure Contacts presence and minimum version compliance |
+| [`Scripts/Test-SecureContactsUpToDate.ps1`](Scripts/Test-SecureContactsUpToDate.ps1) | Detection rule (dynamic) — compares installed version with the latest eligible GitHub release |
 
 In GitHub-download mode, the install script is version-aware. Whenever Intune executes the installation, the script compares the latest GitHub release with the installed version and exits 0 without downloading if the device is already current.
 
@@ -187,7 +187,7 @@ powershell.exe -ExecutionPolicy Bypass -File Install-SecureContacts.ps1 -MsiPath
 Include `Uninstall-SecureContacts.ps1` in the `.intunewin` package and use the following standard uninstall command:
 
 ```
-powershell.exe -ExecutionPolicy Bypass -File .\Uninstall-SecureContacts.ps1 -Mode ApplicationOnly
+powershell.exe -ExecutionPolicy Bypass -File .\Scripts\Uninstall-SecureContacts.ps1 -Mode ApplicationOnly
 ```
 
 `ApplicationOnly` removes the registered Secure Contacts application while preserving per-user data, logs, and the managed policy. The script discovers exact Secure Contacts registrations in both standard registry views, supports the validated MSI and supported non-MSI paths, verifies application process paths before stopping them, and verifies that the application is no longer registered afterward.
@@ -197,7 +197,7 @@ Set **Install behavior** to **System** and configure the package to run scripts 
 For device retirement, reprovisioning, or another explicitly approved cleanup scenario, use the separate complete purge workflow:
 
 ```
-powershell.exe -ExecutionPolicy Bypass -File .\Uninstall-SecureContacts.ps1 -Mode CompletePurge
+powershell.exe -ExecutionPolicy Bypass -File .\Scripts\Uninstall-SecureContacts.ps1 -Mode CompletePurge
 ```
 
 `CompletePurge` removes the verified Secure Contacts data directory for every eligible local profile, including profiles that are not currently logged in. Do not use it as the default Win32 app uninstall command.
@@ -281,9 +281,9 @@ Confirm that the Intune app return code mapping treats `3010` as a soft reboot o
 
 ## Related files
 
-- [`Install-SecureContacts.ps1`](Install-SecureContacts.ps1) — install/update script (see inline documentation for all parameters)
-- [`Test-SecureContactsInstalled.ps1`](Test-SecureContactsInstalled.ps1) — static detection script (update `$MinimumVersion` before deploying)
-- [`Test-SecureContactsUpToDate.ps1`](Test-SecureContactsUpToDate.ps1) — dynamic GitHub-release detection script
-- [`Uninstall-SecureContacts.ps1`](Uninstall-SecureContacts.ps1) — application-only uninstall or optional complete data purge
+- [`Scripts/Install-SecureContacts.ps1`](Scripts/Install-SecureContacts.ps1) — install/update script (see inline documentation for all parameters)
+- [`Scripts/Test-SecureContactsInstalled.ps1`](Scripts/Test-SecureContactsInstalled.ps1) — static detection script (update `$MinimumVersion` before deploying)
+- [`Scripts/Test-SecureContactsUpToDate.ps1`](Scripts/Test-SecureContactsUpToDate.ps1) — dynamic GitHub-release detection script
+- [`Scripts/Uninstall-SecureContacts.ps1`](Scripts/Uninstall-SecureContacts.ps1) — application-only uninstall or optional complete data purge
 - [`README.Intune-Uninstall.md`](README.Intune-Uninstall.md) — uninstall modes, safety scope, Intune usage, and exit codes
 - [`README.Intune-Config-Win.md`](README.Intune-Config-Win.md) — policy configuration guide (run after app deployment)

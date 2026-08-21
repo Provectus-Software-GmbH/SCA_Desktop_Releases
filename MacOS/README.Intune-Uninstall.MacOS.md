@@ -27,7 +27,7 @@ The script remains compatible with the system Bash shipped by macOS, but compati
 
 ## Files
 
-- Deployment script: `Uninstall-SecureContacts.sh`
+- Deployment script: `Scripts/Uninstall-SecureContacts.sh`
 - Managed configuration that must remain untouched: `/Library/Managed Preferences/de.provectus.SecureContactsDesktop.plist`
 - Intune-captured operation output: standard output
 
@@ -58,7 +58,7 @@ Copy only reviewed values from a notarized production artifact. Do not use the M
 ### Application Only
 
 ```bash
-sudo ./Uninstall-SecureContacts.sh application-only
+sudo ./Scripts/Uninstall-SecureContacts.sh application-only
 ```
 
 This mode:
@@ -74,7 +74,7 @@ Removing the application while preserving its login item can leave a stale macOS
 ### Complete Purge
 
 ```bash
-sudo ./Uninstall-SecureContacts.sh complete-purge
+sudo ./Scripts/Uninstall-SecureContacts.sh complete-purge
 ```
 
 This mode additionally enumerates eligible local users through directory services and removes these exact paths from each validated home:
@@ -91,7 +91,7 @@ Deleting `Data` removes the application-owned settings, Level stores, SCACore ca
 Use dry-run before destructive deployment:
 
 ```bash
-./Uninstall-SecureContacts.sh complete-purge --dry-run
+./Scripts/Uninstall-SecureContacts.sh complete-purge --dry-run
 ```
 
 Dry-run performs validation and reports planned operations without sending signals, changing login items, or deleting files. Production identity constants are still required so dry-run cannot give approval to an unconfigured script.

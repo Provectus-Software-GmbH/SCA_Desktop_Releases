@@ -37,12 +37,12 @@ Use this for normal Intune rollout.
 
 ### Required files
 
-- `de.provectus.SecureContactsDesktop.plist`
+- `plist/de.provectus.SecureContactsDesktop.plist`
 
 Important:
 
-- `de.provectus.SecureContactsDesktop.plist` is the blank production template.
-- `de.provectus.SecureContactsDesktop.plist.demo` is the reference example with sample values.
+- `plist/de.provectus.SecureContactsDesktop.plist` is the blank production template.
+- `plist/de.provectus.SecureContactsDesktop.plist.demo` is the reference example with sample values.
 - Use the official policy documentation as source of truth:
   - https://docs.secure-contacts.com/documentation/app-configuration-policy-name-values-for-sca
 
@@ -52,14 +52,14 @@ Use this checklist before assigning the profile to devices.
 
 #### Intune macOS preference file method
 
-- Use `de.provectus.SecureContactsDesktop.plist` as the blank production template.
-- Use `de.provectus.SecureContactsDesktop.plist.demo` only as a reference for valid sample formats.
-- Enter your production values in `de.provectus.SecureContactsDesktop.plist`.
+- Use `plist/de.provectus.SecureContactsDesktop.plist` as the blank production template.
+- Use `plist/de.provectus.SecureContactsDesktop.plist.demo` only as a reference for valid sample formats.
+- Enter your production values in `plist/de.provectus.SecureContactsDesktop.plist`.
 - Upload or paste the completed content into Intune.
 
 #### Optional non-Intune MDM method
 
-- Use `secure-contacts-manifest.json` as the schema reference.
+- Use `plist/secure-contacts-manifest.json` as the schema reference.
 - Build the vendor-specific payload in your MDM system with your real production values.
 
 #### For both methods
@@ -72,7 +72,7 @@ Use this checklist before assigning the profile to devices.
 
 1. In Intune Admin Center, go to Devices -> Configuration -> Profiles.
 2. Create a macOS custom/app configuration profile.
-3. Upload or paste values from `de.provectus.SecureContactsDesktop.plist`.
+3. Upload or paste values from `plist/de.provectus.SecureContactsDesktop.plist`.
 4. Assign to a device group.
 5. Validate on a test device first.
 
@@ -125,11 +125,11 @@ Use this only for Jamf, Kandji, or other MDM systems.
 
 ### Required files
 
-- `secure-contacts-manifest.json`
+- `plist/secure-contacts-manifest.json`
 
 ### Steps
 
-1. Use `secure-contacts-manifest.json` as the property schema.
+1. Use `plist/secure-contacts-manifest.json` as the property schema.
 2. Build the vendor-specific payload in your MDM system.
 3. Map each `SecContacts.*` property to the target payload format.
 4. Deploy to managed macOS devices.
@@ -168,5 +168,5 @@ After successful deployment:
 ## References
 
 - Official policy documentation: https://docs.secure-contacts.com/documentation/app-configuration-policy-name-values-for-sca
-- `de.provectus.SecureContactsDesktop.plist`
-- `secure-contacts-manifest.json`
+- `plist/de.provectus.SecureContactsDesktop.plist`
+- `plist/secure-contacts-manifest.json`

@@ -28,7 +28,7 @@ The Secure Contacts App source code is maintained in a separate private reposito
    - macOS configuration: [README.Intune-Config-MacOS.md](MacOS/README.Intune-Config-MacOS.md)
    - macOS application removal: [README.Intune-Uninstall.MacOS.md](MacOS/README.Intune-Uninstall.MacOS.md) for application-only uninstall and optional complete data purge
    - macOS update paths: [README.AutoUpdate-Pipeline-MacOS.md](MacOS/README.AutoUpdate-Pipeline-MacOS.md) for manual GitHub/AutoPkg workflows, customer-owned polling and Graph publishing, and direct endpoint updating
-   - optional macOS endpoint updater: [Install-SecureContacts.sh](MacOS/Install-SecureContacts.sh) for Intune shell-script deployment and direct GitHub-to-device updates
+   - optional macOS endpoint updater: [Install-SecureContacts.sh](MacOS/Scripts/Install-SecureContacts.sh) for Intune shell-script deployment and direct GitHub-to-device updates
    - macOS update-path comparison: [Four available paths](MacOS/README.AutoUpdate-Pipeline-MacOS.md#four-available-paths)
 3. Configure Secure Contacts for your environment.
 4. Deploy the application and assign the configuration through your device management platform.
@@ -51,10 +51,10 @@ See the repository Releases page for the latest version.
 |---|---|
 | [`README.Intune-Config-Win.md`](Windows/README.Intune-Config-Win.md) | Full Intune configuration guide (Method A: ADMX, Method B: OMA-URI) |
 | [`README.Intune-Win32-Deploy-Win.md`](Windows/README.Intune-Win32-Deploy-Win.md) | Windows app deployment guide — Intune Win32 packaging, SCCM/MECM-compatible scripted deployment, install/detect scripts, uninstall |
-| [`Install-SecureContacts.ps1`](Windows/Install-SecureContacts.ps1) | Windows install/update script — default GitHub-download mode or optional packaged-local MSI mode for Intune/SCCM deployments |
-| [`Uninstall-SecureContacts.ps1`](Windows/Uninstall-SecureContacts.ps1) | Optional Windows application-only uninstall or complete per-user data purge script |
-| [`Test-SecureContactsInstalled.ps1`](Windows/Test-SecureContactsInstalled.ps1) | Intune Win32 app detection script — checks registry for installed version compliance |
-| [`Test-SecureContactsUpToDate.ps1`](Windows/Test-SecureContactsUpToDate.ps1) | Intune Win32 app detection script — compares the installed version with the latest eligible GitHub release |
+| [`Scripts/Install-SecureContacts.ps1`](Windows/Scripts/Install-SecureContacts.ps1) | Windows install/update script — default GitHub-download mode or optional packaged-local MSI mode for Intune/SCCM deployments |
+| [`Scripts/Uninstall-SecureContacts.ps1`](Windows/Scripts/Uninstall-SecureContacts.ps1) | Optional Windows application-only uninstall or complete per-user data purge script |
+| [`Scripts/Test-SecureContactsInstalled.ps1`](Windows/Scripts/Test-SecureContactsInstalled.ps1) | Intune Win32 app detection script — checks registry for installed version compliance |
+| [`Scripts/Test-SecureContactsUpToDate.ps1`](Windows/Scripts/Test-SecureContactsUpToDate.ps1) | Intune Win32 app detection script — compares the installed version with the latest eligible GitHub release |
 | [`ADMX/secure-contacts.admx`](Windows/ADMX/secure-contacts.admx) | ADMX policy schema — required for both Intune methods |
 | [`ADMX/secure-contacts.adml`](Windows/ADMX/secure-contacts.adml) | Matching ADML locale labels for the ADMX |
 | [`OMA-URI/README.Intune-OMA-URI.md`](Windows/OMA-URI/README.Intune-OMA-URI.md) | Blank OMA-URI row template for manual Intune entry |
@@ -72,14 +72,14 @@ See the repository Releases page for the latest version.
 |---|---|
 | [`README.Intune-Deploy-MacOS.md`](MacOS/README.Intune-Deploy-MacOS.md) | macOS app deployment guide - PKG verification, Intune upload, detection, assignment, updates, and rollback planning |
 | [`README.Intune-Uninstall.MacOS.md`](MacOS/README.Intune-Uninstall.MacOS.md) | Optional macOS application-only uninstall or complete per-user data purge guide |
-| [`Uninstall-SecureContacts.sh`](MacOS/Uninstall-SecureContacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
+| [`Scripts/Uninstall-SecureContacts.sh`](MacOS/Scripts/Uninstall-SecureContacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
 | [`README.AutoUpdate-Pipeline-MacOS.md`](MacOS/README.AutoUpdate-Pipeline-MacOS.md) | Manual and optional customer-owned macOS update pipeline, validation, approval, and Graph publishing design |
-| [`Invoke-SecureContactsAutoUpdate.sh`](MacOS/Invoke-SecureContactsAutoUpdate.sh) | Graph-free macOS runner that stages and validates ARM64 artifacts; Graph publishing is disabled |
-| [`Install-SecureContacts.sh`](MacOS/Install-SecureContacts.sh) | Optional customer-owned macOS endpoint updater that downloads, validates, and installs a newer ARM64 PKG |
+| [`Scripts/Invoke-SecureContactsAutoUpdate.sh`](MacOS/Scripts/Invoke-SecureContactsAutoUpdate.sh) | Graph-free macOS runner that stages and validates ARM64 artifacts; Graph publishing is disabled |
+| [`Scripts/Install-SecureContacts.sh`](MacOS/Scripts/Install-SecureContacts.sh) | Optional customer-owned macOS endpoint updater that downloads, validates, and installs a newer ARM64 PKG |
 | [`README.Intune-Config-MacOS.md`](MacOS/README.Intune-Config-MacOS.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
-| [`de.provectus.SecureContactsDesktop.plist`](MacOS/de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
-| [`de.provectus.SecureContactsDesktop.plist.demo`](MacOS/de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |
-| [`secure-contacts-manifest.json`](MacOS/secure-contacts-manifest.json) | Manifest schema reference for non-Intune MDM platforms (Jamf, Kandji) |
+| [`plist/de.provectus.SecureContactsDesktop.plist`](MacOS/plist/de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
+| [`plist/de.provectus.SecureContactsDesktop.plist.demo`](MacOS/plist/de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |
+| [`plist/secure-contacts-manifest.json`](MacOS/plist/secure-contacts-manifest.json) | Manifest schema reference for non-Intune MDM platforms (Jamf, Kandji) |
 | [`de.provectus.securecontacts.download.recipe.yaml`](MacOS/AutoPkg/de.provectus.securecontacts.download.recipe.yaml) | AutoPkg download and Developer ID signature verification recipe |
 | [`de.provectus.securecontacts.intune.recipe.yaml`](MacOS/AutoPkg/de.provectus.securecontacts.intune.recipe.yaml) | AutoPkg staging recipe for the ARM64 package and official checksum |
 | [`de.provectus.securecontacts.config.recipe.yaml`](MacOS/AutoPkg/de.provectus.securecontacts.config.recipe.yaml) | AutoPkg staging recipe for macOS configuration templates |
