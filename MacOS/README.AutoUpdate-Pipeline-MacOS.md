@@ -1,29 +1,70 @@
 # Secure Contacts - Customer-Owned macOS Update Pipeline
 
-This guide describes two supported macOS update paths for Microsoft Intune:
+This guide describes four macOS update paths for Microsoft Intune:
 
-1. **Manual path:** an administrator runs AutoPkg, validates the signed package, and uploads it to Intune.
-2. **Optional customer-owned pipeline:** the customer's macOS runner polls the official GitHub Releases feed, runs the same validation, and can publish an approved package through Microsoft Graph.
+1. **Manual GitHub path:** an administrator downloads the PKG and matching checksum from GitHub, validates the signed package, and uploads it to Intune.
+2. **Manual AutoPkg path:** an administrator runs AutoPkg, validates the staged signed package, and uploads it to Intune.
+3. **Optional customer-owned pipeline:** the customer's macOS runner polls the official GitHub Releases feed, runs the same validation, and can publish an approved package through Microsoft Graph.
+4. **Optional direct endpoint updater:** Intune deploys a stable shell script that checks GitHub from each Mac, validates a newer PKG, and installs it locally.
 
-The manual path is the default and does not require Graph permissions. The optional pipeline is operated, approved, and secured by the customer. This repository does not contain tenant identifiers, client secrets, certificates, access tokens, or a production publishing workflow.
+The two manual paths are the default and do not require Graph permissions. The optional pipeline and direct updater are operated, approved, and secured by the customer. This repository does not contain tenant identifiers, client secrets, certificates, access tokens, or a production publishing workflow.
+
+## Four available paths
+
+Choose one update path per customer operating model. The first two paths both end with an administrator uploading a PKG to Intune; they differ only in how the administrator obtains and prepares the package.
+
+| Path | How it works | Main advantages | Main tradeoffs |
+|---|---|---|---|
+| **1. Manual GitHub download and Intune upload** | Administrator downloads the PKG and matching checksum from GitHub, verifies the package on a Mac, and uploads the PKG in the Intune portal. | Simplest setup; no AutoPkg, CI, Graph permissions, credentials, or endpoint script; Intune remains the deployment and reporting system. | Administrator repeats the process for every release; no automatic release discovery or upload; validation and approval are manual. |
+| **2. Manual AutoPkg staging and Intune upload** | Administrator runs the Intune AutoPkg recipe, validates the staged PKG, and uploads the PKG in the Intune portal. | Repeatable acquisition and recipe-based signer verification; less manual asset handling; checksum and package naming are standardized. | Requires a Mac with AutoPkg; upload and approval remain manual; AutoPkg does not publish to Intune by itself. |
+| **3. Customer-owned AutoPkg and Graph pipeline** | A customer macOS runner or CI job stages and validates the PKG, waits for approval, and publishes it to an existing Intune app object through Microsoft Graph. | Reduces recurring administrator work; supports scheduled polling, audit evidence, approval gates, pilot promotion, and retained rollback artifacts. | Highest setup and maintenance cost; requires customer-owned Graph identity, permissions, CI, app IDs, upload implementation, and test tenant; Graph publishing is not provided here. |
+| **4. Intune direct endpoint updater** | Intune deploys [Install-SecureContacts.sh](Install-SecureContacts.sh) as a macOS shell script. Each Mac checks GitHub, validates a newer PKG, and installs it locally. | Closest to the Windows self-updating model; no per-release Intune upload or Graph publisher; uses the existing PKG checksum and signature controls. | Intune does not show the endpoint update as a new PKG app version; depends on scheduled shell-script execution, root context, GitHub access, process handling, and endpoint logs; requires real Mac pilot testing. |
+
+### Decision guide
+
+- Choose **manual GitHub download** when releases are infrequent and the customer wants the fewest tools and permissions.
+- Choose **AutoPkg staging** when the customer wants repeatable package acquisition and validation but prefers portal-based approval and upload.
+- Choose the **Graph pipeline** when the customer needs centralized automation, auditability, approval gates, and controlled pilot-to-production publishing.
+- Choose the **direct endpoint updater** when reducing per-release Intune administration is more important than having the Intune PKG object represent every installed version. Keep it opt-in until process handling, scheduling, permissions, and reporting are proven on pilot Macs.
+
+The paths are alternatives, not cumulative requirements. A customer may use manual GitHub download as a fallback for a customer-owned pipeline, but should not assign the direct endpoint updater to the same devices that are also managed by a native Intune PKG update workflow unless the interaction has been explicitly tested.
 
 ## Operating model
 
-| Concern | Manual path | Customer-owned pipeline |
-|---|---|---|
-| Release source | Official GitHub Release | Official GitHub Release API or release asset URL |
-| Package preparation | AutoPkg 2.3+ on macOS | AutoPkg 2.3+ on a customer macOS runner or macOS CI job |
-| Validation | Administrator runs the documented checks | Validation runner fails closed before any Graph write |
-| Intune publishing | Administrator uploads the PKG in the portal | Customer's Graph application publishes to an existing pilot app object |
-| Approval | Existing customer change control | Customer approval gate between validation and production promotion |
-| Credentials | None required by this repository | Customer-owned Entra application or workload identity |
-| Rollback | Existing Intune rollback procedure | Customer retains the prior approved PKG and can narrow assignments or restore the prior version |
+| Concern | Manual GitHub path | Manual AutoPkg path | Customer-owned pipeline | Direct endpoint updater |
+|---|---|---|---|---|
+| Release source | Official GitHub Release | Official GitHub Release | Official GitHub Release API or release asset URL | Official GitHub Releases endpoint |
+| Package preparation | Administrator downloads the PKG and checksum | AutoPkg 2.3+ on macOS | AutoPkg 2.3+ on a customer macOS runner or macOS CI job | Each endpoint downloads the PKG and checksum |
+| Validation | Administrator runs the documented checks | Administrator runs the documented checks or validation runner | Validation runner fails closed before any Graph write | Updater validates before local installation |
+| Intune interaction | Administrator uploads the PKG in the portal | Administrator uploads the PKG in the portal | Customer's Graph application publishes to an existing pilot app object | Intune deploys the script; it does not receive a new PKG version |
+| Approval | Existing customer change control | Existing customer change control | Customer approval gate between validation and production promotion | Customer change control and pilot assignment |
+| Credentials | None required by this repository | None required by this repository | Customer-owned Entra application or workload identity | None required by this repository |
+| Rollback | Existing Intune rollback procedure | Existing Intune rollback procedure | Customer retains the prior approved PKG and can narrow assignments or restore the prior version | Reassign the native PKG workflow or use a separately approved rollback package |
+
+The direct endpoint updater is described in [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md#optional-direct-endpoint-updater). It is intentionally separate from this runner-based pipeline: it does not upload to Intune or Microsoft Graph and does not change the version shown on an Intune PKG app object.
 
 The pipeline is not an application update service. It prepares a deployment candidate; Intune remains responsible for device targeting, installation, detection, and reporting.
 
-## Manual workflow
+## Manual GitHub workflow
 
-Use this path when a customer wants a human approval and portal upload:
+Use this path when a customer wants the fewest tools and a human approval before portal upload:
+
+1. On a Mac, open the [repository Releases page](https://github.com/Provectus-Software-GmbH/SCA_Desktop_Releases/releases) and select the approved stable release.
+2. Download both matching assets:
+
+   ```text
+   SecureContacts-<version>-arm64.pkg
+   SecureContacts-<version>-arm64.pkg.sha256
+   ```
+
+3. Keep the two assets together and run the verification commands in [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md#step-2---verify-the-package-before-upload).
+4. Record the release version, package SHA256, signer, validation date, and change reference.
+5. Upload the exact validated `SecureContacts-<version>-arm64.pkg` to the existing Secure Contacts macOS app (PKG) object in Intune.
+6. Assign the package to the pilot group first. Promote it through the customer's normal deployment rings only after pilot validation.
+
+## Manual AutoPkg workflow
+
+Use this path when a customer wants repeatable package acquisition with a human approval and portal upload:
 
 1. On a macOS host, clone or download this repository and install AutoPkg 2.3 or later.
 2. Run the Intune recipe into an isolated output directory:
@@ -45,7 +86,7 @@ Use this path when a customer wants a human approval and portal upload:
 5. Upload the exact validated `SecureContacts-<version>-arm64.pkg` to the existing Secure Contacts macOS app (PKG) object in Intune, or create a new object when the portal or package metadata requires it.
 6. Assign the package to the pilot group first. Promote it through the customer's normal deployment rings only after pilot validation.
 
-Follow [SCA-Intune-Deploy-Manual-MacOS.md](SCA-Intune-Deploy-Manual-MacOS.md) for the full portal workflow and [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md) for managed preferences.
+Follow [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md) for the full portal workflow and [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md) for managed preferences.
 
 ## Optional automated workflow
 
@@ -172,7 +213,8 @@ Before enabling a production publisher, test at least one stable release in a cu
 
 ## Related documentation
 
-- [SCA-Intune-Deploy-Manual-MacOS.md](SCA-Intune-Deploy-Manual-MacOS.md)
-- [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md)
+- [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md)
+- [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md)
 - [MacOS README](README.md)
 - [Validation runner](Invoke-SecureContactsAutoUpdate.sh)
+- [Direct endpoint updater](Install-SecureContacts.sh)

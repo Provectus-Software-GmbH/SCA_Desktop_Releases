@@ -2,7 +2,7 @@
 
 This guide shows how to configure Secure Contacts for macOS with Microsoft Intune.
 
-> **Related:** Deploy the signed application package first using [SCA-Intune-Deploy-Manual-MacOS.md](SCA-Intune-Deploy-Manual-MacOS.md).
+> **Related:** Deploy the signed application package first using [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md).
 
 ## Scope
 

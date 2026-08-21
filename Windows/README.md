@@ -4,15 +4,17 @@ Secure Contacts App (SCA) is an enterprise contact management solution that lets
 
 This folder contains the files IT administrators need to configure and manage SCA on Windows devices via Microsoft Intune. The included deployment script is also suitable for SCCM/MECM when you want the same MSI install logic outside Intune. Two policy-configuration methods are supported: ADMX/ADML imported templates and OMA-URI custom profiles (manual or PowerShell-automated via Graph).
 
-**Start here:** [SCA-Intune-Config-Manual-Win.md](SCA-Intune-Config-Manual-Win.md) for policy configuration and [SCA-Intune-Win32-Deploy-Manual-Win.md](SCA-Intune-Win32-Deploy-Manual-Win.md) for Intune Win32 packaging, packaged-local MSI usage, and SCCM/MECM-compatible deployment.
+**Start here:** [README.Intune-Config-Win.md](README.Intune-Config-Win.md) for policy configuration and [README.Intune-Win32-Deploy-Win.md](README.Intune-Win32-Deploy-Win.md) for Intune Win32 packaging, packaged-local MSI usage, SCCM/MECM-compatible deployment, and the standard uninstall command. For optional data cleanup, see [README.Intune-Uninstall.md](README.Intune-Uninstall.md).
 
 ## Files in this folder
 
 | File | Role |
 |---|---|
-| [SCA-Intune-Config-Manual-Win.md](SCA-Intune-Config-Manual-Win.md) | Full Intune configuration guide (Method A: ADMX, Method B: OMA-URI) |
-| [SCA-Intune-Win32-Deploy-Manual-Win.md](SCA-Intune-Win32-Deploy-Manual-Win.md) | Windows app deployment guide — Intune Win32 packaging, packaged-local MSI usage, SCCM/MECM-compatible deployment |
+| [README.Intune-Config-Win.md](README.Intune-Config-Win.md) | Full Intune configuration guide (Method A: ADMX, Method B: OMA-URI) |
+| [README.Intune-Win32-Deploy-Win.md](README.Intune-Win32-Deploy-Win.md) | Windows app deployment guide — Intune Win32 packaging, packaged-local MSI usage, SCCM/MECM-compatible deployment |
 | [Install-SecureContacts.ps1](Install-SecureContacts.ps1) | Windows install/update script — default GitHub-download mode or optional packaged-local MSI mode for Intune/SCCM |
+| [Uninstall-SecureContacts.ps1](Uninstall-SecureContacts.ps1) | Optional Windows application-only uninstall or complete per-user data purge script |
+| [README.Intune-Uninstall.md](README.Intune-Uninstall.md) | Windows uninstall modes, safety scope, Intune usage, and exit codes |
 | [Test-SecureContactsInstalled.ps1](Test-SecureContactsInstalled.ps1) | Intune Win32 app detection script — checks registry for installed version compliance |
 | [Test-SecureContactsUpToDate.ps1](Test-SecureContactsUpToDate.ps1) | Intune Win32 app detection script — compares the installed version with the latest eligible GitHub release |
 | [ADMX/secure-contacts.admx](ADMX/secure-contacts.admx) | ADMX policy schema — required for both Intune methods |

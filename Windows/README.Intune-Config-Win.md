@@ -20,7 +20,7 @@ You can configure the app using either of these methods:
 - Access to the Secure Contacts deployment files.
 - Microsoft Graph PowerShell module (Method B Option 2 only).
 
-> **App installation:** This guide covers app *configuration* only. To install Secure Contacts as an Intune Win32 app, use [`Install-SecureContacts.ps1`](Install-SecureContacts.ps1) as the install script and [`Test-SecureContactsInstalled.ps1`](Test-SecureContactsInstalled.ps1) as the detection rule. See [`SCA-Intune-Win32-Deploy-Manual-Win.md`](SCA-Intune-Win32-Deploy-Manual-Win.md) for the full deployment walkthrough.
+> **App installation:** This guide covers app *configuration* only. To install Secure Contacts as an Intune Win32 app, use [`Install-SecureContacts.ps1`](Install-SecureContacts.ps1) as the install script and [`Test-SecureContactsInstalled.ps1`](Test-SecureContactsInstalled.ps1) as the detection rule. See [`README.Intune-Win32-Deploy-Win.md`](README.Intune-Win32-Deploy-Win.md) for the full deployment walkthrough.
 
 ## Choosing a setup path
 

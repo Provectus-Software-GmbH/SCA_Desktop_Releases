@@ -2,7 +2,7 @@
 
 This guide covers deploying Secure Contacts to managed Apple silicon Macs as an Intune **macOS app (PKG)**. It uses the signed ARM64 package published in this repository's GitHub Releases.
 
-> **Related:** Configure Secure Contacts policies after app deployment using [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md). For an optional customer-owned polling and publishing workflow, see [SCA-AutoUpdate-Pipeline-Manual-MacOS.md](SCA-AutoUpdate-Pipeline-Manual-MacOS.md).
+> **Related:** Configure Secure Contacts policies after app deployment using [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md). For customer-owned AutoPkg/Graph automation, see [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md). The separate direct endpoint updater is documented below and implemented in [Install-SecureContacts.sh](Install-SecureContacts.sh).
 
 ## Scope
 
@@ -199,7 +199,7 @@ After assigning the pilot group, sync the test Mac from Company Portal or Intune
   ```
 
 - Core application behavior works with a test account.
-- Managed preferences are delivered separately and read by the app as described in [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md).
+- Managed preferences are delivered separately and read by the app as described in [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md).
 
 ### Intune management logs
 
@@ -224,6 +224,29 @@ Treat every new release as a new deployment candidate:
 
 Do not enable **Ignore app version** merely to bypass a version or detection mismatch. Investigate package metadata and installed bundle versions first.
 
+## Optional direct endpoint updater
+
+The repository also includes [Install-SecureContacts.sh](Install-SecureContacts.sh), an opt-in customer-owned updater for environments that want devices to download approved releases directly from GitHub. This is a separate Intune macOS shell-script workflow; it does not replace the uploaded PKG app, update the Intune app object, or publish through Microsoft Graph.
+
+Deploy the script only to a pilot group after reviewing it for your organization's change-control requirements. It runs as a machine-level script and:
+
+1. Reads the installed bundle version from `/Applications/SecureContacts.app`.
+2. Resolves the latest stable GitHub release.
+3. Exits successfully without downloading when the installed version is current.
+4. Downloads the matching ARM64 PKG and `.sha256` asset when an update is available.
+5. Verifies the checksum, Developer ID signer chain, Gatekeeper assessment, bundle metadata, and ARM64 executable before installation.
+6. Installs with `/usr/sbin/installer` only after all checks pass.
+
+Example Intune shell-script command:
+
+```text
+/bin/bash Install-SecureContacts.sh
+```
+
+The script writes logs under `/Library/Logs/SecureContacts` and uses a lock under `/var/run` to avoid concurrent installations. It refuses to proceed while Secure Contacts is running; the user must close the application and the next scheduled execution can retry. Confirm the Intune macOS shell-script execution schedule and root context on a pilot device because this workflow does not have the same detection/install contract as a Windows Win32 app.
+
+This updater requires outbound access to GitHub Releases and is subject to GitHub availability and rate limits. It is not a substitute for approval rings: keep the script assignment scoped to pilot devices until the release has been approved. It does not uninstall the application, remove user data, modify Keychain items, forget package receipts, or automatically downgrade an installation.
+
 ## Rollback and removal
 
 Intune's macOS app (PKG) workflow does not provide a general automatic rollback or Uninstall assignment.
@@ -235,7 +258,11 @@ For rollback:
 3. Test the downgrade on a non-production Mac, including application data and managed preferences.
 4. Deploy the approved rollback package only after successful testing.
 
-For removal, obtain or build a vendor-approved uninstall procedure that removes only Secure Contacts files and preserves data according to organizational policy. Test it independently before deploying it as a separate management script. Do not derive a destructive removal command from an assumed application path or package receipt.
+For removal, use the separately tested [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) and [uninstall-secure-contacts.sh](uninstall-secure-contacts.sh) workflow. It runs as an Intune macOS Shell script rather than as a PKG app Uninstall assignment. Use `application-only` for the conservative removal path; treat `complete-purge` as a separate destructive workflow requiring explicit review, controlled assignment, and acceptance testing.
+
+The PKG app type still has no general Uninstall assignment. Removing an app assignment or retiring a device must not be treated as proof that the application or its user data was removed. The standalone uninstall guide defines the production identity gate, dry-run process, safety checks, preserved managed preferences and Keychain state, best-effort login-item cleanup, and exit codes.
+
+Do not remove `/Library/Managed Preferences/de.provectus.SecureContactsDesktop.plist`, delete user-data directories, remove Keychain items, or run `pkgutil --forget` from an uninstall workflow unless each operation is explicitly approved and tested.
 
 ## Troubleshooting
 
@@ -262,8 +289,8 @@ For removal, obtain or build a vendor-approved uninstall procedure that removes 
 
 ## Related files and references
 
-- [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md) - managed-preferences configuration guide
-- [SCA-AutoUpdate-Pipeline-Manual-MacOS.md](SCA-AutoUpdate-Pipeline-Manual-MacOS.md) - manual and optional customer-owned update pipeline
+- [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md) - managed-preferences configuration guide
+- [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md) - manual and optional customer-owned update pipeline
 - [README.md](README.md) - AutoPkg staging and verification workflow
 - [de.provectus.securecontacts.download.recipe.yaml](de.provectus.securecontacts.download.recipe.yaml) - package download and signer verification
 - [de.provectus.securecontacts.intune.recipe.yaml](de.provectus.securecontacts.intune.recipe.yaml) - verified PKG and checksum staging

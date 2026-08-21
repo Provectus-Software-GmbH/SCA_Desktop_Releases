@@ -2,13 +2,14 @@
 
 This guide covers deploying Secure Contacts as an Intune **Win32 app** with the provided PowerShell scripts. The same deploy script can also be reused in SCCM/MECM-style packaged deployments. By default, the script downloads and installs the latest release from GitHub Releases, and an optional local-content mode installs a bundled MSI from the package itself.
 
-> **Related:** Configure Secure Contacts policies using [SCA-Intune-Config-Manual-Win.md](SCA-Intune-Config-Manual-Win.md).
+> **Related:** Configure Secure Contacts policies using [README.Intune-Config-Win.md](README.Intune-Config-Win.md).
 
 ## How it works
 
 | Script | Role in Intune |
 |---|---|
 | [`Install-SecureContacts.ps1`](Install-SecureContacts.ps1) | Install command — default GitHub-download mode or optional packaged-local MSI mode, both with silent install behavior |
+| [`Uninstall-SecureContacts.ps1`](Uninstall-SecureContacts.ps1) | Uninstall command — application-only removal by default, with an optional complete data purge mode |
 | [`Test-SecureContactsInstalled.ps1`](Test-SecureContactsInstalled.ps1) | Detection rule (static) — checks registry for Secure Contacts presence and minimum version compliance |
 | [`Test-SecureContactsUpToDate.ps1`](Test-SecureContactsUpToDate.ps1) | Detection rule (dynamic) — compares installed version with the latest eligible GitHub release |
 
@@ -90,14 +91,15 @@ The Intune Win32 app format requires a `.intunewin` package.
 
 2. Choose one packaging pattern and stage the files accordingly.
 
-   **GitHub-download mode** packages only the install script. Upload the detection script separately in Intune:
+   **GitHub-download mode** packages the install and uninstall scripts. Upload the detection script separately in Intune:
 
    ```
    C:\staging\SCA-Deploy\
       Install-SecureContacts.ps1
+      Uninstall-SecureContacts.ps1
    ```
 
-   **Packaged-local mode** bundles the MSI with the scripts:
+   **Packaged-local mode** bundles the MSI with the install and uninstall scripts:
 
    Download the MSI from the repository Releases assets first:
    https://github.com/Provectus-Software-GmbH/SCA_Desktop_Releases/releases
@@ -107,6 +109,7 @@ The Intune Win32 app format requires a `.intunewin` package.
    ```
    C:\staging\SCA-Deploy\
       Install-SecureContacts.ps1
+      Uninstall-SecureContacts.ps1
       SecureContacts.msi
    ```
 
@@ -181,17 +184,23 @@ powershell.exe -ExecutionPolicy Bypass -File Install-SecureContacts.ps1 -MsiPath
 
 ### Uninstall command
 
-Use the following dynamic uninstall command. It looks up the installed product code from the registry at uninstall time:
+Include `Uninstall-SecureContacts.ps1` in the `.intunewin` package and use the following standard uninstall command:
 
 ```
-powershell.exe -ExecutionPolicy Bypass -Command "& { `$appName = 'Secure Contacts'; `$app = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' -ErrorAction SilentlyContinue | Where-Object { `$_.DisplayName -eq `$appName } | Select-Object -First 1; if (`$app) { Start-Process msiexec.exe -ArgumentList '/x', `$app.PSChildName, '/qn', '/norestart' -Wait } else { Write-Host 'Not installed' } }"
+powershell.exe -ExecutionPolicy Bypass -File .\Uninstall-SecureContacts.ps1 -Mode ApplicationOnly
 ```
 
-> The uninstall command automatically discovers the currently installed MSI ProductCode and therefore remains valid across Secure Contacts versions.
+`ApplicationOnly` removes the registered Secure Contacts application while preserving per-user data, logs, and the managed policy. The script discovers exact Secure Contacts registrations in both standard registry views, supports the validated MSI and supported non-MSI paths, verifies application process paths before stopping them, and verifies that the application is no longer registered afterward.
 
-### Install behavior
+Set **Install behavior** to **System** and configure the package to run scripts as a **64-bit process**. See [README.Intune-Uninstall.md](README.Intune-Uninstall.md) for the complete safety scope and exit codes.
 
-Set **Install behavior** to **System** (the script requires administrator privileges to install to `C:\Program Files\`).
+For device retirement, reprovisioning, or another explicitly approved cleanup scenario, use the separate complete purge workflow:
+
+```
+powershell.exe -ExecutionPolicy Bypass -File .\Uninstall-SecureContacts.ps1 -Mode CompletePurge
+```
+
+`CompletePurge` removes the verified Secure Contacts data directory for every eligible local profile, including profiles that are not currently logged in. Do not use it as the default Win32 app uninstall command.
 
 ## Step 4 — Set requirements
 
@@ -240,6 +249,13 @@ On a test device, trigger an Intune sync and confirm:
    - `Test-SecureContactsInstalled.ps1` for static minimum-version detection
 4. Check the install log if needed: `%TEMP%\SecureContacts_*_install.log` (kept on failure only). When the script runs from Intune as `SYSTEM`, `%TEMP%` refers to the system temp directory, typically `C:\Windows\Temp`.
 
+For uninstall validation, confirm that:
+
+5. The Secure Contacts uninstall registration is absent.
+6. `SecureContacts.exe` and `TeamsCallMonitor.exe` are no longer running from the application installation directory.
+7. After `ApplicationOnly`, the expected per-user data remains.
+8. After an approved `CompletePurge`, the verified `SecureContacts\\Data` target is absent for eligible profiles.
+
 ## Exit codes
 
 | Code | Meaning |
@@ -261,10 +277,13 @@ Confirm that the Intune app return code mapping treats `3010` as a soft reboot o
 - **Internet access:** The install script calls `api.github.com` and downloads from `objects.githubusercontent.com` only in GitHub-download mode. If all devices share a single egress IP, add a GitHub API token to avoid the 60 requests/hour rate limit — see `Install-SecureContacts.ps1` for instructions.
 - **Manual test context:** A local manual run of `Install-SecureContacts.ps1` must be elevated for per-machine installation. Intune Win32 installs running as `SYSTEM` and SCCM/MECM installs running with administrative context already satisfy this requirement.
 - **Running app instances:** The deployment script stops running Secure Contacts processes before upgrade so MSI updates are less likely to fail because of locked files.
+- **Uninstall behavior:** Use `ApplicationOnly` for the normal Intune uninstall assignment. `CompletePurge` is a separate destructive cleanup workflow; see [`README.Intune-Uninstall.md`](README.Intune-Uninstall.md) for exit codes, safety checks, and manual execution.
 
 ## Related files
 
 - [`Install-SecureContacts.ps1`](Install-SecureContacts.ps1) — install/update script (see inline documentation for all parameters)
 - [`Test-SecureContactsInstalled.ps1`](Test-SecureContactsInstalled.ps1) — static detection script (update `$MinimumVersion` before deploying)
 - [`Test-SecureContactsUpToDate.ps1`](Test-SecureContactsUpToDate.ps1) — dynamic GitHub-release detection script
-- [`SCA-Intune-Config-Manual-Win.md`](SCA-Intune-Config-Manual-Win.md) — policy configuration guide (run after app deployment)
+- [`Uninstall-SecureContacts.ps1`](Uninstall-SecureContacts.ps1) — application-only uninstall or optional complete data purge
+- [`README.Intune-Uninstall.md`](README.Intune-Uninstall.md) — uninstall modes, safety scope, Intune usage, and exit codes
+- [`README.Intune-Config-Win.md`](README.Intune-Config-Win.md) — policy configuration guide (run after app deployment)

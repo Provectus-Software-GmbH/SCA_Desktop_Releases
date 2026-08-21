@@ -6,18 +6,34 @@ This folder contains the files IT administrators need to deploy, configure, and 
 
 **Start here:**
 
-1. Deploy the app with [SCA-Intune-Deploy-Manual-MacOS.md](SCA-Intune-Deploy-Manual-MacOS.md).
-2. Configure managed preferences with [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md).
-3. For optional customer-owned polling and Graph publishing, use [SCA-AutoUpdate-Pipeline-Manual-MacOS.md](SCA-AutoUpdate-Pipeline-Manual-MacOS.md).
+1. Deploy the app with [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md).
+2. Configure managed preferences with [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md).
+3. For optional application removal or complete data cleanup, use [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) and [uninstall-secure-contacts.sh](uninstall-secure-contacts.sh).
+4. To compare or operate any of the four macOS update paths, use [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md).
+5. For the optional direct endpoint updater, review [Install-SecureContacts.sh](Install-SecureContacts.sh) and the updater section in [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md).
+
+## Choose an update path
+
+| Path | Best for | Tradeoff |
+|---|---|---|
+| Manual GitHub download | Small or infrequent deployments | Repeat the download, validation, and Intune upload for each release |
+| Manual AutoPkg staging | Repeatable package acquisition without Graph | Requires AutoPkg; Intune upload and approval remain manual |
+| Customer-owned Graph pipeline | Centralized, auditable approval and publishing | Requires customer CI, Graph permissions, credentials, and maintenance |
+| Direct endpoint updater | Windows-like client-side update behavior | Less Intune version visibility; depends on shell scheduling, endpoint permissions, GitHub access, and pilot validation |
+
+For the detailed comparison and decision guidance, see [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md#four-available-paths).
 
 ## Files in this folder
 
 | File | Role |
 |---|---|
-| [SCA-Intune-Deploy-Manual-MacOS.md](SCA-Intune-Deploy-Manual-MacOS.md) | Intune PKG app deployment, verification, detection, assignment, update, and rollback guide |
-| [SCA-AutoUpdate-Pipeline-Manual-MacOS.md](SCA-AutoUpdate-Pipeline-Manual-MacOS.md) | Manual and optional customer-owned AutoPkg, validation, approval, and Graph publishing workflow |
+| [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md) | Intune PKG app deployment, verification, detection, assignment, update, and rollback guide |
+| [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) | Optional macOS application-only uninstall or complete per-user data purge guide |
+| [uninstall-secure-contacts.sh](uninstall-secure-contacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
+| [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md) | Four macOS update paths: manual GitHub, manual AutoPkg, customer-owned Graph publishing, and direct endpoint updating |
 | [Invoke-SecureContactsAutoUpdate.sh](Invoke-SecureContactsAutoUpdate.sh) | Graph-free ARM64 PKG staging and validation runner; never writes to Graph |
-| [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
+| [Install-SecureContacts.sh](Install-SecureContacts.sh) | Optional customer-owned endpoint updater; downloads, validates, and installs a newer ARM64 PKG |
+| [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
 | [de.provectus.SecureContactsDesktop.plist](de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
 | [de.provectus.SecureContactsDesktop.plist.demo](de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |
 | [secure-contacts-manifest.json](secure-contacts-manifest.json) | Manifest schema reference for non-Intune MDM platforms |
@@ -89,7 +105,7 @@ shasum -a 256 -c SecureContacts-<version>-arm64.pkg.sha256
 spctl --assess --type install --verbose=4 SecureContacts-<version>-arm64.pkg
 ```
 
-For the complete manual and optional customer-owned polling workflow, see [SCA-AutoUpdate-Pipeline-Manual-MacOS.md](SCA-AutoUpdate-Pipeline-Manual-MacOS.md). The validation runner is intentionally Graph-free; on macOS, make it executable once with `chmod +x ./MacOS/Invoke-SecureContactsAutoUpdate.sh`.
+For the complete manual and optional customer-owned polling workflow, see [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md). The validation runner is intentionally Graph-free; on macOS, make it executable once with `chmod +x ./MacOS/Invoke-SecureContactsAutoUpdate.sh`.
 
 The runner stages the latest package with AutoPkg and validates it by default. Use `--skip-recipe` when the output directory already contains the artifacts produced by a separate recipe step.
 
@@ -107,7 +123,7 @@ The default output directory is:
 ~/Library/AutoPkg/Cache/de.provectus.securecontacts.config/
 ```
 
-Use `SecureContacts-config-production.plist` as the editable Intune preference-file fragment. Never deploy `SecureContacts-config-demo.plist`; it contains example values only. Follow [SCA-Intune-Config-Manual-Mac.md](SCA-Intune-Config-Manual-Mac.md) for the supported keys and Intune workflow.
+Use `SecureContacts-config-production.plist` as the editable Intune preference-file fragment. Never deploy `SecureContacts-config-demo.plist`; it contains example values only. Follow [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md) for the supported keys and Intune workflow.
 
 For custom output:
 

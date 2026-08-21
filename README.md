@@ -21,11 +21,15 @@ The Secure Contacts App source code is maintained in a separate private reposito
 
 1. Download the latest SCA Desktop release package and deployment files.
 2. Review the appropriate deployment guide:
-   - Windows configuration: [SCA-Intune-Config-Manual-Win.md](Windows/SCA-Intune-Config-Manual-Win.md)
-   - Windows app deployment: [SCA-Intune-Win32-Deploy-Manual-Win.md](Windows/SCA-Intune-Win32-Deploy-Manual-Win.md) for Intune Win32 packaging and SCCM/MECM-compatible scripted deployment
-   - macOS app deployment: [SCA-Intune-Deploy-Manual-MacOS.md](MacOS/SCA-Intune-Deploy-Manual-MacOS.md) for Intune PKG deployment
-   - macOS configuration: [SCA-Intune-Config-Manual-Mac.md](MacOS/SCA-Intune-Config-Manual-Mac.md)
-   - optional macOS update automation: [SCA-AutoUpdate-Pipeline-Manual-MacOS.md](MacOS/SCA-AutoUpdate-Pipeline-Manual-MacOS.md) for customer-owned polling, validation, and Graph publishing design
+   - Windows configuration: [README.Intune-Config-Win.md](Windows/README.Intune-Config-Win.md)
+   - Windows app deployment: [README.Intune-Win32-Deploy-Win.md](Windows/README.Intune-Win32-Deploy-Win.md) for Intune Win32 packaging and SCCM/MECM-compatible scripted deployment
+   - Windows application removal: [README.Intune-Uninstall.md](Windows/README.Intune-Uninstall.md) for application-only uninstall and optional complete data purge
+   - macOS app deployment: [README.Intune-Deploy-MacOS.md](MacOS/README.Intune-Deploy-MacOS.md) for Intune PKG deployment
+   - macOS configuration: [README.Intune-Config-MacOS.md](MacOS/README.Intune-Config-MacOS.md)
+   - macOS application removal: [README.Intune-Uninstall.MacOS.md](MacOS/README.Intune-Uninstall.MacOS.md) for application-only uninstall and optional complete data purge
+   - macOS update paths: [README.AutoUpdate-Pipeline-MacOS.md](MacOS/README.AutoUpdate-Pipeline-MacOS.md) for manual GitHub/AutoPkg workflows, customer-owned polling and Graph publishing, and direct endpoint updating
+   - optional macOS endpoint updater: [Install-SecureContacts.sh](MacOS/Install-SecureContacts.sh) for Intune shell-script deployment and direct GitHub-to-device updates
+   - macOS update-path comparison: [Four available paths](MacOS/README.AutoUpdate-Pipeline-MacOS.md#four-available-paths)
 3. Configure Secure Contacts for your environment.
 4. Deploy the application and assign the configuration through your device management platform.
 5. Validate the deployment on a test device.
@@ -45,9 +49,10 @@ See the repository Releases page for the latest version.
 
 | File | Role |
 |---|---|
-| [`SCA-Intune-Config-Manual-Win.md`](Windows/SCA-Intune-Config-Manual-Win.md) | Full Intune configuration guide (Method A: ADMX, Method B: OMA-URI) |
-| [`SCA-Intune-Win32-Deploy-Manual-Win.md`](Windows/SCA-Intune-Win32-Deploy-Manual-Win.md) | Windows app deployment guide — Intune Win32 packaging, SCCM/MECM-compatible scripted deployment, install/detect scripts, uninstall |
+| [`README.Intune-Config-Win.md`](Windows/README.Intune-Config-Win.md) | Full Intune configuration guide (Method A: ADMX, Method B: OMA-URI) |
+| [`README.Intune-Win32-Deploy-Win.md`](Windows/README.Intune-Win32-Deploy-Win.md) | Windows app deployment guide — Intune Win32 packaging, SCCM/MECM-compatible scripted deployment, install/detect scripts, uninstall |
 | [`Install-SecureContacts.ps1`](Windows/Install-SecureContacts.ps1) | Windows install/update script — default GitHub-download mode or optional packaged-local MSI mode for Intune/SCCM deployments |
+| [`Uninstall-SecureContacts.ps1`](Windows/Uninstall-SecureContacts.ps1) | Optional Windows application-only uninstall or complete per-user data purge script |
 | [`Test-SecureContactsInstalled.ps1`](Windows/Test-SecureContactsInstalled.ps1) | Intune Win32 app detection script — checks registry for installed version compliance |
 | [`Test-SecureContactsUpToDate.ps1`](Windows/Test-SecureContactsUpToDate.ps1) | Intune Win32 app detection script — compares the installed version with the latest eligible GitHub release |
 | [`ADMX/secure-contacts.admx`](Windows/ADMX/secure-contacts.admx) | ADMX policy schema — required for both Intune methods |
@@ -59,15 +64,19 @@ See the repository Releases page for the latest version.
 | [`OMA-URI/secure-contacts.intune-omauri-profile.example.json`](Windows/OMA-URI/secure-contacts.intune-omauri-profile.example.json) | Filled Graph payload reference showing valid sample values |
 | [`OMA-URI/import-secure-contacts-omauri.ps1`](Windows/OMA-URI/import-secure-contacts-omauri.ps1) | PowerShell script — creates the Intune profile via Microsoft Graph |
 | [`OMA-URI/README.intune-omauri-import.md`](Windows/OMA-URI/README.intune-omauri-import.md) | Quick-start guide for the PowerShell importer |
+| [`README.Intune-Uninstall.md`](Windows/README.Intune-Uninstall.md) | Windows uninstall modes, safety scope, Intune usage, and exit codes |
 
 ## macOS deployment files
 
 | File | Role |
 |---|---|
-| [`SCA-Intune-Deploy-Manual-MacOS.md`](MacOS/SCA-Intune-Deploy-Manual-MacOS.md) | macOS app deployment guide - PKG verification, Intune upload, detection, assignment, updates, and rollback planning |
-| [`SCA-AutoUpdate-Pipeline-Manual-MacOS.md`](MacOS/SCA-AutoUpdate-Pipeline-Manual-MacOS.md) | Manual and optional customer-owned macOS update pipeline, validation, approval, and Graph publishing design |
+| [`README.Intune-Deploy-MacOS.md`](MacOS/README.Intune-Deploy-MacOS.md) | macOS app deployment guide - PKG verification, Intune upload, detection, assignment, updates, and rollback planning |
+| [`README.Intune-Uninstall.MacOS.md`](MacOS/README.Intune-Uninstall.MacOS.md) | Optional macOS application-only uninstall or complete per-user data purge guide |
+| [`uninstall-secure-contacts.sh`](MacOS/uninstall-secure-contacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
+| [`README.AutoUpdate-Pipeline-MacOS.md`](MacOS/README.AutoUpdate-Pipeline-MacOS.md) | Manual and optional customer-owned macOS update pipeline, validation, approval, and Graph publishing design |
 | [`Invoke-SecureContactsAutoUpdate.sh`](MacOS/Invoke-SecureContactsAutoUpdate.sh) | Graph-free macOS runner that stages and validates ARM64 artifacts; Graph publishing is disabled |
-| [`SCA-Intune-Config-Manual-Mac.md`](MacOS/SCA-Intune-Config-Manual-Mac.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
+| [`Install-SecureContacts.sh`](MacOS/Install-SecureContacts.sh) | Optional customer-owned macOS endpoint updater that downloads, validates, and installs a newer ARM64 PKG |
+| [`README.Intune-Config-MacOS.md`](MacOS/README.Intune-Config-MacOS.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
 | [`de.provectus.SecureContactsDesktop.plist`](MacOS/de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
 | [`de.provectus.SecureContactsDesktop.plist.demo`](MacOS/de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |
 | [`secure-contacts-manifest.json`](MacOS/secure-contacts-manifest.json) | Manifest schema reference for non-Intune MDM platforms (Jamf, Kandji) |
@@ -77,7 +86,8 @@ See the repository Releases page for the latest version.
 
 ## Additional documentation
 
-- Windows deployment and configuration: [`Windows/SCA-Intune-Config-Manual-Win.md`](Windows/SCA-Intune-Config-Manual-Win.md)
-- macOS app deployment: [`MacOS/SCA-Intune-Deploy-Manual-MacOS.md`](MacOS/SCA-Intune-Deploy-Manual-MacOS.md)
-- macOS configuration: [`MacOS/SCA-Intune-Config-Manual-Mac.md`](MacOS/SCA-Intune-Config-Manual-Mac.md)
+- Windows deployment and configuration: [`Windows/README.Intune-Config-Win.md`](Windows/README.Intune-Config-Win.md)
+- macOS app deployment: [`MacOS/README.Intune-Deploy-MacOS.md`](MacOS/README.Intune-Deploy-MacOS.md)
+- macOS configuration: [`MacOS/README.Intune-Config-MacOS.md`](MacOS/README.Intune-Config-MacOS.md)
+- macOS application removal: [`MacOS/README.Intune-Uninstall.MacOS.md`](MacOS/README.Intune-Uninstall.MacOS.md)
 - Official policy documentation: [Secure Contacts Policy Documentation](https://docs.secure-contacts.com/documentation/app-configuration-policy-name-values-for-sca)
