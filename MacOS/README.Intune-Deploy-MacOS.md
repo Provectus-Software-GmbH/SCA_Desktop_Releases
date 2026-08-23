@@ -237,15 +237,61 @@ Deploy the script only to a pilot group after reviewing it for your organization
 5. Verifies the checksum, Developer ID signer chain, Gatekeeper assessment, bundle metadata, and ARM64 executable before installation.
 6. Installs with `/usr/sbin/installer` only after all checks pass.
 
+The updater requires an Apple silicon Mac and exits before contacting GitHub when the host architecture is not `arm64`. Before installation it checks executable paths, not only process names, and refuses the update while any process from `/Applications/SecureContacts.app/Contents/` is running. Package metadata validation selects the single bundle whose identifier is `de.provectus.SecureContactsDesktop`; packages with no matching bundle or multiple matching bundles are rejected.
+
 Example Intune shell-script command:
 
 ```text
 /bin/bash Install-SecureContacts.sh
 ```
 
-The script writes logs under `/Library/Logs/SecureContacts` and uses a lock under `/var/run` to avoid concurrent installations. It refuses to proceed while Secure Contacts is running; the user must close the application and the next scheduled execution can retry. Confirm the Intune macOS shell-script execution schedule and root context on a pilot device because this workflow does not have the same detection/install contract as a Windows Win32 app.
+The script writes logs under `/Library/Logs/SecureContacts` and uses a lock under `/var/run` to avoid concurrent installations. It refuses to proceed while Secure Contacts or a helper inside its application bundle is running; the user must close the application and the next scheduled execution can retry. Confirm the Intune macOS shell-script execution schedule and root context on a pilot device because this workflow does not have the same detection/install contract as a Windows Win32 app.
 
 This updater requires outbound access to GitHub Releases and is subject to GitHub availability and rate limits. It is not a substitute for approval rings: keep the script assignment scoped to pilot devices until the release has been approved. It does not uninstall the application, remove user data, modify Keychain items, forget package receipts, or automatically downgrade an installation.
+
+### Endpoint updater validation path
+
+Validate the updater on a disposable or pilot Apple silicon Mac before assigning it broadly. Run the following checks from a repository checkout:
+
+1. Confirm the script is syntactically valid and executable:
+
+  ```bash
+  bash -n MacOS/Scripts/Install-SecureContacts.sh
+  chmod +x MacOS/Scripts/Install-SecureContacts.sh
+  ```
+
+2. Confirm the host is supported and the installed bundle has the expected identity:
+
+  ```bash
+  uname -m
+  defaults read "/Applications/SecureContacts.app/Contents/Info.plist" CFBundleIdentifier
+  defaults read "/Applications/SecureContacts.app/Contents/Info.plist" CFBundleShortVersionString
+  ```
+
+  The architecture must be `arm64` and the bundle identifier must be `de.provectus.SecureContactsDesktop`. A non-ARM64 host must be rejected before the updater contacts GitHub.
+
+3. Validate the exact release package separately with the package validation runner before using it for endpoint installation:
+
+  ```bash
+  chmod +x MacOS/Scripts/Invoke-SecureContactsAutoUpdate.sh
+  MacOS/Scripts/Invoke-SecureContactsAutoUpdate.sh --output ./artifacts --skip-recipe
+  ```
+
+  Confirm that the runner reports one matching ARM64 package, a valid checksum, the expected signer chain, Gatekeeper approval, the expected bundle ID and version, and an ARM64 executable.
+
+4. Test process protection. Launch Secure Contacts and confirm that the updater exits with a clear running-process message without invoking `/usr/sbin/installer`. Repeat with a helper executable located under `/Applications/SecureContacts.app/Contents/`; a same-named process outside that bundle must not block the update.
+
+5. Close all bundle-owned processes and run the updater in check-only mode:
+
+  ```bash
+  sudo MacOS/Scripts/Install-SecureContacts.sh --check-only
+  ```
+
+  Confirm that an up-to-date installation exits successfully without downloading a package. For an approved newer release, confirm that the updater downloads the matching package and checksum, validates both, and installs only after all metadata and architecture checks pass.
+
+6. Review `/Library/Logs/SecureContacts` and confirm that failed checks leave the existing application unchanged. Record the host architecture, installed and target versions, package SHA256, validation result, and test date with the pilot evidence.
+
+Do not simulate a different `uname` result or bypass signature checks on a production Mac. Intel-host rejection and package ambiguity cases should be tested with command stubs or disposable fixtures in a controlled test environment; production acceptance must use the real macOS tools and signed package.
 
 ## Rollback and removal
 
@@ -258,7 +304,7 @@ For rollback:
 3. Test the downgrade on a non-production Mac, including application data and managed preferences.
 4. Deploy the approved rollback package only after successful testing.
 
-For removal, use the separately tested [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) and [Scripts/Uninstall-SecureContacts.sh](Scripts/Uninstall-SecureContacts.sh) workflow. It runs as an Intune macOS Shell script rather than as a PKG app Uninstall assignment. Use `application-only` for the conservative removal path; treat `complete-purge` as a separate destructive workflow requiring explicit review, controlled assignment, and acceptance testing.
+For removal, use the separately tested [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) and [Scripts/Uninstall-SecureContacts.sh](Scripts/Uninstall-SecureContacts.sh) workflow. It runs as an Intune macOS Shell script rather than as a PKG app Uninstall assignment. Use `application-only` for the conservative removal path, which leaves the automatic updater installed; treat `complete-purge` as a separate destructive workflow that also disables and removes the updater bootstrap, requiring explicit review, controlled assignment, and acceptance testing.
 
 The PKG app type still has no general Uninstall assignment. Removing an app assignment or retiring a device must not be treated as proof that the application or its user data was removed. The standalone uninstall guide defines the production identity gate, dry-run process, safety checks, preserved managed preferences and Keychain state, best-effort login-item cleanup, and exit codes.
 

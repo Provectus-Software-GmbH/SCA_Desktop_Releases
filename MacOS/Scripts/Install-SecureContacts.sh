@@ -64,8 +64,8 @@ require_command curl
 require_command file
 require_command find
 require_command grep
+require_command lsof
 require_command mktemp
-require_command pgrep
 require_command pkgutil
 require_command shasum
 require_command spctl
@@ -75,6 +75,12 @@ require_command spctl
 }
 [ -x /usr/sbin/installer ] || {
   echo "/usr/sbin/installer is required" >&2
+  exit 1
+}
+
+host_architecture=$(/usr/bin/uname -m)
+[ "$host_architecture" = "arm64" ] || {
+  echo "Secure Contacts updater requires an Apple silicon Mac; detected: $host_architecture" >&2
   exit 1
 }
 
@@ -180,9 +186,31 @@ if [ "$CHECK_ONLY" = true ]; then
   exit 0
 fi
 
-if pgrep -x SecureContacts >/dev/null 2>&1 || pgrep -x SecContacts >/dev/null 2>&1; then
-  echo "Secure Contacts is running. Close it before retrying the update." >&2
-  exit 1
+bundle_processes() {
+  local lsof_output
+
+  lsof_output=$(/usr/sbin/lsof -n -d txt -F pn 2>/dev/null || true)
+  printf '%s\n' "$lsof_output" | /usr/bin/awk -v prefix="$APP_PATH/Contents/" '
+    /^p[0-9]+$/ { pid = substr($0, 2); next }
+    /^n/ {
+      path = substr($0, 2)
+      if (pid != "" && index(path, prefix) == 1) {
+        print pid "|" path
+      }
+    }
+  '
+}
+
+running_bundle_processes="$(bundle_processes)"
+if [ -n "$running_bundle_processes" ]; then
+  while IFS='|' read -r process_id executable_path; do
+    [ -n "$process_id" ] || continue
+    current_process_path=$(/usr/sbin/lsof -n -a -p "$process_id" -d txt -F n 2>/dev/null | /usr/bin/sed -n 's/^n//p' | /usr/bin/head -1 || true)
+    if [ "$current_process_path" = "$executable_path" ] && [[ "$current_process_path" == "$APP_PATH/Contents/"* ]]; then
+      echo "Secure Contacts is running from the application bundle (PID $process_id). Close it before retrying the update." >&2
+      exit 1
+    fi
+  done <<< "$running_bundle_processes"
 fi
 
 pkg_name="SecureContacts-${release_version}-arm64.pkg"
@@ -222,8 +250,24 @@ spctl --assess --type install --verbose=4 "$PKG_PATH"
 echo "Inspecting package metadata"
 expanded_path="$WORK_PATH/expanded"
 pkgutil --expand-full "$PKG_PATH" "$expanded_path"
-info_path=$(find "$expanded_path" -type f -path '*/Contents/Info.plist' -not -path '*/Frameworks/*' -print | head -n 1)
-[ -n "$info_path" ] || { echo "No application Info.plist found in package" >&2; exit 1; }
+info_path=""
+matching_info_count=0
+while IFS= read -r candidate_info_path; do
+  candidate_bundle_id=$(read_app_value "$candidate_info_path" CFBundleIdentifier || true)
+  if [ "$candidate_bundle_id" = "$EXPECTED_BUNDLE_ID" ]; then
+    matching_info_count=$((matching_info_count + 1))
+    info_path="$candidate_info_path"
+  fi
+done < <(find "$expanded_path" -type f -path '*/Contents/Info.plist' -not -path '*/Frameworks/*' -print | LC_ALL=C sort)
+
+if [ "$matching_info_count" -eq 0 ]; then
+  echo "No application Info.plist with bundle ID $EXPECTED_BUNDLE_ID found in package" >&2
+  exit 1
+fi
+if [ "$matching_info_count" -ne 1 ]; then
+  echo "Multiple application Info.plist files with bundle ID $EXPECTED_BUNDLE_ID found in package" >&2
+  exit 1
+fi
 package_bundle_id=$(read_app_value "$info_path" CFBundleIdentifier)
 package_version=$(read_app_value "$info_path" CFBundleShortVersionString)
 executable_name=$(read_app_value "$info_path" CFBundleExecutable)

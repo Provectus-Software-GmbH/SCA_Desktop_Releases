@@ -84,6 +84,17 @@ This mode additionally enumerates eligible local users through directory service
 ~/Library/Logs/SecureContacts
 ```
 
+It also boots out and removes the automatic updater, its LaunchDaemon plist, its bootstrap payload, and only these updater-specific daemon logs:
+
+```text
+/Library/LaunchDaemons/de.provectus.securecontacts.updater.plist
+/Library/Application Support/SecureContacts/IntuneBootstrap
+/Library/Logs/SecureContacts/launchdaemon.log
+/Library/Logs/SecureContacts/launchdaemon-error.log
+```
+
+`application-only` does not modify any of these updater paths.
+
 Deleting `Data` removes the application-owned settings, Level stores, SCACore cache, MSAL cache files, runtime authentication state, avatars, call history, and `secure-settings.bin` stored below that directory. It does not remove unrelated state outside `Data`.
 
 ## Dry Run
@@ -135,7 +146,7 @@ The script never modifies or removes:
 - Intune configuration profiles
 - PKG receipts
 - Unrelated login items
-- Files outside the fixed application, Data, and log paths
+- Files outside the fixed application, Data/log paths, updater LaunchDaemon, updater bootstrap payload, and two updater-specific daemon log paths
 
 File deletion removes application-owned encrypted files, but it does not claim to remove all Electron/macOS Keychain metadata.
 
@@ -173,7 +184,7 @@ Application-only detection should require the application bundle to be absent:
 test ! -e /Applications/SecureContacts.app
 ```
 
-Complete-purge verification must additionally inspect every eligible local user's exact Data and log paths. Do not use root's `$HOME` as the user-data location.
+Complete-purge verification must additionally inspect every eligible local user's exact Data and log paths, confirm the updater LaunchDaemon and bootstrap payload are absent, and check the two updater-specific daemon logs. Do not use root's `$HOME` as the user-data location.
 
 After execution, verify:
 
@@ -181,6 +192,7 @@ After execution, verify:
 - The application bundle is absent.
 - Application-only mode preserved Data and logs.
 - Complete-purge mode removed Data and logs for every reachable eligible user.
+- Complete-purge mode removed the updater LaunchDaemon, bootstrap payload, and updater-specific daemon logs.
 - Managed-preference hash, owner, mode, and modification time are unchanged.
 - Unrelated files and login items remain intact.
 

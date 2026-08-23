@@ -7,6 +7,13 @@ readonly APP_PATH="/Applications/SecureContacts.app"
 readonly APP_BUNDLE_ID="de.provectus.SecureContactsDesktop"
 readonly APP_EXECUTABLE="SecureContacts"
 readonly MANAGED_PREFERENCE_PATH="/Library/Managed Preferences/de.provectus.SecureContactsDesktop.plist"
+readonly UPDATER_LABEL="de.provectus.securecontacts.updater"
+readonly UPDATER_PLIST_PATH="/Library/LaunchDaemons/${UPDATER_LABEL}.plist"
+readonly UPDATER_BOOTSTRAP_PATH="/Library/Application Support/SecureContacts/IntuneBootstrap"
+readonly UPDATER_LOG_PATHS=(
+	"/Library/Logs/SecureContacts/launchdaemon.log"
+	"/Library/Logs/SecureContacts/launchdaemon-error.log"
+)
 readonly MIN_SUPPORTED_MACOS_MAJOR=15
 
 # Populate both values from a signed production Developer ID artifact before deployment.
@@ -72,7 +79,7 @@ usage() {
 Usage: uninstall-secure-contacts.sh <application-only|complete-purge> [--dry-run]
 
   application-only  Remove the verified application bundle and preserve user data/logs.
-  complete-purge    Remove the verified bundle plus Secure Contacts Data/logs for all eligible users.
+  complete-purge    Remove the verified bundle, user data/logs, and the automatic updater bootstrap.
   --dry-run         Perform preflight and report planned actions without changing the device.
 EOF
 }
@@ -319,6 +326,32 @@ preflight_cleanup_targets() {
 	done
 }
 
+validate_system_cleanup_target() {
+	local target_path="$1"
+	local current_path="/"
+	local component
+
+	IFS='/' read -r -a components <<< "${target_path#/}"
+	for component in "${components[@]}"; do
+		[[ -n "$component" && "$component" != "." && "$component" != ".." ]] || return 1
+		current_path="$current_path$component"
+		[[ ! -L "$current_path" ]] || return 1
+		[[ "$current_path" == "/" || "$current_path" == */ ]] || current_path="$current_path/"
+	done
+	return 0
+}
+
+preflight_updater_cleanup() {
+	local log_path
+
+	[[ "$MODE" == "complete-purge" ]] || return
+	validate_system_cleanup_target "$UPDATER_PLIST_PATH" || fail "$EXIT_PREFLIGHT" "updater_preflight" "unsafe_cleanup_target" "$UPDATER_PLIST_PATH"
+	validate_system_cleanup_target "$UPDATER_BOOTSTRAP_PATH" || fail "$EXIT_PREFLIGHT" "updater_preflight" "unsafe_cleanup_target" "$UPDATER_BOOTSTRAP_PATH"
+	for log_path in "${UPDATER_LOG_PATHS[@]}"; do
+		validate_system_cleanup_target "$log_path" || fail "$EXIT_PREFLIGHT" "updater_preflight" "unsafe_cleanup_target" "$log_path"
+	done
+}
+
 scan_verified_processes() {
 	local lsof_output
 	local process_records
@@ -459,6 +492,28 @@ remove_user_data() {
 	done
 }
 
+remove_updater_bootstrap() {
+	local log_path
+
+	[[ "$MODE" == "complete-purge" ]] || return
+	if [[ "$DRY_RUN" == true ]]; then
+		emit_event "info" "updater_daemon" "planned" "daemon_would_be_disabled" "$UPDATER_LABEL"
+	else
+		if /bin/launchctl print "system/$UPDATER_LABEL" >/dev/null 2>&1; then
+			/bin/launchctl bootout "system/$UPDATER_LABEL" || fail "$EXIT_DELETE" "updater_daemon" "daemon_bootout_failed" "$UPDATER_LABEL"
+			emit_event "info" "updater_daemon" "removed" "daemon_booted_out" "$UPDATER_LABEL"
+		else
+			emit_event "info" "updater_daemon" "already_absent" "daemon_not_loaded" "$UPDATER_LABEL"
+		fi
+	fi
+
+	remove_path "$UPDATER_PLIST_PATH" "updater_plist_removal"
+	remove_path "$UPDATER_BOOTSTRAP_PATH" "updater_bootstrap_removal"
+	for log_path in "${UPDATER_LOG_PATHS[@]}"; do
+		remove_path "$log_path" "updater_log_removal"
+	done
+}
+
 remove_legacy_login_item_for_console_user() {
 	local console_user
 	local console_uid
@@ -519,6 +574,7 @@ main() {
 	if [[ "$MODE" == "complete-purge" ]]; then
 		enumerate_eligible_users
 		preflight_cleanup_targets
+		preflight_updater_cleanup
 	fi
 	emit_event "info" "uninstall" "started" "operation_started"
 	kill_verified_processes
@@ -526,6 +582,7 @@ main() {
 	if [[ "$MODE" == "complete-purge" ]]; then
 		remove_legacy_login_item_for_console_user
 		remove_user_data
+		remove_updater_bootstrap
 	else
 		emit_event "info" "data_removal" "preserved" "application_only_mode"
 		emit_event "info" "logs_removal" "preserved" "application_only_mode"

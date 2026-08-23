@@ -34,6 +34,7 @@ For the detailed comparison and decision guidance, see [README.AutoUpdate-Pipeli
 | [Scripts/Install-SecureContacts.sh](Scripts/Install-SecureContacts.sh) | Optional customer-owned endpoint updater; downloads, validates, and installs a newer ARM64 PKG |
 | [Scripts/Uninstall-SecureContacts.sh](Scripts/Uninstall-SecureContacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
 | [Scripts/Invoke-SecureContactsAutoUpdate.sh](Scripts/Invoke-SecureContactsAutoUpdate.sh) | Graph-free ARM64 PKG staging and validation runner; never writes to Graph |
+| [Scripts/Sync-SecureContactsToIntune.sh](Scripts/Sync-SecureContactsToIntune.sh) | Validation orchestration entry point with read-only beta Graph `--what-if` decisioning; publishing remains disabled |
 | [plist/de.provectus.SecureContactsDesktop.plist](plist/de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
 | [plist/de.provectus.SecureContactsDesktop.plist.demo](plist/de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |
 | [plist/secure-contacts-manifest.json](plist/secure-contacts-manifest.json) | Manifest schema reference for non-Intune MDM platforms |
@@ -82,6 +83,32 @@ The default output directory is:
 ~/Library/AutoPkg/Cache/de.provectus.securecontacts.intune/
 ```
 
+### Run the validation wrapper
+
+The sync entry point provides the planned publisher interface while Graph publishing is being implemented:
+
+```bash
+./MacOS/Scripts/Sync-SecureContactsToIntune.sh \
+	--output ./artifacts \
+	--manifest-output ./artifacts/validation-manifest.json
+```
+
+This runs AutoPkg and the full validation runner, then writes a non-secret JSON manifest. It is validation-only by default. `--publish` currently fails closed because the macOS Intune Graph upload contract has not yet been verified. `--what-if` performs a read-only beta Graph lookup and version decision when supplied with an existing app ID and an access token through environment variables; it never uploads, commits, creates, or assigns an app.
+
+Read-only decision check against an existing test app:
+
+```bash
+export INTUNE_APP_ID='<existing macOS PKG app GUID>'
+export GRAPH_ACCESS_TOKEN='<short-lived test token>'
+./MacOS/Scripts/Sync-SecureContactsToIntune.sh \
+	--output ./artifacts \
+	--skip-recipe \
+	--publish \
+	--what-if
+```
+
+The token must be supplied out-of-band and is never written to a manifest. The beta contract evidence and remaining upload requirements are tracked in [Documentation/Intune-macos-pkg-graph-contract.md](Documentation/Intune-macos-pkg-graph-contract.md).
+
 CI or a custom local directory:
 
 ```bash
@@ -105,7 +132,7 @@ shasum -a 256 -c SecureContacts-<version>-arm64.pkg.sha256
 spctl --assess --type install --verbose=4 SecureContacts-<version>-arm64.pkg
 ```
 
-For the complete manual and optional customer-owned polling workflow, see [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md). The validation runner is intentionally Graph-free; on macOS, make it executable once with `chmod +x ./MacOS/Invoke-SecureContactsAutoUpdate.sh`.
+For the complete manual and optional customer-owned polling workflow, see [README.AutoUpdate-Pipeline-MacOS.md](README.AutoUpdate-Pipeline-MacOS.md). The validation runner is intentionally Graph-free; from the repository root on macOS, make it executable once with `chmod +x ./MacOS/Scripts/Invoke-SecureContactsAutoUpdate.sh`.
 
 The runner stages the latest package with AutoPkg and validates it by default. Use `--skip-recipe` when the output directory already contains the artifacts produced by a separate recipe step.
 

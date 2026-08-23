@@ -102,7 +102,7 @@ GitHub Releases -> AutoPkg -> local validation -> artifact retention -> approval
                                            pilot health check -> production approval
 ```
 
-The first implementation in this repository is Graph-free staging and validation. A customer publishing job may be added around it, but it must keep Graph write operations outside the validation script and behind an explicit approval gate.
+The current implementation provides staging and validation through [Scripts/Sync-SecureContactsToIntune.sh](Scripts/Sync-SecureContactsToIntune.sh). It writes a non-secret validation manifest and supports an authenticated, read-only beta Graph `--what-if` decision against an explicit existing app ID. It still fails closed for every publish request because the PKG upload and processing contract is not implemented. Graph write operations must remain outside the validation script and behind an explicit approval gate.
 
 ### Required pipeline stages
 
@@ -112,7 +112,7 @@ The first implementation in this repository is Graph-free staging and validation
 4. **Compare:** compare the candidate version with the version currently approved for the Intune app. Do not publish downgrades automatically. Use an explicit override only in a separately approved rollback procedure.
 5. **Retain:** store the exact PKG, checksum, validation summary, recipe log, and release URL in the customer's artifact store. Do not rebuild or modify the package between validation and upload.
 6. **Approve:** require a customer-controlled approval for pilot publishing. A second approval should promote the same bytes to production assignments.
-7. **Publish:** upload to an existing Intune macOS app (PKG) object through the Microsoft Graph deviceAppManagement API. Prefer the supported Intune app upload flow and verify the Graph response and processing state before changing assignments.
+7. **Publish:** after the beta PKG upload contract is confirmed and implemented, upload to an existing Intune macOS app (PKG) object through Microsoft Graph. The current script does not perform this step.
 8. **Observe:** check pilot device install status, detection, application launch, and managed preferences. Expand assignments only when the pilot health criteria pass.
 
 ### Initial safety boundaries
@@ -161,7 +161,7 @@ Keep Graph access disabled for validation jobs. Separate validation and publishi
 
 ## Graph publishing design
 
-The Graph publisher is intentionally not implemented in the vendor repository because the upload protocol, permissions, app object, assignment model, and approval controls belong to the customer tenant. The customer implementation should:
+The Graph upload publisher is not yet implemented. The observed test-tenant contract is documented in [Documentation/Intune-macos-pkg-graph-contract.md](Documentation/Intune-macos-pkg-graph-contract.md). The current script implements only read-only beta decisioning; a future upload implementation should:
 
 - authenticate with the customer-owned identity;
 - query and verify the target app object before upload;

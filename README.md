@@ -23,6 +23,7 @@ The Secure Contacts App source code is maintained in a separate private reposito
 2. Review the appropriate deployment guide:
    - Windows configuration: [README.Intune-Config-Win.md](Windows/README.Intune-Config-Win.md)
    - Windows app deployment: [README.Intune-Win32-Deploy-Win.md](Windows/README.Intune-Win32-Deploy-Win.md) for Intune Win32 packaging and SCCM/MECM-compatible scripted deployment
+   - Windows automated publishing: [README.Intune-Publisher-Win.md](Windows/README.Intune-Publisher-Win.md) for validated MSI packaging and gated Intune publishing
    - Windows application removal: [README.Intune-Uninstall.md](Windows/README.Intune-Uninstall.md) for application-only uninstall and optional complete data purge
    - macOS app deployment: [README.Intune-Deploy-MacOS.md](MacOS/README.Intune-Deploy-MacOS.md) for Intune PKG deployment
    - macOS configuration: [README.Intune-Config-MacOS.md](MacOS/README.Intune-Config-MacOS.md)
@@ -52,6 +53,7 @@ See the repository Releases page for the latest version.
 | [`README.Intune-Config-Win.md`](Windows/README.Intune-Config-Win.md) | Full Intune configuration guide (Method A: ADMX, Method B: OMA-URI) |
 | [`README.Intune-Win32-Deploy-Win.md`](Windows/README.Intune-Win32-Deploy-Win.md) | Windows app deployment guide — Intune Win32 packaging, SCCM/MECM-compatible scripted deployment, install/detect scripts, uninstall |
 | [`Scripts/Install-SecureContacts.ps1`](Windows/Scripts/Install-SecureContacts.ps1) | Windows install/update script — default GitHub-download mode or optional packaged-local MSI mode for Intune/SCCM deployments |
+| [`README.Intune-Publisher-Win.md`](Windows/README.Intune-Publisher-Win.md) | Validated GitHub MSI staging and gated Intune publishing automation for administrator workstations and CI/CD |
 | [`Scripts/Uninstall-SecureContacts.ps1`](Windows/Scripts/Uninstall-SecureContacts.ps1) | Optional Windows application-only uninstall or complete per-user data purge script |
 | [`Scripts/Test-SecureContactsInstalled.ps1`](Windows/Scripts/Test-SecureContactsInstalled.ps1) | Intune Win32 app detection script — checks registry for installed version compliance |
 | [`Scripts/Test-SecureContactsUpToDate.ps1`](Windows/Scripts/Test-SecureContactsUpToDate.ps1) | Intune Win32 app detection script — compares the installed version with the latest eligible GitHub release |
