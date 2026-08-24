@@ -9,7 +9,7 @@ MANIFEST_OUTPUT=""
 
 usage() {
   cat <<'EOF'
-Usage: Invoke-SecureContactsAutoUpdate.sh [--output PATH] [--manifest-output PATH] [--skip-recipe]
+Usage: Validate-SecureContactsPackage.sh [--output PATH] [--manifest-output PATH] [--skip-recipe]
 
 Stages and validates one Secure Contacts ARM64 PKG. This script never writes to
 Microsoft Graph. Run it on macOS with AutoPkg 2.3+ and the Apple package tools.
@@ -140,7 +140,7 @@ if [ -n "$MANIFEST_OUTPUT" ]; then
   /usr/bin/plutil -insert BundleId -string "$BUNDLE_ID" "$manifest_plist"
   /usr/bin/plutil -insert Sha256 -string "$PACKAGE_SHA256" "$manifest_plist"
   /usr/bin/plutil -insert Signer -string "$SIGNER" "$manifest_plist"
-  /usr/bin/plutil -insert CreatedUtc -date "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$manifest_plist"
+  /usr/bin/plutil -insert CreatedUtc -string "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$manifest_plist"
   /usr/bin/plutil -convert json -o "$MANIFEST_OUTPUT" "$manifest_plist"
   rm -f "$manifest_plist"
   echo "Validation manifest: $MANIFEST_OUTPUT"

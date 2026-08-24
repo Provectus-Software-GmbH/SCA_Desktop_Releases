@@ -33,6 +33,14 @@ The script remains compatible with the system Bash shipped by macOS, but compati
 
 ## Required Production Identity
 
+Before uploading this script to Intune, complete this checklist:
+
+- Extract and review the production Team ID and designated requirement from a signed production application.
+- Set `INTUNE_MODE` to the approved `application-only` or `complete-purge` mode.
+- Replace both identity placeholders with the reviewed production values.
+- Run the configured artifact locally with `--dry-run` and review the planned targets and warnings.
+- Upload only the reviewed, fixed artifact. Intune does not provide runtime arguments for selecting the mode or identity.
+
 The checked-in script is intentionally blocked from destructive deployment until these constants are populated:
 
 ```bash
@@ -84,7 +92,7 @@ This mode additionally enumerates eligible local users through directory service
 ~/Library/Logs/SecureContacts
 ```
 
-It also boots out and removes the automatic updater, its LaunchDaemon plist, its bootstrap payload, and only these updater-specific daemon logs:
+For historical deployments only, it also boots out and removes the retired automatic updater, its LaunchDaemon plist, its bootstrap payload, and only these updater-specific daemon logs. New updater installations are not supported:
 
 ```text
 /Library/LaunchDaemons/de.provectus.securecontacts.updater.plist
@@ -93,7 +101,7 @@ It also boots out and removes the automatic updater, its LaunchDaemon plist, its
 /Library/Logs/SecureContacts/launchdaemon-error.log
 ```
 
-`application-only` does not modify any of these updater paths.
+`application-only` does not modify any of these legacy updater paths.
 
 Deleting `Data` removes the application-owned settings, Level stores, SCACore cache, MSAL cache files, runtime authentication state, avatars, call history, and `secure-settings.bin` stored below that directory. It does not remove unrelated state outside `Data`.
 
@@ -229,6 +237,6 @@ Test on macOS 15 Sequoia and macOS 26 Tahoe separately because login-item behavi
 
 ## Related files and references
 
-- [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md) - macOS PKG deployment, update, rollback, and removal-workflow context
+- [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md) - macOS initial PKG deployment and removal-workflow context
 - [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md) - managed-preferences configuration guide
 - [README.md](README.md) - macOS deployment files and operational entry points

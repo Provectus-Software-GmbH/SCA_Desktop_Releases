@@ -24,13 +24,17 @@ The Secure Contacts App source code is maintained in a separate private reposito
    - Windows configuration: [README.Intune-Config-Win.md](Windows/README.Intune-Config-Win.md)
    - Windows app deployment: [README.Intune-Win32-Deploy-Win.md](Windows/README.Intune-Win32-Deploy-Win.md) for Intune Win32 packaging and SCCM/MECM-compatible scripted deployment
    - Windows automated publishing: [README.Intune-Publisher-Win.md](Windows/README.Intune-Publisher-Win.md) for validated MSI packaging and gated Intune publishing
+   - Windows update paths: [README.Intune-Update-Options-Win.md](Windows/README.Intune-Update-Options-Win.md) for Intune-managed GitHub release, packaged-local MSI, and organization-owned Graph publishing
+   - Windows GitHub Actions automation: [README.Intune-GitHub-Actions.md](Windows/README.Intune-GitHub-Actions.md) and [gh-publish-sca-intune-win.yml](.github/workflows/gh-publish-sca-intune-win.yml)
+   - Windows Azure DevOps automation: [README.Intune-Azure-DevOps.md](Windows/README.Intune-Azure-DevOps.md) and [azure-publish-sca-intune-win.yml](Windows/.azure-pipelines/azure-publish-sca-intune-win.yml)
    - Windows application removal: [README.Intune-Uninstall.md](Windows/README.Intune-Uninstall.md) for application-only uninstall and optional complete data purge
    - macOS app deployment: [README.Intune-Deploy-MacOS.md](MacOS/README.Intune-Deploy-MacOS.md) for Intune PKG deployment
    - macOS configuration: [README.Intune-Config-MacOS.md](MacOS/README.Intune-Config-MacOS.md)
    - macOS application removal: [README.Intune-Uninstall.MacOS.md](MacOS/README.Intune-Uninstall.MacOS.md) for application-only uninstall and optional complete data purge
-   - macOS update paths: [README.AutoUpdate-Pipeline-MacOS.md](MacOS/README.AutoUpdate-Pipeline-MacOS.md) for manual GitHub/AutoPkg workflows, customer-owned polling and Graph publishing, and direct endpoint updating
-   - optional macOS endpoint updater: [Install-SecureContacts.sh](MacOS/Scripts/Install-SecureContacts.sh) for Intune shell-script deployment and direct GitHub-to-device updates
-   - macOS update-path comparison: [Four available paths](MacOS/README.AutoUpdate-Pipeline-MacOS.md#four-available-paths)
+   - macOS update paths: [README.Intune-Update-Options-MacOS.md](MacOS/README.Intune-Update-Options-MacOS.md) for manual GitHub, automated staging, and organization-owned Graph publishing
+   - macOS Azure DevOps automation: [README.Intune-Azure-DevOps.md](MacOS/README.Intune-Azure-DevOps.md) and [azure-publish-sca-intune-macos.yml](MacOS/.azure-pipelines/azure-publish-sca-intune-macos.yml)
+   - macOS GitHub Actions automation: [README.Intune-GitHub-Actions.md](MacOS/README.Intune-GitHub-Actions.md) and [gh-publish-sca-intune-macos.yml](.github/workflows/gh-publish-sca-intune-macos.yml)
+   - macOS update-path comparison: [Choose an update path](MacOS/README.Intune-Update-Options-MacOS.md#choose-an-update-path)
 3. Configure Secure Contacts for your environment.
 4. Deploy the application and assign the configuration through your device management platform.
 5. Validate the deployment on a test device.
@@ -54,6 +58,11 @@ See the repository Releases page for the latest version.
 | [`README.Intune-Win32-Deploy-Win.md`](Windows/README.Intune-Win32-Deploy-Win.md) | Windows app deployment guide — Intune Win32 packaging, SCCM/MECM-compatible scripted deployment, install/detect scripts, uninstall |
 | [`Scripts/Install-SecureContacts.ps1`](Windows/Scripts/Install-SecureContacts.ps1) | Windows install/update script — default GitHub-download mode or optional packaged-local MSI mode for Intune/SCCM deployments |
 | [`README.Intune-Publisher-Win.md`](Windows/README.Intune-Publisher-Win.md) | Validated GitHub MSI staging and gated Intune publishing automation for administrator workstations and CI/CD |
+| [`README.Intune-Update-Options-Win.md`](Windows/README.Intune-Update-Options-Win.md) | Windows update paths, detection behavior, approval, and organization-owned Graph publishing design |
+| [`README.Intune-GitHub-Actions.md`](Windows/README.Intune-GitHub-Actions.md) | GitHub Actions implementation guide for organization-owned Windows Graph publishing |
+| [`gh-publish-sca-intune-win.yml`](.github/workflows/gh-publish-sca-intune-win.yml) | Customer-operated GitHub Actions validation and gated Intune publishing workflow |
+| [`README.Intune-Azure-DevOps.md`](Windows/README.Intune-Azure-DevOps.md) | Azure DevOps implementation guide for organization-owned Windows Graph publishing |
+| [`azure-publish-sca-intune-win.yml`](Windows/.azure-pipelines/azure-publish-sca-intune-win.yml) | Customer-operated Azure DevOps validation and gated Intune publishing pipeline |
 | [`Scripts/Uninstall-SecureContacts.ps1`](Windows/Scripts/Uninstall-SecureContacts.ps1) | Optional Windows application-only uninstall or complete per-user data purge script |
 | [`Scripts/Test-SecureContactsInstalled.ps1`](Windows/Scripts/Test-SecureContactsInstalled.ps1) | Intune Win32 app detection script — checks registry for installed version compliance |
 | [`Scripts/Test-SecureContactsUpToDate.ps1`](Windows/Scripts/Test-SecureContactsUpToDate.ps1) | Intune Win32 app detection script — compares the installed version with the latest eligible GitHub release |
@@ -75,9 +84,12 @@ See the repository Releases page for the latest version.
 | [`README.Intune-Deploy-MacOS.md`](MacOS/README.Intune-Deploy-MacOS.md) | macOS app deployment guide - PKG verification, Intune upload, detection, assignment, updates, and rollback planning |
 | [`README.Intune-Uninstall.MacOS.md`](MacOS/README.Intune-Uninstall.MacOS.md) | Optional macOS application-only uninstall or complete per-user data purge guide |
 | [`Scripts/Uninstall-SecureContacts.sh`](MacOS/Scripts/Uninstall-SecureContacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
-| [`README.AutoUpdate-Pipeline-MacOS.md`](MacOS/README.AutoUpdate-Pipeline-MacOS.md) | Manual and optional customer-owned macOS update pipeline, validation, approval, and Graph publishing design |
-| [`Scripts/Invoke-SecureContactsAutoUpdate.sh`](MacOS/Scripts/Invoke-SecureContactsAutoUpdate.sh) | Graph-free macOS runner that stages and validates ARM64 artifacts; Graph publishing is disabled |
-| [`Scripts/Install-SecureContacts.sh`](MacOS/Scripts/Install-SecureContacts.sh) | Optional customer-owned macOS endpoint updater that downloads, validates, and installs a newer ARM64 PKG |
+| [`README.Intune-Update-Options-MacOS.md`](MacOS/README.Intune-Update-Options-MacOS.md) | macOS update paths, validation, approval, and optional Graph publishing design |
+| [`README.Intune-Azure-DevOps.md`](MacOS/README.Intune-Azure-DevOps.md) | Azure DevOps implementation guide for the organization-owned macOS Graph pipeline |
+| [`azure-publish-sca-intune-macos.yml`](MacOS/.azure-pipelines/azure-publish-sca-intune-macos.yml) | Customer-operated Azure DevOps validation and gated Intune publishing pipeline |
+| [`README.Intune-GitHub-Actions.md`](MacOS/README.Intune-GitHub-Actions.md) | GitHub Actions implementation guide for the organization-owned macOS Graph pipeline |
+| [`gh-publish-sca-intune-macos.yml`](.github/workflows/gh-publish-sca-intune-macos.yml) | Customer-operated GitHub Actions validation and gated Intune publishing workflow |
+| [`Scripts/Validate-SecureContactsPackage.sh`](MacOS/Scripts/Validate-SecureContactsPackage.sh) | Graph-free macOS runner that stages and validates ARM64 artifacts; Graph publishing is disabled |
 | [`README.Intune-Config-MacOS.md`](MacOS/README.Intune-Config-MacOS.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
 | [`plist/de.provectus.SecureContactsDesktop.plist`](MacOS/plist/de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
 | [`plist/de.provectus.SecureContactsDesktop.plist.demo`](MacOS/plist/de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |

@@ -2,6 +2,8 @@
 
 `Scripts/Sync-SecureContactsToIntune.ps1` stages a Windows MSI from the latest eligible GitHub release, or from an explicitly selected release tag, validates it, creates an `.intunewin` package, and optionally updates Microsoft Intune.
 
+For the three Windows update choices, see [README.Intune-Update-Options-Win.md](README.Intune-Update-Options-Win.md). CI-specific setup is documented in [README.Intune-GitHub-Actions.md](README.Intune-GitHub-Actions.md) and [README.Intune-Azure-DevOps.md](README.Intune-Azure-DevOps.md).
+
 ## Safety model
 
 The script performs validation and packaging by default. It does not authenticate to Graph or change Intune unless `-Publish` is supplied. `-WhatIf` can be combined with `-Publish` to exercise target selection without writing the app change.
@@ -164,8 +166,8 @@ The script submits the Intune request but does not assign the app to groups. Con
 
 ## CI templates
 
-- GitHub Actions: `.github/workflows/publish-secure-contacts-intune.yml`
-- Azure DevOps: `azure-pipelines-intune.yml`
+- GitHub Actions: `.github/workflows/gh-publish-sca-intune-win.yml`
+- Azure DevOps: `Windows/.azure-pipelines/azure-publish-sca-intune-win.yml`
 
 Both templates use a Windows runner and install the pinned module. They support these modes:
 

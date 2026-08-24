@@ -12,7 +12,6 @@ Input:
   CATEGORIES:
     - Business Applications
   OUTPUT_PATH: '%RECIPE_CACHE_DIR%'
-  PACKAGE_FILENAME: 'SecureContacts-%version%-arm64.pkg'
 
 Process:
   # All parent recipe processors run first:
@@ -27,15 +26,15 @@ Process:
   - Processor: Copier
     Arguments:
       source_path: '%pathname%'
-      destination_path: '%OUTPUT_PATH%/%PACKAGE_FILENAME%'
+      destination_path: '%OUTPUT_PATH%/SecureContacts-%version%-arm64.pkg'
       overwrite: true
 
   # Download the official checksum next to the package. Keeping the original
   # package filename allows standard tools such as `shasum -a 256 -c` to use it.
   - Processor: URLDownloader
     Arguments:
-      url: 'https://github.com/%GITHUB_REPO%/releases/download/v%version%/%PACKAGE_FILENAME%.sha256'
-      filename: '%PACKAGE_FILENAME%.sha256'
+      url: 'https://github.com/%GITHUB_REPO%/releases/download/v%version%/SecureContacts-%version%-arm64.pkg.sha256'
+      filename: 'SecureContacts-%version%-arm64.pkg.sha256'
       download_dir: '%OUTPUT_PATH%'
 
 # USAGE INSTRUCTIONS
