@@ -1,6 +1,6 @@
 # Secure Contacts Intune Publisher (Windows)
 
-`Scripts/Sync-SecureContactsToIntune.ps1` stages a Windows MSI from the latest eligible GitHub release, or from an explicitly selected release tag, validates it, creates an `.intunewin` package, and optionally updates Microsoft Intune.
+`Scripts/Sync-SecureContactsToIntune.ps1` stages a Windows MSI from the latest eligible GitHub release, or from an explicitly selected release tag, validates it, creates an `.intunewin` package, and optionally creates or updates an Intune Win32 app.
 
 For the three Windows update choices, see [README.Intune-Update-Options-Win.md](README.Intune-Update-Options-Win.md). CI-specific setup is documented in [README.Intune-GitHub-Actions.md](README.Intune-GitHub-Actions.md) and [README.Intune-Azure-DevOps.md](README.Intune-Azure-DevOps.md).
 

@@ -108,7 +108,7 @@ Deploy application **Configuration** separately using [README.Intune-Config-MacO
 
 ## Updating the app
 
-After the initial app deployment, choose exactly one update path from [README.Intune-Update-Options-MacOS.md](README.Intune-Update-Options-MacOS.md#choose-an-update-path): manual GitHub download, automated staging with manual Intune upload, or the optional organization-owned Graph pipeline.
+After the initial app deployment, choose exactly one update path from [README.Intune-Update-Options-MacOS.md](README.Intune-Update-Options-MacOS.md#choose-an-update-path): organization-owned Graph publishing, automated staging with manual Intune upload, or manual GitHub download.
 
 The update guide is the single source of truth for subsequent-release validation, Intune upload, approval, pilot rollout, rollback, Graph authentication, and AutoPkg staging.
 

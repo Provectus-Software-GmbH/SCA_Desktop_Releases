@@ -10,8 +10,8 @@ This folder contains the files IT administrators need to deploy, configure, and 
 2. Configure managed preferences with [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md).
 3. For optional application removal or complete data cleanup, use [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) and [Scripts/Uninstall-SecureContacts.sh](Scripts/Uninstall-SecureContacts.sh).
 4. To compare or operate any of the three supported macOS update paths, use [README.Intune-Update-Options-MacOS.md](README.Intune-Update-Options-MacOS.md).
-5. To operate Path 3 from Azure DevOps Pipelines, use [README.Intune-Azure-DevOps.md](README.Intune-Azure-DevOps.md) and [azure-publish-sca-intune-macos.yml](.azure-pipelines/azure-publish-sca-intune-macos.yml).
-6. To operate Path 3 from GitHub Actions, use [README.Intune-GitHub-Actions.md](README.Intune-GitHub-Actions.md) and [gh-publish-sca-intune-macos.yml](../.github/workflows/gh-publish-sca-intune-macos.yml).
+5. To operate Path 1 from Azure DevOps Pipelines, use [README.Intune-Azure-DevOps.md](README.Intune-Azure-DevOps.md) and [azure-publish-sca-intune-macos.yml](.azure-pipelines/azure-publish-sca-intune-macos.yml).
+6. To operate Path 1 from GitHub Actions, use [README.Intune-GitHub-Actions.md](README.Intune-GitHub-Actions.md) and [gh-publish-sca-intune-macos.yml](../.github/workflows/gh-publish-sca-intune-macos.yml).
 
 ## Choose an update path
 
@@ -30,7 +30,7 @@ For the detailed comparison and decision guidance, see [README.Intune-Update-Opt
 | [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
 | [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md) | Initial Intune PKG app deployment, verification, detection, assignment, and post-install checks |
 | [README.Intune-Uninstall.MacOS.md](README.Intune-Uninstall.MacOS.md) | Optional macOS application-only uninstall or complete per-user data purge guide |
-| [README.Intune-Update-Options-MacOS.md](README.Intune-Update-Options-MacOS.md) | Three macOS update paths: manual GitHub, automated staging with manual upload, and organization-owned Graph publishing |
+| [README.Intune-Update-Options-MacOS.md](README.Intune-Update-Options-MacOS.md) | Three macOS update paths: organization-owned Graph publishing, automated staging with manual upload, and manual GitHub download |
 | [README.Intune-Azure-DevOps.md](README.Intune-Azure-DevOps.md) | Azure DevOps implementation guide for the organization-owned macOS Graph pipeline |
 | [.azure-pipelines/azure-publish-sca-intune-macos.yml](.azure-pipelines/azure-publish-sca-intune-macos.yml) | Customer-operated Azure DevOps validation and gated Intune publishing pipeline |
 | [README.Intune-GitHub-Actions.md](README.Intune-GitHub-Actions.md) | GitHub Actions implementation guide for the organization-owned macOS Graph pipeline |

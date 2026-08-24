@@ -2,28 +2,28 @@
 
 This guide describes three supported macOS update paths for Microsoft Intune:
 
-1. **Manual GitHub path:** an administrator downloads the PKG and matching checksum from GitHub, validates the signed package, and uploads it to Intune.
-2. **Automated staging with manual Intune upload:** the sync script runs AutoPkg and validation, then an administrator reviews and uploads the package to Intune.
-3. **Optional organization-owned Graph publishing automation:** your macOS runner polls the official GitHub Releases feed, runs the same validation, and can publish an approved package through Microsoft Graph. This can be implemented with GitHub Actions, Azure DevOps Pipelines, or another approved orchestrator.
+1. **Organization-owned Graph publishing automation:** an organization-owned macOS runner polls the official GitHub Releases feed, validates the package, and publishes an approved package through Microsoft Graph. This is the enterprise-recommended option for centralized release control, audit evidence, approval gates, and controlled pilot-to-production publishing. It can be implemented with GitHub Actions, Azure DevOps Pipelines, or another approved orchestrator.
+2. **Automated staging with manual Intune upload:** the sync script runs AutoPkg and validation, then an administrator reviews and uploads the package through the Intune portal.
+3. **Manual GitHub download:** an administrator downloads the PKG and matching checksum from GitHub, validates the signed package, and uploads it through the Intune portal.
 
-The two manual paths are the default: both prepare the package and end with an administrator uploading it through the Intune portal. They do not require Microsoft Graph permissions. The optional pipeline automates that upload through Microsoft Graph. These paths are operated, approved, and secured by the administrator. This repository does not contain tenant identifiers, client secrets, certificates, access tokens, or an organization-specific hosted production pipeline.
+All three paths are supported alternatives. Graph publishing provides the most centralized automation and auditability; staging and manual download retain portal-based approval and upload and do not require Microsoft Graph permissions. These paths are operated, approved, and secured by the administrator. This repository does not contain tenant identifiers, client secrets, certificates, access tokens, or an organization-specific hosted production pipeline.
 
 ## Choose an update path
 
-Choose exactly one path for each device population. The first two paths prepare a package for administrator portal upload. The third publishes centrally through Microsoft Graph.
+Choose exactly one path for each device population. Path 1 publishes centrally through Microsoft Graph; Paths 2 and 3 prepare a package for administrator portal upload.
 
 | Path | How it works | Main advantages | Main tradeoffs |
 |---|---|---|---|
-| **1. Manual GitHub download and Intune upload** | Administrator downloads the PKG and matching checksum from GitHub, verifies the package on a Mac, and uploads the PKG in the Intune portal. | Simplest setup; no AutoPkg, CI, Graph permissions, credentials, or endpoint script; Intune remains the deployment and reporting system. | Administrator repeats the process for every release; no automatic release discovery or upload; validation and approval are manual. |
+| **1. Organization-owned Graph publishing automation** | An organization-owned macOS runner or CI job stages and validates the PKG, waits for approval, and publishes it to an existing Intune app object through Microsoft Graph. GitHub Actions and Azure DevOps Pipelines are supported implementation examples. | Reduces recurring administrator work; supports scheduled polling, audit evidence, approval gates, pilot promotion, and retained rollback artifacts. | Highest setup and maintenance cost; requires an organization-owned Graph identity, permissions, CI, app IDs, and test tenant. |
 | **2. Automated staging with manual Intune upload** | The sync script runs AutoPkg and validation without `--publish`; an administrator reviews the artifacts and uploads the PKG in the Intune portal. | Repeatable acquisition and validation; no Graph permissions or credentials; Intune upload and approval remain under administrator control. | Requires a Mac with AutoPkg; portal upload and approval remain manual. |
-| **3. Organization-owned Graph publishing automation** | An organization-owned macOS runner or CI job stages and validates the PKG, waits for approval, and publishes it to an existing Intune app object through Microsoft Graph. GitHub Actions and Azure DevOps Pipelines are supported implementation examples. | Reduces recurring administrator work; supports scheduled polling, audit evidence, approval gates, pilot promotion, and retained rollback artifacts. | Highest setup and maintenance cost; requires an organization-owned Graph identity, permissions, CI, app IDs, and test tenant. |
+| **3. Manual GitHub download and Intune upload** | Administrator downloads the PKG and matching checksum from GitHub, verifies the package on a Mac, and uploads the PKG in the Intune portal. | Simplest setup; no AutoPkg, CI, Graph permissions, credentials, or endpoint script; Intune remains the deployment and reporting system. | Administrator repeats the process for every release; no automatic release discovery or upload; validation and approval are manual. |
 
 ### Decision guide
 
-- Choose **manual GitHub download** when releases are infrequent and you want the fewest tools and permissions.
-- Choose **AutoPkg staging** when you want repeatable package acquisition and validation but prefer portal-based approval and upload.
 - Choose the **Graph pipeline** when you need centralized automation, auditability, approval gates, and controlled pilot-to-production publishing.
-The paths are alternatives, not cumulative requirements. Azure DevOps is an alternative implementation of Path 3, not a fourth update path. You may use manual GitHub download as a fallback for an organization-owned pipeline.
+- Choose **AutoPkg staging** when you want repeatable package acquisition and validation but prefer portal-based approval and upload.
+- Choose **manual GitHub download** when releases are infrequent and you want the fewest tools and permissions.
+The paths are alternatives, not cumulative requirements. Azure DevOps and GitHub Actions are alternative implementations of Path 1, not additional update paths. You may use manual GitHub download as a fallback for an organization-owned pipeline.
 
 ## Rules for every path
 
@@ -35,19 +35,19 @@ For paths 1 through 3, use [Validate-SecureContactsPackage.sh](Scripts/Validate-
 
 ## Operating model
 
-| Concern | Manual GitHub path | Automated staging with manual upload | Organization-owned pipeline |
+| Concern | Organization-owned pipeline | Automated staging with manual upload | Manual GitHub path |
 |---|---|---|---|
 | Release source | Official GitHub Release | Official GitHub Release | Official GitHub Release API or release asset URL |
-| Package preparation | Administrator downloads the PKG and checksum | Sync script runs AutoPkg 2.3+ on macOS | Pipeline downloads the approved release assets directly or uses an approved staging recipe |
-| Validation | Administrator runs the documented checks | Sync script runs the validation runner; administrator reviews the manifest | Validation runner fails closed before any Graph write |
-| Intune interaction | Administrator uploads the PKG in the portal | Administrator uploads the PKG in the portal | Your Graph application publishes to an existing pilot app object |
-| Approval | Your existing change control | Your existing change control | Your approval gate between validation and production promotion |
-| Credentials | None required by this repository | None required by this repository | Your organization-owned Entra application or workload identity |
-| Rollback | Your existing Intune rollback procedure | Your existing Intune rollback procedure | You retain the prior approved PKG and can narrow assignments or restore the prior version |
+| Package preparation | Pipeline downloads the approved release assets directly or uses an approved staging recipe | Sync script runs AutoPkg 2.3+ on macOS | Administrator downloads the PKG and checksum |
+| Validation | Validation runner fails closed before any Graph write | Sync script runs the validation runner; administrator reviews the manifest | Administrator runs the documented checks |
+| Intune interaction | Your Graph application publishes to an existing pilot app object | Administrator uploads the PKG in the portal | Administrator uploads the PKG in the portal |
+| Approval | Your approval gate between validation and production promotion | Your existing change control | Your existing change control |
+| Credentials | Your organization-owned Entra application or workload identity | None required by this repository | None required by this repository |
+| Rollback | You retain the prior approved PKG and can narrow assignments or restore the prior version | Your existing Intune rollback procedure | Your existing Intune rollback procedure |
 
 The pipeline is not an application update service. It prepares a deployment candidate; Intune remains responsible for device targeting, installation, detection, and reporting.
 
-## Path 1: Manual GitHub download
+## Manual GitHub download
 
 Use this path when releases are infrequent and you want the fewest tools and permissions.
 
@@ -68,7 +68,7 @@ Use this path when releases are infrequent and you want the fewest tools and per
 
 The shared validation rules apply before upload. Intune receives the package through the portal and reports its detected bundle and version after installation. For rollback, stop or narrow the new assignment and restore a previously retained, validated package through the same controlled portal process.
 
-## Path 2: Automated staging with manual Intune upload
+## Automated staging with manual Intune upload
 
 Use this path when you want repeatable package acquisition and validation but prefer portal-based approval and upload. The sync script runs AutoPkg and the validation runner for you; do not add `--publish` to this workflow.
 
@@ -104,7 +104,7 @@ The sync command applies the shared checksum, signer, Gatekeeper, architecture, 
 
 Follow [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md) for the full portal workflow and [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md) for managed preferences.
 
-## Path 3: Organization-owned Graph publishing automation
+## Organization-owned Graph publishing automation
 
 Use this path when you need centralized release discovery, audit evidence, approval gates, and controlled pilot-to-production publishing. The runner must be macOS; Windows administrators may trigger a macOS CI job but cannot run the Bash and Apple package validation directly on Windows.
 
@@ -124,7 +124,7 @@ The current implementation provides staging and validation through [Scripts/Sync
 
 For GitHub Actions, use the [GitHub Actions guide](README.Intune-GitHub-Actions.md) and workflow [gh-publish-sca-intune-macos.yml](../.github/workflows/gh-publish-sca-intune-macos.yml). The workflow separates validation from publishing: the protected `intune-production` environment is attached only to the publish job, which depends on successful validation.
 
-For Azure DevOps Pipelines, use the [Azure DevOps guide](README.Intune-Azure-DevOps.md) and example [azure-publish-sca-intune-macos.yml](.azure-pipelines/azure-publish-sca-intune-macos.yml). It runs the same validation and Graph publishing scripts on `macOS-latest`, with Azure DevOps parameters for validation, read-only `whatIf`, and gated `publish`. Configure the protected variables described in the guide and protect the `intune-production` environment. This Azure DevOps definition is an alternative implementation of this same third path, not an additional update path.
+For Azure DevOps Pipelines, use the [Azure DevOps guide](README.Intune-Azure-DevOps.md) and example [azure-publish-sca-intune-macos.yml](.azure-pipelines/azure-publish-sca-intune-macos.yml). It runs the same validation and Graph publishing scripts on `macOS-latest`, with Azure DevOps parameters for validation, read-only `whatIf`, and gated `publish`. Configure the protected variables described in the guide and protect the `intune-production` environment. This Azure DevOps definition is an alternative implementation of the Graph publishing path, not an additional update path.
 
 ### Preview, publish, and cleanup commands
 
@@ -173,7 +173,7 @@ The publisher temporarily converts the certificate to a mode-600 PEM for Azure C
 ### Required pipeline stages
 
 1. **Discover:** query the official repository's latest stable release or run on an administrator-approved release/manual schedule. Do not treat an arbitrary tag, prerelease, or filename as approved input.
-2. **Stage:** acquire the approved PKG and matching checksum into an isolated `OUTPUT_PATH`. Path 2 normally runs `de.provectus.securecontacts.intune`; the current GitHub Actions and Azure DevOps examples download the release assets directly and use `--skip-recipe`.
+2. **Stage:** acquire the approved PKG and matching checksum into an isolated `OUTPUT_PATH`. The automated staging path normally runs `de.provectus.securecontacts.intune`; the current GitHub Actions and Azure DevOps examples download the release assets directly and use `--skip-recipe`.
 3. **Validate:** run `Validate-SecureContactsPackage.sh`. It checks that there is exactly one expected ARM64 package and checksum, verifies the checksum, confirms the Developer ID signer, runs Gatekeeper assessment, checks the package version, bundle ID, and ARM64 application executable, and rejects malformed or ambiguous artifacts.
 4. **Compare:** compare the candidate version with the version currently approved for the Intune app. Do not publish downgrades automatically. Use an explicit override only in a separately approved rollback procedure.
 5. **Retain:** store the exact PKG, checksum, validation summary, recipe log, and release URL in your approved artifact store. Do not rebuild or modify the package between validation and upload.

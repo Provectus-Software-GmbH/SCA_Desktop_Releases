@@ -24,14 +24,14 @@ The Secure Contacts App source code is maintained in a separate private reposito
    - Windows configuration: [README.Intune-Config-Win.md](Windows/README.Intune-Config-Win.md)
    - Windows app deployment: [README.Intune-Win32-Deploy-Win.md](Windows/README.Intune-Win32-Deploy-Win.md) for Intune Win32 packaging and SCCM/MECM-compatible scripted deployment
    - Windows automated publishing: [README.Intune-Publisher-Win.md](Windows/README.Intune-Publisher-Win.md) for validated MSI packaging and gated Intune publishing
-   - Windows update paths: [README.Intune-Update-Options-Win.md](Windows/README.Intune-Update-Options-Win.md) for Intune-managed GitHub release, packaged-local MSI, and organization-owned Graph publishing
+   - Windows update paths: [README.Intune-Update-Options-Win.md](Windows/README.Intune-Update-Options-Win.md) for organization-owned Graph publishing, packaged-local MSI, and Intune-managed GitHub release
    - Windows GitHub Actions automation: [README.Intune-GitHub-Actions.md](Windows/README.Intune-GitHub-Actions.md) and [gh-publish-sca-intune-win.yml](.github/workflows/gh-publish-sca-intune-win.yml)
    - Windows Azure DevOps automation: [README.Intune-Azure-DevOps.md](Windows/README.Intune-Azure-DevOps.md) and [azure-publish-sca-intune-win.yml](Windows/.azure-pipelines/azure-publish-sca-intune-win.yml)
    - Windows application removal: [README.Intune-Uninstall.md](Windows/README.Intune-Uninstall.md) for application-only uninstall and optional complete data purge
    - macOS app deployment: [README.Intune-Deploy-MacOS.md](MacOS/README.Intune-Deploy-MacOS.md) for Intune PKG deployment
    - macOS configuration: [README.Intune-Config-MacOS.md](MacOS/README.Intune-Config-MacOS.md)
    - macOS application removal: [README.Intune-Uninstall.MacOS.md](MacOS/README.Intune-Uninstall.MacOS.md) for application-only uninstall and optional complete data purge
-   - macOS update paths: [README.Intune-Update-Options-MacOS.md](MacOS/README.Intune-Update-Options-MacOS.md) for manual GitHub, automated staging, and organization-owned Graph publishing
+   - macOS update paths: [README.Intune-Update-Options-MacOS.md](MacOS/README.Intune-Update-Options-MacOS.md) for organization-owned Graph publishing, automated staging with manual upload, and manual GitHub download
    - macOS Azure DevOps automation: [README.Intune-Azure-DevOps.md](MacOS/README.Intune-Azure-DevOps.md) and [azure-publish-sca-intune-macos.yml](MacOS/.azure-pipelines/azure-publish-sca-intune-macos.yml)
    - macOS GitHub Actions automation: [README.Intune-GitHub-Actions.md](MacOS/README.Intune-GitHub-Actions.md) and [gh-publish-sca-intune-macos.yml](.github/workflows/gh-publish-sca-intune-macos.yml)
    - macOS update-path comparison: [Choose an update path](MacOS/README.Intune-Update-Options-MacOS.md#choose-an-update-path)

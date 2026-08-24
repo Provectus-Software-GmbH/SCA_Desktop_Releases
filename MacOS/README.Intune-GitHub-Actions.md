@@ -1,6 +1,6 @@
 # Secure Contacts - GitHub Actions macOS Intune Pipeline
 
-This guide explains how to operate the organization-owned macOS Intune publishing workflow with GitHub Actions. It is an implementation of Path 3 in [README.Intune-Update-Options-MacOS.md](README.Intune-Update-Options-MacOS.md), not a separate update path.
+This guide explains how to operate the organization-owned macOS Intune publishing workflow with GitHub Actions. It is an implementation of Path 1 in [README.Intune-Update-Options-MacOS.md](README.Intune-Update-Options-MacOS.md), not a separate update path.
 
 The workflow is [gh-publish-sca-intune-macos.yml](../.github/workflows/gh-publish-sca-intune-macos.yml). It reuses the shared package validator and Graph publisher; it does not contain a second updater or Graph implementation.
 
