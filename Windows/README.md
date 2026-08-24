@@ -4,7 +4,7 @@ Secure Contacts App (SCA) is an enterprise contact management solution that lets
 
 This folder contains the files IT administrators need to configure and manage SCA on Windows devices via Microsoft Intune. The included deployment script is also suitable for SCCM/MECM when you want the same MSI install logic outside Intune. Two policy-configuration methods are supported: ADMX/ADML imported templates and OMA-URI custom profiles (manual or PowerShell-automated via Graph).
 
-**Start here:** [README.Intune-Config-Win.md](README.Intune-Config-Win.md) for policy configuration and [README.Intune-Win32-Deploy-Win.md](README.Intune-Win32-Deploy-Win.md) for Intune Win32 packaging, packaged-local MSI usage, SCCM/MECM-compatible deployment, and the standard uninstall command. For optional data cleanup, see [README.Intune-Uninstall.md](README.Intune-Uninstall.md).
+**Start here:** [README.Intune-Config-Win.md](README.Intune-Config-Win.md) for policy configuration, [README.Intune-Win32-Deploy-Win.md](README.Intune-Win32-Deploy-Win.md) for managed app deployment, and [README.Intune-Update-Options-Win.md](README.Intune-Update-Options-Win.md) to choose an update path. For CI implementation details, see [README.Intune-GitHub-Actions.md](README.Intune-GitHub-Actions.md), [README.Intune-Azure-DevOps.md](README.Intune-Azure-DevOps.md), and the publisher reference [README.Intune-Publisher-Win.md](README.Intune-Publisher-Win.md). For optional data cleanup, see [README.Intune-Uninstall.md](README.Intune-Uninstall.md).
 
 ## Files in this folder
 
@@ -12,8 +12,13 @@ This folder contains the files IT administrators need to configure and manage SC
 |---|---|
 | [README.Intune-Config-Win.md](README.Intune-Config-Win.md) | Full Intune configuration guide (Method A: ADMX, Method B: OMA-URI) |
 | [README.Intune-Win32-Deploy-Win.md](README.Intune-Win32-Deploy-Win.md) | Windows app deployment guide — Intune Win32 packaging, packaged-local MSI usage, SCCM/MECM-compatible deployment |
+| [README.Intune-Update-Options-Win.md](README.Intune-Update-Options-Win.md) | Three Windows update paths: organization-owned Graph publishing, packaged-local MSI, and Intune-managed GitHub release |
+| [README.Intune-GitHub-Actions.md](README.Intune-GitHub-Actions.md) | GitHub Actions implementation guide for organization-owned Windows Graph publishing |
+| [README.Intune-Azure-DevOps.md](README.Intune-Azure-DevOps.md) | Azure DevOps implementation guide for organization-owned Windows Graph publishing |
+| [README.Intune-Publisher-Win.md](README.Intune-Publisher-Win.md) | Detailed `Sync-SecureContactsToIntune.ps1` reference — staging, validation, target selection, and publishing |
 | [README.Intune-Uninstall.md](README.Intune-Uninstall.md) | Windows uninstall modes, safety scope, Intune usage, and exit codes |
 | [Scripts/Install-SecureContacts.ps1](Scripts/Install-SecureContacts.ps1) | Windows install/update script — default GitHub-download mode or optional packaged-local MSI mode for Intune/SCCM |
+| [Scripts/Sync-SecureContactsToIntune.ps1](Scripts/Sync-SecureContactsToIntune.ps1) | Publisher automation — validates, packages, and optionally creates or updates an Intune Win32 app with a signed GitHub MSI |
 | [Scripts/Uninstall-SecureContacts.ps1](Scripts/Uninstall-SecureContacts.ps1) | Optional Windows application-only uninstall or complete per-user data purge script |
 | [Scripts/Test-SecureContactsInstalled.ps1](Scripts/Test-SecureContactsInstalled.ps1) | Intune Win32 app detection script — checks registry for installed version compliance |
 | [Scripts/Test-SecureContactsUpToDate.ps1](Scripts/Test-SecureContactsUpToDate.ps1) | Intune Win32 app detection script — compares the installed version with the latest eligible GitHub release |

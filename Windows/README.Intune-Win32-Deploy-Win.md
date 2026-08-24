@@ -2,7 +2,7 @@
 
 This guide covers deploying Secure Contacts as an Intune **Win32 app** with the provided PowerShell scripts. The same deploy script can also be reused in SCCM/MECM-style packaged deployments. By default, the script downloads and installs the latest release from GitHub Releases, and an optional local-content mode installs a bundled MSI from the package itself.
 
-> **Related:** Configure Secure Contacts policies using [README.Intune-Config-Win.md](README.Intune-Config-Win.md).
+> **Related:** Configure Secure Contacts policies using [README.Intune-Config-Win.md](README.Intune-Config-Win.md). Compare update approaches in [README.Intune-Update-Options-Win.md](README.Intune-Update-Options-Win.md).
 
 ## How it works
 
@@ -11,7 +11,7 @@ This guide covers deploying Secure Contacts as an Intune **Win32 app** with the 
 | [`Scripts/Install-SecureContacts.ps1`](Scripts/Install-SecureContacts.ps1) | Install command — default GitHub-download mode or optional packaged-local MSI mode, both with silent install behavior |
 | [`Scripts/Uninstall-SecureContacts.ps1`](Scripts/Uninstall-SecureContacts.ps1) | Uninstall command — application-only removal by default, with an optional complete data purge mode |
 | [`Scripts/Test-SecureContactsInstalled.ps1`](Scripts/Test-SecureContactsInstalled.ps1) | Detection rule (static) — checks registry for Secure Contacts presence and minimum version compliance |
-| [`Scripts/Test-SecureContactsUpToDate.ps1`](Scripts/Test-SecureContactsUpToDate.ps1) | Detection rule (dynamic) — compares installed version with the latest eligible GitHub release |
+| [`Scripts/Test-SecureContactsUpToDate.ps1`](Scripts/Test-SecureContactsUpToDate.ps1) | Intune detection rule (dynamic) — compares installed version with the latest eligible GitHub release |
 
 In GitHub-download mode, the install script is version-aware. Whenever Intune executes the installation, the script compares the latest GitHub release with the installed version and exits 0 without downloading if the device is already current.
 
@@ -19,10 +19,10 @@ In GitHub-download mode, the install script is version-aware. Whenever Intune ex
 
 Use one of these mode combinations consistently:
 
-1. **GitHub-download install + dynamic detection**
+1. **Intune-managed GitHub release mode**
    - Install: `Install-SecureContacts.ps1` (GitHub mode)
    - Detection: `Test-SecureContactsUpToDate.ps1`
-   - Best when you want release tracking without repackaging for every app update.
+   - Best when you want release tracking without repackaging for every app update. Intune controls when detection runs and invokes the install command; this is not an autonomous scheduled updater.
 
 2. **Packaged-local install + static detection**
    - Install: `Install-SecureContacts.ps1 -MsiPath ...`
@@ -33,7 +33,7 @@ Use one of these mode combinations consistently:
 
 | Requirement | Recommended mode |
 |---|---|
-| Always latest version | GitHub-download install + dynamic detection |
+| Automatically track the latest eligible release | Intune-managed GitHub release mode |
 | Fully controlled change management | Packaged-local install + static detection |
 | No internet access from endpoints | Packaged-local install + static detection |
 | Minimal packaging effort | GitHub-download install + dynamic detection |
@@ -135,7 +135,7 @@ The Intune Win32 app format requires a `.intunewin` package.
    |---|---|
    | Name | Secure Contacts |
    | Publisher | Provectus Software GmbH |
-   | Version | Informational only (does not control install/update logic). Suggested: `Script-managed (GitHub latest)` for GitHub-download mode, or the bundled MSI version (for example `0.8.2.0`) for packaged-local mode. |
+   | Version | Informational only (does not control install/update logic). Suggested: `Script-managed (Intune GitHub release)` for Intune-managed GitHub release mode, or the bundled MSI version (for example `0.8.2.0`) for packaged-local mode. |
 
 ## Step 3 — Configure install and uninstall commands
 
@@ -215,14 +215,14 @@ Add any additional requirements (disk space, RAM) as needed for your environment
 
 1. Under **Detection rules**, select **Rule format: Use a custom detection script**.
 2. Upload the detection script for your chosen mode:
-   - `Test-SecureContactsUpToDate.ps1` for **GitHub-download** + dynamic detection
+   - `Test-SecureContactsUpToDate.ps1` for **Intune-managed GitHub release mode**
    - `Test-SecureContactsInstalled.ps1` for **packaged-local** + static minimum-version detection
 3. Set **Run script as 32-bit process on 64-bit clients**: **No**.
 4. Set **Enforce script signature check**: as required by your tenant policy.
 
 Detection behavior differs by script:
 
-- **`Test-SecureContactsUpToDate.ps1` (dynamic):** compares installed version to latest eligible GitHub release and returns non-compliant when an update is available.
+- **`Test-SecureContactsUpToDate.ps1` (dynamic):** compares installed version to the latest eligible GitHub release and returns non-compliant when an update is available. Intune then invokes the configured install command; the detection script does not install the MSI itself.
 - **`Test-SecureContactsInstalled.ps1` (static):** exits 0 with output when the app is detected at or above `$MinimumVersion`. Update `$MinimumVersion` before deploying if you want to enforce a minimum release.
 
 If you enable script signature enforcement, ensure the selected detection script is signed with a certificate trusted by the managed devices.
@@ -245,7 +245,7 @@ On a test device, trigger an Intune sync and confirm:
    ```
    > Note: `{ProductCode}` is the MSI ProductCode assigned by Windows Installer and may vary between releases.
 3. Run your selected detection script manually:
-   - `Test-SecureContactsUpToDate.ps1` for dynamic GitHub-update detection
+   - `Test-SecureContactsUpToDate.ps1` for Intune-managed GitHub-release detection
    - `Test-SecureContactsInstalled.ps1` for static minimum-version detection
 4. Check the install log if needed: `%TEMP%\SecureContacts_*_install.log` (kept on failure only). When the script runs from Intune as `SYSTEM`, `%TEMP%` refers to the system temp directory, typically `C:\Windows\Temp`.
 
@@ -269,9 +269,9 @@ Confirm that the Intune app return code mapping treats `3010` as a soft reboot o
 
 ## Notes
 
-- **Deployment modes:** GitHub-download mode minimizes packaging work and automatically targets the latest release. Packaged-local mode removes the runtime GitHub dependency, but each MSI update requires a new `.intunewin` package or SCCM content revision.
+- **Deployment modes:** Intune-managed GitHub release mode minimizes packaging work and tracks the latest eligible release. Packaged-local mode removes the runtime GitHub dependency, but each MSI update requires a new `.intunewin` package or SCCM content revision. For organization-owned Graph publishing, see [README.Intune-Update-Options-Win.md](README.Intune-Update-Options-Win.md).
 - **Auto-update behavior depends on detection script:**
-   - With `Test-SecureContactsUpToDate.ps1`, update detection follows latest eligible GitHub release.
+   - With `Test-SecureContactsUpToDate.ps1`, Intune detection follows the latest eligible GitHub release and Intune invokes the install command when non-compliant.
    - With `Test-SecureContactsInstalled.ps1`, update detection follows the configured `$MinimumVersion`.
    - In both cases, GitHub-download install mode does not require a new `.intunewin` package for each app release.
 - **Internet access:** The install script calls `api.github.com` and downloads from `objects.githubusercontent.com` only in GitHub-download mode. If all devices share a single egress IP, add a GitHub API token to avoid the 60 requests/hour rate limit — see `Install-SecureContacts.ps1` for instructions.

@@ -4,7 +4,6 @@ MinimumVersion: '2.3'
 Input:
   NAME: SecureContacts
   GITHUB_REPO: Provectus-Software-GmbH/SCA_Desktop_Releases
-  PACKAGE_FILENAME: 'SecureContacts-%version%-arm64.pkg'
 Process:
 - Processor: GitHubReleasesInfoProvider
   Arguments:
@@ -14,7 +13,7 @@ Process:
 
 - Processor: URLDownloader
   Arguments:
-    filename: '%PACKAGE_FILENAME%'
+    url: '%url%'
 
 - Processor: EndOfCheckPhase
 

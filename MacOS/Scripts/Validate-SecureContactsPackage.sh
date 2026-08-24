@@ -3,12 +3,13 @@ set -euo pipefail
 
 EXPECTED_BUNDLE_ID="de.provectus.SecureContactsDesktop"
 EXPECTED_SIGNER="Developer ID Installer: Provectus Software GmbH (572S9T76X8)"
-RECIPE="${RECIPE:-$(cd "$(dirname "$0")" && pwd)/de.provectus.securecontacts.intune.recipe.yaml}"
+RECIPE="${RECIPE:-$(cd "$(dirname "$0")/../AutoPkg" && pwd)/de.provectus.securecontacts.intune.recipe.yaml}"
 OUTPUT_PATH="./artifacts"
+MANIFEST_OUTPUT=""
 
 usage() {
   cat <<'EOF'
-Usage: Invoke-SecureContactsAutoUpdate.sh [--output PATH] [--skip-recipe]
+Usage: Validate-SecureContactsPackage.sh [--output PATH] [--manifest-output PATH] [--skip-recipe]
 
 Stages and validates one Secure Contacts ARM64 PKG. This script never writes to
 Microsoft Graph. Run it on macOS with AutoPkg 2.3+ and the Apple package tools.
@@ -25,6 +26,11 @@ while [ "$#" -gt 0 ]; do
     --skip-recipe)
       SKIP_RECIPE=true
       shift
+      ;;
+    --manifest-output)
+      [ "$#" -ge 2 ] || { echo "--manifest-output requires a path" >&2; exit 2; }
+      MANIFEST_OUTPUT="$2"
+      shift 2
       ;;
     --help|-h)
       usage
@@ -45,6 +51,7 @@ command -v shasum >/dev/null || { echo "shasum is required" >&2; exit 1; }
 command -v pkgutil >/dev/null || { echo "pkgutil is required" >&2; exit 1; }
 command -v spctl >/dev/null || { echo "spctl is required" >&2; exit 1; }
 command -v file >/dev/null || { echo "file is required" >&2; exit 1; }
+[ -x /usr/bin/plutil ] || { echo "/usr/bin/plutil is required" >&2; exit 1; }
 [ -x /usr/libexec/PlistBuddy ] || { echo "/usr/libexec/PlistBuddy is required" >&2; exit 1; }
 
 if [ "$SKIP_RECIPE" != true ]; then
@@ -113,3 +120,28 @@ printf 'Bundle ID: %s\n' "$bundle_id"
 printf 'SHA256: %s\n' "$(shasum -a 256 "$pkg_path" | awk '{print $1}')"
 printf 'Signer: %s\n' "$EXPECTED_SIGNER"
 printf 'Graph publishing: disabled (validation-only)\n'
+
+if [ -n "$MANIFEST_OUTPUT" ]; then
+  manifest_directory=$(dirname "$MANIFEST_OUTPUT")
+  mkdir -p "$manifest_directory"
+  MANIFEST_OUTPUT="$MANIFEST_OUTPUT" \
+  PACKAGE_NAME="$pkg_name" \
+  PACKAGE_PATH="$pkg_path" \
+  CANDIDATE_VERSION="$candidate_version" \
+  BUNDLE_ID="$bundle_id" \
+  PACKAGE_SHA256="$(shasum -a 256 "$pkg_path" | awk '{print $1}')" \
+  SIGNER="$EXPECTED_SIGNER" \
+  manifest_plist=$(mktemp "$manifest_directory/.validation-manifest.XXXXXX")
+  /usr/bin/plutil -create xml1 "$manifest_plist"
+  /usr/bin/plutil -insert ValidationResult -string 'Validated' "$manifest_plist"
+  /usr/bin/plutil -insert PackageName -string "$PACKAGE_NAME" "$manifest_plist"
+  /usr/bin/plutil -insert PackagePath -string "$(cd "$(dirname "$PACKAGE_PATH")" && pwd)/$(basename "$PACKAGE_PATH")" "$manifest_plist"
+  /usr/bin/plutil -insert ReleaseVersion -string "$CANDIDATE_VERSION" "$manifest_plist"
+  /usr/bin/plutil -insert BundleId -string "$BUNDLE_ID" "$manifest_plist"
+  /usr/bin/plutil -insert Sha256 -string "$PACKAGE_SHA256" "$manifest_plist"
+  /usr/bin/plutil -insert Signer -string "$SIGNER" "$manifest_plist"
+  /usr/bin/plutil -insert CreatedUtc -string "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$manifest_plist"
+  /usr/bin/plutil -convert json -o "$MANIFEST_OUTPUT" "$manifest_plist"
+  rm -f "$manifest_plist"
+  echo "Validation manifest: $MANIFEST_OUTPUT"
+fi

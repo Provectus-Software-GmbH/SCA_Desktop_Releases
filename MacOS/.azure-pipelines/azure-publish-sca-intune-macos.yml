@@ -1,0 +1,172 @@
+parameters:
+- name: publish
+  displayName: Publish to Intune
+  type: boolean
+  default: false
+- name: whatIf
+  displayName: Review only (What-If)
+  type: boolean
+  default: false
+
+trigger: none
+
+variables:
+- name: intuneOutputPath
+  value: '$(Pipeline.Workspace)/secure-contacts-macos-artifacts'
+
+stages:
+- stage: Validate
+  displayName: Validate macOS package
+  jobs:
+  - job: ValidateMacOS
+    displayName: Download and validate package
+    pool:
+      vmImage: macOS-latest
+    steps:
+    - checkout: self
+
+    - bash: |
+        set -euo pipefail
+        command -v curl >/dev/null || { echo 'curl is required' >&2; exit 1; }
+        command -v jq >/dev/null || brew install jq
+        command -v shasum >/dev/null || { echo 'shasum is required' >&2; exit 1; }
+        command -v pkgutil >/dev/null || { echo 'pkgutil is required' >&2; exit 1; }
+        command -v spctl >/dev/null || { echo 'spctl is required' >&2; exit 1; }
+      displayName: Check macOS package tools
+
+    - bash: |
+        set -euo pipefail
+        output_path='$(intuneOutputPath)'
+        mkdir -p "$output_path"
+
+        release_json=$(curl --fail --silent --show-error \
+          --header 'Accept: application/vnd.github+json' \
+          'https://api.github.com/repos/Provectus-Software-GmbH/SCA_Desktop_Releases/releases/latest')
+        tag_name=$(jq -r '.tag_name // empty' <<< "$release_json")
+        printf '%s\n' "$tag_name" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$' || {
+          echo "Latest GitHub release has an invalid stable tag: $tag_name" >&2
+          exit 1
+        }
+
+        version="${tag_name#v}"
+        package_name="SecureContacts-${version}-arm64.pkg"
+        checksum_name="${package_name}.sha256"
+        release_url="https://github.com/Provectus-Software-GmbH/SCA_Desktop_Releases/releases/download/$tag_name"
+        curl --fail --silent --show-error --location "$release_url/$package_name" \
+          --output "$output_path/$package_name"
+        curl --fail --silent --show-error --location "$release_url/$checksum_name" \
+          --output "$output_path/$checksum_name"
+      displayName: Download latest stable PKG and checksum
+
+    - bash: |
+        set -euo pipefail
+        chmod +x MacOS/Scripts/Validate-SecureContactsPackage.sh
+        MacOS/Scripts/Validate-SecureContactsPackage.sh \
+          --output '$(intuneOutputPath)' \
+          --manifest-output '$(intuneOutputPath)/validation-manifest.json' \
+          --skip-recipe
+      displayName: Run Graph-free package validation
+
+    - bash: |
+        set -euo pipefail
+        if [ '${{ parameters.whatIf }}' != 'True' ]; then
+          exit 0
+        fi
+        command -v az >/dev/null || brew install azure-cli
+        umask 077
+        certificate_path="$(Agent.TempDirectory)/intune-auth.p12"
+        password_path="$(Agent.TempDirectory)/intune-auth.password"
+        printf '%s' "$INTUNE_CERTIFICATE_BASE64" | openssl base64 -d -A > "$certificate_path"
+        printf '%s\n' "$INTUNE_CERTIFICATE_PASSWORD" > "$password_path"
+        chmod 600 "$certificate_path" "$password_path"
+        export INTUNE_CERTIFICATE_PATH="$certificate_path"
+        export INTUNE_CERTIFICATE_PASSWORD_FILE="$password_path"
+        export INTUNE_AUTH_METHOD=certificate
+        chmod +x MacOS/Scripts/Sync-SecureContactsToIntune.sh
+        MacOS/Scripts/Sync-SecureContactsToIntune.sh \
+          --output '$(intuneOutputPath)' \
+          --decision-manifest-output '$(intuneOutputPath)/decision-manifest.json' \
+          --skip-recipe \
+          --publish \
+          --what-if
+      displayName: Run read-only Intune decision
+      condition: eq('${{ parameters.whatIf }}', 'True')
+      env:
+        INTUNE_CERTIFICATE_BASE64: $(INTUNE_CERTIFICATE_BASE64)
+        INTUNE_CERTIFICATE_PASSWORD: $(INTUNE_CERTIFICATE_PASSWORD)
+        INTUNE_TENANT_ID: $(INTUNE_TENANT_ID)
+        INTUNE_CLIENT_ID: $(INTUNE_CLIENT_ID)
+        INTUNE_APP_ID: $(INTUNE_MACOS_APP_ID)
+
+    - task: PublishPipelineArtifact@1
+      condition: always()
+      inputs:
+        targetPath: '$(intuneOutputPath)'
+        artifact: secure-contacts-macos-intune-artifacts
+        publishLocation: pipeline
+
+    - bash: |
+        rm -f '$(Agent.TempDirectory)/intune-auth.p12'
+        rm -f '$(Agent.TempDirectory)/intune-auth.password'
+      condition: always()
+      displayName: Remove temporary certificate files
+
+- stage: Publish
+  displayName: Publish macOS package to Intune
+  dependsOn: Validate
+  condition: and(succeeded(), eq('${{ parameters.publish }}', 'True'))
+  jobs:
+  - deployment: PublishMacOS
+    displayName: Publish approved package
+    environment: intune-production
+    pool:
+      vmImage: macOS-latest
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: secure-contacts-macos-intune-artifacts
+              path: '$(intuneOutputPath)'
+
+          - bash: |
+              set -euo pipefail
+              command -v az >/dev/null || brew install azure-cli
+              umask 077
+              certificate_path="$(Agent.TempDirectory)/intune-auth.p12"
+              password_path="$(Agent.TempDirectory)/intune-auth.password"
+              printf '%s' "$INTUNE_CERTIFICATE_BASE64" | openssl base64 -d -A > "$certificate_path"
+              printf '%s\n' "$INTUNE_CERTIFICATE_PASSWORD" > "$password_path"
+              chmod 600 "$certificate_path" "$password_path"
+              export INTUNE_CERTIFICATE_PATH="$certificate_path"
+              export INTUNE_CERTIFICATE_PASSWORD_FILE="$password_path"
+              export INTUNE_AUTH_METHOD=certificate
+              chmod +x MacOS/Scripts/Sync-SecureContactsToIntune.sh
+              MacOS/Scripts/Sync-SecureContactsToIntune.sh \
+                --output '$(intuneOutputPath)' \
+                --decision-manifest-output '$(intuneOutputPath)/decision-manifest.json' \
+                --skip-recipe \
+                --publish
+            displayName: Publish validated package to Intune
+            env:
+              INTUNE_CERTIFICATE_BASE64: $(INTUNE_CERTIFICATE_BASE64)
+              INTUNE_CERTIFICATE_PASSWORD: $(INTUNE_CERTIFICATE_PASSWORD)
+              INTUNE_TENANT_ID: $(INTUNE_TENANT_ID)
+              INTUNE_CLIENT_ID: $(INTUNE_CLIENT_ID)
+              INTUNE_APP_ID: $(INTUNE_MACOS_APP_ID)
+
+          - task: PublishPipelineArtifact@1
+            condition: always()
+            inputs:
+              targetPath: '$(intuneOutputPath)'
+              artifact: secure-contacts-macos-intune-publish-artifacts
+              publishLocation: pipeline
+
+          - bash: |
+              rm -f '$(Agent.TempDirectory)/intune-auth.p12'
+              rm -f '$(Agent.TempDirectory)/intune-auth.password'
+            condition: always()
+            displayName: Remove temporary certificate files

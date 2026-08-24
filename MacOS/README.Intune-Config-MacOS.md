@@ -19,12 +19,16 @@ Important:
 - Managed macOS devices.
 - Access to the Secure Contacts deployment files.
 
+Deploy and verify the Secure Contacts application before relying on this configuration profile. The profile may be assigned during the same rollout, but application verification should be completed first on a pilot device so configuration failures are not confused with installation failures.
+
 ## Platform scope
 
 - Platform: macOS
 - App bundle ID: `de.provectus.SecureContactsDesktop`
 - Managed device-level target file:
   - `/Library/Managed Preferences/de.provectus.SecureContactsDesktop.plist`
+
+An Intune configuration profile is the management object assigned to devices. Managed preferences are the resulting device-level settings file that Secure Contacts reads.
 
 ## Deployment recommendation
 

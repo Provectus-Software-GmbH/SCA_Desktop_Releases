@@ -1,0 +1,191 @@
+name: Publish Secure Contacts macOS to Intune
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the validated macOS PKG to the existing Intune app
+        required: true
+        default: false
+        type: boolean
+      whatIf:
+        description: Review the existing Intune app decision without writing changes
+        required: true
+        default: false
+        type: boolean
+
+env:
+  GITHUB_REPOSITORY_NAME: Provectus-Software-GmbH/SCA_Desktop_Releases
+
+jobs:
+  validate-macos:
+    runs-on: macos-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install macOS publishing dependencies
+        run: brew install jq azure-cli
+
+      - name: Download the latest stable PKG and checksum
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          output_path="$RUNNER_TEMP/secure-contacts-artifacts"
+          mkdir -p "$output_path"
+
+          release_json=$(curl --fail --silent --show-error \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY_NAME/releases/latest")
+          tag_name=$(jq -r '.tag_name // empty' <<< "$release_json")
+          printf '%s\n' "$tag_name" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$' || {
+            echo "Latest GitHub release has an invalid stable tag: $tag_name" >&2
+            exit 1
+          }
+
+          version="${tag_name#v}"
+          package_name="SecureContacts-${version}-arm64.pkg"
+          checksum_name="${package_name}.sha256"
+          release_url="https://github.com/$GITHUB_REPOSITORY_NAME/releases/download/$tag_name"
+          curl --fail --silent --show-error --location "$release_url/$package_name" --output "$output_path/$package_name"
+          curl --fail --silent --show-error --location "$release_url/$checksum_name" --output "$output_path/$checksum_name"
+          echo "INTUNE_MACOS_OUTPUT_PATH=$output_path" >> "$GITHUB_ENV"
+
+      - name: Prepare protected certificate files for Graph decision
+        if: ${{ inputs.publish || inputs.whatIf }}
+        shell: bash
+        env:
+          INTUNE_CERTIFICATE_BASE64: ${{ secrets.INTUNE_CERTIFICATE_BASE64 }}
+          INTUNE_CERTIFICATE_PASSWORD: ${{ secrets.INTUNE_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          certificate_path="$RUNNER_TEMP/intune-auth.p12"
+          password_path="$RUNNER_TEMP/intune-auth.password"
+
+          printf '%s' "$INTUNE_CERTIFICATE_BASE64" \
+            | openssl base64 -d -A > "$certificate_path"
+          printf '%s\n' "$INTUNE_CERTIFICATE_PASSWORD" > "$password_path"
+          chmod 600 "$certificate_path" "$password_path"
+
+          echo "INTUNE_CERTIFICATE_PATH=$certificate_path" >> "$GITHUB_ENV"
+          echo "INTUNE_CERTIFICATE_PASSWORD_FILE=$password_path" >> "$GITHUB_ENV"
+          unset INTUNE_CERTIFICATE_BASE64
+          unset INTUNE_CERTIFICATE_PASSWORD
+
+      - name: Validate macOS PKG and optionally run Graph decision
+        shell: bash
+        env:
+          INTUNE_TENANT_ID: ${{ secrets.INTUNE_TENANT_ID }}
+          INTUNE_CLIENT_ID: ${{ secrets.INTUNE_CLIENT_ID }}
+          INTUNE_APP_ID: ${{ vars.INTUNE_MACOS_APP_ID }}
+          INTUNE_AUTH_METHOD: certificate
+        run: |
+          set -euo pipefail
+          chmod +x MacOS/Scripts/Validate-SecureContactsPackage.sh
+          chmod +x MacOS/Scripts/Sync-SecureContactsToIntune.sh
+
+          arguments=(
+            --output "$INTUNE_MACOS_OUTPUT_PATH"
+            --manifest-output "$INTUNE_MACOS_OUTPUT_PATH/validation-manifest.json"
+            --decision-manifest-output "$INTUNE_MACOS_OUTPUT_PATH/decision-manifest.json"
+            --skip-recipe
+          )
+          if [ "${{ inputs.publish }}" = true ] || [ "${{ inputs.whatIf }}" = true ]; then
+            arguments+=(--publish)
+          fi
+          if [ "${{ inputs.whatIf }}" = true ]; then
+            arguments+=(--what-if)
+          fi
+
+          MacOS/Scripts/Sync-SecureContactsToIntune.sh "${arguments[@]}"
+
+      - name: Upload validated package and audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: secure-contacts-macos-intune-artifacts
+          path: ${{ runner.temp }}/secure-contacts-artifacts
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Remove certificate files
+        if: always()
+        shell: bash
+        run: |
+          rm -f "$RUNNER_TEMP/intune-auth.p12"
+          rm -f "$RUNNER_TEMP/intune-auth.password"
+
+  publish-macos:
+    needs: validate-macos
+    if: ${{ inputs.publish }}
+    runs-on: macos-latest
+    environment: intune-production
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download validated package and audit artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: secure-contacts-macos-intune-artifacts
+          path: ${{ runner.temp }}/secure-contacts-artifacts
+
+      - name: Prepare protected certificate files
+        shell: bash
+        env:
+          INTUNE_CERTIFICATE_BASE64: ${{ secrets.INTUNE_CERTIFICATE_BASE64 }}
+          INTUNE_CERTIFICATE_PASSWORD: ${{ secrets.INTUNE_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          certificate_path="$RUNNER_TEMP/intune-auth.p12"
+          password_path="$RUNNER_TEMP/intune-auth.password"
+
+          printf '%s' "$INTUNE_CERTIFICATE_BASE64" \
+            | openssl base64 -d -A > "$certificate_path"
+          printf '%s\n' "$INTUNE_CERTIFICATE_PASSWORD" > "$password_path"
+          chmod 600 "$certificate_path" "$password_path"
+
+      - name: Publish validated macOS PKG to Intune
+        shell: bash
+        env:
+          INTUNE_TENANT_ID: ${{ secrets.INTUNE_TENANT_ID }}
+          INTUNE_CLIENT_ID: ${{ secrets.INTUNE_CLIENT_ID }}
+          INTUNE_APP_ID: ${{ vars.INTUNE_MACOS_APP_ID }}
+          INTUNE_AUTH_METHOD: certificate
+          INTUNE_CERTIFICATE_PATH: ${{ runner.temp }}/intune-auth.p12
+          INTUNE_CERTIFICATE_PASSWORD_FILE: ${{ runner.temp }}/intune-auth.password
+        run: |
+          set -euo pipefail
+          chmod +x MacOS/Scripts/Sync-SecureContactsToIntune.sh
+          MacOS/Scripts/Sync-SecureContactsToIntune.sh \
+            --output "$RUNNER_TEMP/secure-contacts-artifacts" \
+            --decision-manifest-output "$RUNNER_TEMP/secure-contacts-artifacts/decision-manifest.json" \
+            --skip-recipe \
+            --publish
+
+      - name: Upload publish audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: secure-contacts-macos-intune-publish-artifacts
+          path: ${{ runner.temp }}/secure-contacts-artifacts
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Remove certificate files
+        if: always()
+        shell: bash
+        run: |
+          rm -f "$RUNNER_TEMP/intune-auth.p12"
+          rm -f "$RUNNER_TEMP/intune-auth.password"
