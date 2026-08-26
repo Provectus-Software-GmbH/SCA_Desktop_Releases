@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitions revision="1.3" schemaVersion="1.0">
+  <policyNamespaces>
+    <target prefix="SecureContacts" namespace="Provectus.SecureContacts.v1.1" />
+  </policyNamespaces>
+  <resources minRequiredRevision="1.0" />
+
+  <supportedOn>
+    <definitions>
+      <definition name="SUPPORTED_Windows10" displayName="$(string.SUPPORTED_Windows10)" />
+    </definitions>
+  </supportedOn>
+  
+  <categories>
+    <category name="SecureContactsCategory" displayName="$(string.SecureContactsCategory)" />
+    <category name="SecContactsCategory" displayName="$(string.SecContactsCategory)">
+      <parentCategory ref="SecureContactsCategory" />
+    </category>
+  </categories>
+
+  <policies>
+    <policy name="Pol_Defaults" class="Machine" displayName="$(string.Title_Defaults)" explainText="$(string.Help_Defaults)" presentation="$(presentation.Pol_Defaults)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.Defaults">
+      <parentCategory ref="SecContactsCategory" />
+      <supportedOn ref="SUPPORTED_Windows10" />
+      <elements>
+        <text id="Txt_Defaults" valueName="SecContacts.Defaults" required="false" />
+      </elements>
+    </policy>
+
+    <policy name="Pol_DefaultsExtension" class="Machine" displayName="$(string.Title_DefaultsExtension)" explainText="$(string.Help_DefaultsExtension)" presentation="$(presentation.Pol_DefaultsExtension)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.DefaultsExtension">
+      <parentCategory ref="SecContactsCategory" />
+      <supportedOn ref="SUPPORTED_Windows10" />
+      <elements>
+        <text id="Txt_DefaultsExtension" valueName="SecContacts.DefaultsExtension" required="false" />
+      </elements>
+    </policy>
+
+    <policy name="Pol_Licenses" class="Machine" displayName="$(string.Title_Licenses)" explainText="$(string.Help_Licenses)" presentation="$(presentation.Pol_Licenses)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.Licenses">
+      <parentCategory ref="SecContactsCategory" />
+      <supportedOn ref="SUPPORTED_Windows10" />
+      <elements>
+        <text id="Txt_Licenses" valueName="SecContacts.Licenses" required="false" />
+      </elements>
+    </policy>
+
+    <policy name="Pol_AADGroups" class="Machine" displayName="$(string.Title_AADGroups)" explainText="$(string.Help_AADGroups)" presentation="$(presentation.Pol_AADGroups)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.AADGroups">
+      <parentCategory ref="SecContactsCategory" />
+      <supportedOn ref="SUPPORTED_Windows10" />
+      <elements>
+        <text id="Txt_AADGroups" valueName="SecContacts.AADGroups" required="false" />
+      </elements>
+    </policy>
+
+    <policy name="Pol_AADCache" class="Machine" displayName="$(string.Title_AADCache)" explainText="$(string.Help_AADCache)" presentation="$(presentation.Pol_AADCache)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.AADCache">
+      <parentCategory ref="SecContactsCategory" />
+      <supportedOn ref="SUPPORTED_Windows10" />
+      <elements>
+        <text id="Txt_AADCache" valueName="SecContacts.AADCache" required="false" />
+      </elements>
+    </policy>
+
+    <policy name="Pol_AADCacheList" class="Machine" displayName="$(string.Title_AADCacheList)" explainText="$(string.Help_AADCacheList)" presentation="$(presentation.Pol_AADCacheList)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.AADCacheList">
+      <parentCategory ref="SecContactsCategory" />
+      <supportedOn ref="SUPPORTED_Windows10" />
+      <elements>
+      <multiText id="Txt_AADCacheList" valueName="SecContacts.AADCacheList" required="false" />
+      </elements>
+    </policy>
+
+    <policy name="Pol_ServiceUrls" class="Machine" displayName="$(string.Title_ServiceUrls)" explainText="$(string.Help_ServiceUrls)" presentation="$(presentation.Pol_ServiceUrls)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.ServiceUrls">
+      <parentCategory ref="SecContactsCategory" />
+      <supportedOn ref="SUPPORTED_Windows10" />
+      <elements>
+        <text id="Txt_ServiceUrls" valueName="SecContacts.ServiceUrls" required="false" />
+      </elements>
+    </policy>
+
+    <policy name="Pol_AzureBlobStorage" class="Machine" displayName="$(string.Title_AzureBlobStorage)" explainText="$(string.Help_AzureBlobStorage)" presentation="$(presentation.Pol_AzureBlobStorage)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.AzureBlobStorage">
+      <parentCategory ref="SecContactsCategory" />
+      <supportedOn ref="SUPPORTED_Windows10" />
+      <elements>
+        <text id="Txt_AzureBlobStorage" valueName="SecContacts.AzureBlobStorage" required="false" />
+      </elements>
+    </policy>
+
+    <policy name="Pol_AzureBlobStorageList" class="Machine" displayName="$(string.Title_AzureBlobStorageList)" explainText="$(string.Help_AzureBlobStorageList)" presentation="$(presentation.Pol_AzureBlobStorageList)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.AzureBlobStorageList">
+      <parentCategory ref="SecContactsCategory" />
+      <supportedOn ref="SUPPORTED_Windows10" />
+      <elements>
+        <multiText id="Txt_AzureBlobStorageList" valueName="SecContacts.AzureBlobStorageList" required="false" />
+      </elements>
+    </policy>
+
+    <policy name="Pol_SharedMailboxContacts" class="Machine" displayName="$(string.Title_SharedMailboxContacts)" explainText="$(string.Help_SharedMailboxContacts)" presentation="$(presentation.Pol_SharedMailboxContacts)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.SharedMailboxContacts">
+      <parentCategory ref="SecContactsCategory" />
+      <supportedOn ref="SUPPORTED_Windows10" />
+      <elements>
+        <text id="Txt_SharedMailboxContacts" valueName="SecContacts.SharedMailboxContacts" required="false" />
+      </elements>
+    </policy>
+
+    <policy name="Pol_CustomDatasourceNames" class="Machine" displayName="$(string.Title_CustomDatasourceNames)" explainText="$(string.Help_CustomDatasourceNames)" presentation="$(presentation.Pol_CustomDatasourceNames)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.CustomDatasourceNames">
+      <parentCategory ref="SecContactsCategory" />
+      <supportedOn ref="SUPPORTED_Windows10" />
+      <elements>
+        <text id="Txt_CustomDatasourceNames" valueName="SecContacts.CustomDatasourceNames" required="false" />
+      </elements>
+    </policy>
+
+    <policy name="Pol_InternalLink" class="Machine" displayName="$(string.Title_InternalLink)" explainText="$(string.Help_InternalLink)" presentation="$(presentation.Pol_InternalLink)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.InternalLinks">
+      <parentCategory ref="SecContactsCategory" />
+      <supportedOn ref="SUPPORTED_Windows10" />
+      <elements>
+        <text id="Txt_InternalLink" valueName="SecContacts.InternalLinks" required="false" />
+      </elements>
+    </policy>
+  </policies>
+</policyDefinitions>
