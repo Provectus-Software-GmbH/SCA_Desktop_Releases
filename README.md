@@ -90,13 +90,11 @@ See the repository Releases page for the latest version.
 | [`README.Intune-GitHub-Actions.md`](MacOS/README.Intune-GitHub-Actions.md) | GitHub Actions implementation guide for the organization-owned macOS Graph pipeline |
 | [`gh-publish-sca-intune-macos.yml`](.github/workflows/gh-publish-sca-intune-macos.yml) | Customer-operated GitHub Actions validation and gated Intune publishing workflow |
 | [`Scripts/Validate-SecureContactsPackage.sh`](MacOS/Scripts/Validate-SecureContactsPackage.sh) | Graph-free macOS runner that stages and validates ARM64 artifacts; Graph publishing is disabled |
+| [`Scripts/Sync-SecureContactsToIntune.sh`](MacOS/Scripts/Sync-SecureContactsToIntune.sh) | Self-contained macOS release download, staging, validation, and optional Graph publishing entry point |
 | [`README.Intune-Config-MacOS.md`](MacOS/README.Intune-Config-MacOS.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
 | [`plist/de.provectus.SecureContactsDesktop.plist`](MacOS/plist/de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
 | [`plist/de.provectus.SecureContactsDesktop.plist.demo`](MacOS/plist/de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |
 | [`plist/secure-contacts-manifest.json`](MacOS/plist/secure-contacts-manifest.json) | Manifest schema reference for non-Intune MDM platforms (Jamf, Kandji) |
-| [`de.provectus.securecontacts.download.recipe.yaml`](MacOS/AutoPkg/de.provectus.securecontacts.download.recipe.yaml) | AutoPkg download and Developer ID signature verification recipe |
-| [`de.provectus.securecontacts.intune.recipe.yaml`](MacOS/AutoPkg/de.provectus.securecontacts.intune.recipe.yaml) | AutoPkg staging recipe for the ARM64 package and official checksum |
-| [`de.provectus.securecontacts.config.recipe.yaml`](MacOS/AutoPkg/de.provectus.securecontacts.config.recipe.yaml) | AutoPkg staging recipe for macOS configuration templates |
 
 ## Additional documentation
 
