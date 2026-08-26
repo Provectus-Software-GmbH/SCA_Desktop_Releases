@@ -1,0 +1,102 @@
+parameters:
+- name: publish
+  displayName: Publish to Intune
+  type: boolean
+  default: false
+- name: whatIf
+  displayName: Review only (WhatIf)
+  type: boolean
+  default: false
+
+trigger: none
+
+pool:
+  vmImage: windows-latest
+
+variables:
+- name: intuneModuleVersion
+  value: '1.5.0'
+- name: intuneCertificatePath
+  value: '$(Agent.TempDirectory)\intune-auth.pfx'
+
+steps:
+- checkout: self
+
+- powershell: |
+    $scriptPaths = @(Get-ChildItem -Path '$(Build.SourcesDirectory)' -Filter 'Sync-SecureContactsToIntune.ps1' -File -Recurse | Select-Object -ExpandProperty FullName)
+    if ($scriptPaths.Count -ne 1) {
+      throw "Expected exactly one Sync-SecureContactsToIntune.ps1 under $(Build.SourcesDirectory); found $($scriptPaths.Count)."
+    }
+    $scriptDirectory = Split-Path -Parent $scriptPaths[0]
+    Write-Host "##vso[task.setvariable variable=secureContactsScriptDirectory]$scriptDirectory"
+  displayName: Locate Windows pipeline script
+
+- powershell: |
+    Install-Module -Name IntuneWin32App -RequiredVersion '$(intuneModuleVersion)' -Scope CurrentUser -Force -AllowClobber
+  displayName: Install pinned IntuneWin32App module
+
+- powershell: |
+    $bytes = [Convert]::FromBase64String($env:INTUNE_CERTIFICATE_BASE64)
+    [IO.File]::WriteAllBytes('$(intuneCertificatePath)', $bytes)
+    $password = ConvertTo-SecureString $env:INTUNE_CERTIFICATE_PASSWORD -AsPlainText -Force
+    $certificate = Import-PfxCertificate -FilePath '$(intuneCertificatePath)' -CertStoreLocation 'Cert:\CurrentUser\My' -Password $password | Where-Object HasPrivateKey | Select-Object -First 1
+    if (-not $certificate) { throw 'The imported PFX does not contain a certificate with a private key.' }
+    Write-Host "##vso[task.setvariable variable=intuneCertificateThumbprint;issecret=true]$($certificate.Thumbprint)"
+  displayName: Import Intune certificate
+  condition: or(eq('${{ parameters.publish }}', 'True'), eq('${{ parameters.whatIf }}', 'True'))
+  env:
+    INTUNE_CERTIFICATE_BASE64: $(INTUNE_CERTIFICATE_BASE64)
+    INTUNE_CERTIFICATE_PASSWORD: $(INTUNE_CERTIFICATE_PASSWORD)
+
+- powershell: |
+    $parameters = @{
+      GitHubRepo = 'Provectus-Software-GmbH/SCA_Desktop_Releases'
+      ArtifactOutputPath = '$(Build.ArtifactStagingDirectory)\SecureContacts-Intune-Artifacts'
+    }
+    if ('${{ parameters.publish }}' -eq 'True' -or '${{ parameters.whatIf }}' -eq 'True') {
+      $parameters.TenantId = $env:INTUNE_TENANT_ID
+      $parameters.ClientId = $env:INTUNE_CLIENT_ID
+      $parameters.CertificateStoreLocation = 'CurrentUser\My'
+      $parameters.AppId = $env:INTUNE_APP_ID
+      if ($env:INTUNE_CERTIFICATE_THUMBPRINT -and $env:INTUNE_CERTIFICATE_THUMBPRINT -notmatch '^\$\([^)]+\)$') {
+        $parameters.CertificateThumbprint = $env:INTUNE_CERTIFICATE_THUMBPRINT
+      }
+      $parameters.Publish = $true
+      if ('${{ parameters.whatIf }}' -eq 'True') { $parameters.WhatIf = $true }
+    }
+    if ($env:SECURE_CONTACTS_MSI_SHA256 -and $env:SECURE_CONTACTS_MSI_SHA256 -notmatch '^\$\([^)]+\)$') {
+      $parameters.ExpectedSha256 = $env:SECURE_CONTACTS_MSI_SHA256
+    }
+    if ($env:SECURE_CONTACTS_EXPECTED_SIGNER -and $env:SECURE_CONTACTS_EXPECTED_SIGNER -notmatch '^\$\([^)]+\)$') {
+      $parameters.ExpectedSigner = $env:SECURE_CONTACTS_EXPECTED_SIGNER
+    }
+    $scriptPath = Join-Path '$(secureContactsScriptDirectory)' 'Sync-SecureContactsToIntune.ps1'
+    & $scriptPath @parameters
+  displayName: Validate or publish Secure Contacts
+  env:
+    INTUNE_TENANT_ID: $(INTUNE_TENANT_ID)
+    INTUNE_CLIENT_ID: $(INTUNE_CLIENT_ID)
+    INTUNE_APP_ID: $(INTUNE_APP_ID)
+    INTUNE_CERTIFICATE_THUMBPRINT: $(intuneCertificateThumbprint)
+    SECURE_CONTACTS_GITHUB_TOKEN: $(SECURE_CONTACTS_GITHUB_TOKEN)
+    SECURE_CONTACTS_MSI_SHA256: $(SECURE_CONTACTS_MSI_SHA256)
+    SECURE_CONTACTS_EXPECTED_SIGNER: $(SECURE_CONTACTS_EXPECTED_SIGNER)
+
+- powershell: |
+    New-Item -ItemType Directory -Path '$(Build.ArtifactStagingDirectory)\SecureContacts-Intune-Artifacts' -Force | Out-Null
+  condition: always()
+  displayName: Ensure artifact directory exists
+
+- task: PublishPipelineArtifact@1
+  condition: always()
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)\SecureContacts-Intune-Artifacts'
+    artifact: secure-contacts-intune-artifacts
+    publishLocation: pipeline
+
+- powershell: |
+    Remove-Item '$(intuneCertificatePath)' -Force -ErrorAction SilentlyContinue
+    $thumbprint = '$(intuneCertificateThumbprint)'
+    if ($thumbprint) { Remove-Item "Cert:\CurrentUser\My\$thumbprint" -Force -ErrorAction SilentlyContinue }
+  condition: always()
+  displayName: Remove Intune certificate

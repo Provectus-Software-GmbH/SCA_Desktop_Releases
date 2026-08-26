@@ -1,5 +1,7 @@
 # Secure Contacts Intune Deployment and Configuration
 
+This `.github` folder is a self-contained GitHub Actions bundle. Copy the complete folder, including `workflows`, both workflow files, and all three scripts, into an administrator-owned repository. The workflows use the scripts stored in `.github/workflows`; they do not depend on the `script-assisted` folder. Keeping the same scripts in `script-assisted`, `.azure-pipelines`, and `.github/workflows` is intentional so each automation entry point can be copied independently.
+
 Secure Contacts App (SCA) is an enterprise contact management solution that lets organizations securely manage, synchronize, and distribute business contacts across managed devices. Learn more at [secure-contacts.com](https://secure-contacts.com).
 
 This repository is the deployment and configuration companion for the official SCA Desktop releases. The signed Windows MSI and macOS PKG release assets are published in the [SCA Desktop Releases repository](https://github.com/Provectus-Software-GmbH/SCA_Desktop_Releases); this repository provides the documentation, configuration templates, validation tools, and Intune update automation used to manage those releases.

@@ -94,6 +94,8 @@ Use the existing CI integrations when you need repeatable execution, centralized
 
 Those documents contain platform-specific pipeline triggers, secret configuration, artifact handling, environment approvals, and CI cleanup details.
 
+Each CI integration is portable. An administrator can copy the complete [`.github`](.github) folder into a GitHub repository or the complete [`.azure-pipelines`](.azure-pipelines) folder into an Azure DevOps repository without cloning this repository. Each folder includes its own workflow or pipeline definitions and script copies; the duplication with [`script-assisted`](script-assisted) is intentional.
+
 ## Repository map
 
 | Folder | Responsibility |
