@@ -1,6 +1,6 @@
 # Secure Contacts Windows Uninstall and Optional Data Purge
 
-`Scripts/Uninstall-SecureContacts.ps1` is a standalone administrator/SYSTEM script for removing the machine-installed Secure Contacts application through Intune or manual PowerShell execution. The default `ApplicationOnly` mode removes the application while preserving user data; `CompletePurge` is an optional, destructive data-cleanup mode.
+[`Uninstall-SecureContacts.ps1`](Uninstall-SecureContacts.ps1) is a standalone administrator/SYSTEM script for removing the machine-installed Secure Contacts application through Intune or manual PowerShell execution. The default `ApplicationOnly` mode removes the application while preserving user data; `CompletePurge` is an optional, destructive data-cleanup mode.
 
 ## Modes
 
@@ -12,7 +12,7 @@
 Application-only removal preserves per-user data, logs, and managed policy:
 
 ```powershell
-powershell.exe -ExecutionPolicy Bypass -File .\Scripts\Uninstall-SecureContacts.ps1 -Mode ApplicationOnly
+powershell.exe -ExecutionPolicy Bypass -File .\uninstall\Uninstall-SecureContacts.ps1 -Mode ApplicationOnly
 ```
 
 > Warning: `CompletePurge` deletes Secure Contacts data for every eligible local Windows profile on the device, including profiles whose users are not currently logged in. Use it only when that data removal is explicitly approved.
@@ -20,13 +20,13 @@ powershell.exe -ExecutionPolicy Bypass -File .\Scripts\Uninstall-SecureContacts.
 Complete purge removes the application and the verified Secure Contacts data directory for each eligible local profile:
 
 ```powershell
-powershell.exe -ExecutionPolicy Bypass -File .\Scripts\Uninstall-SecureContacts.ps1 -Mode CompletePurge
+powershell.exe -ExecutionPolicy Bypass -File .\uninstall\Uninstall-SecureContacts.ps1 -Mode CompletePurge
 ```
 
 Use `-WhatIf` to perform discovery and validation without changing application processes, registry state, or application data:
 
 ```powershell
-powershell.exe -ExecutionPolicy Bypass -File .\Scripts\Uninstall-SecureContacts.ps1 -Mode CompletePurge -WhatIf
+powershell.exe -ExecutionPolicy Bypass -File .\uninstall\Uninstall-SecureContacts.ps1 -Mode CompletePurge -WhatIf
 ```
 
 An optional `-LogPath` writes the JSON-lines event stream to a local file in addition to standard output. Supplying `-LogPath` can create or append to that log file, including during a `-WhatIf` run.
@@ -34,7 +34,7 @@ An optional `-LogPath` writes the JSON-lines event stream to a local file in add
 For an Intune Win32 app, include `Uninstall-SecureContacts.ps1` in the `.intunewin` package and run the standard uninstall command in 64-bit SYSTEM context:
 
 ```powershell
-powershell.exe -ExecutionPolicy Bypass -File .\Scripts\Uninstall-SecureContacts.ps1 -Mode ApplicationOnly
+powershell.exe -ExecutionPolicy Bypass -File .\uninstall\Uninstall-SecureContacts.ps1 -Mode ApplicationOnly
 ```
 
 ## Scope

@@ -36,7 +36,7 @@ URI base:
 - Value (enable with sample):
 
 ```xml
-<enabled/><data id="Txt_Defaults" value="[{\"name\":\"aad_initvalue\",\"value\":\"true\"}]"/>
+<enabled/><data id="Txt_Defaults" value="[{&quot;name&quot;:&quot;aad_initvalue&quot;,&quot;value&quot;:&quot;true&quot;}]"/>
 ```
 
 ### Pol_DefaultsExtension
@@ -47,7 +47,7 @@ URI base:
 - Value (enable with sample):
 
 ```xml
-<enabled/><data id="Txt_DefaultsExtension" value="[{\"name\":\"searchalldatasources_initvalue\",\"value\":\"false\"}]"/>
+<enabled/><data id="Txt_DefaultsExtension" value="[{&quot;name&quot;:&quot;searchalldatasources_initvalue&quot;,&quot;value&quot;:&quot;false&quot;}]"/>
 ```
 
 ### Pol_Licenses
@@ -58,7 +58,7 @@ URI base:
 - Value (enable with sample):
 
 ```xml
-<enabled/><data id="Txt_Licenses" value="[{\"name\":\"tenant-or-license-name\",\"key\":\"encrypted-license-key\"}]"/>
+<enabled/><data id="Txt_Licenses" value="[{&quot;name&quot;:&quot;tenant-or-license-name&quot;,&quot;key&quot;:&quot;encrypted-license-key&quot;}]"/>
 ```
 
 ### Pol_AADGroups
@@ -69,7 +69,7 @@ URI base:
 - Value (enable with sample):
 
 ```xml
-<enabled/><data id="Txt_AADGroups" value="[{\"name\":\"group-id-or-name\",\"value\":\"display-value\"}]"/>
+<enabled/><data id="Txt_AADGroups" value="[{&quot;name&quot;:&quot;group-id-or-name&quot;,&quot;value&quot;:&quot;display-value&quot;}]"/>
 ```
 
 ### Pol_AADCache
@@ -80,7 +80,7 @@ URI base:
 - Value (enable with sample):
 
 ```xml
-<enabled/><data id="Txt_AADCache" value="[{\"name\":\"cache1\",\"value\":\"encryptedPayload\"}]"/>
+<enabled/><data id="Txt_AADCache" value="[{&quot;name&quot;:&quot;cache1&quot;,&quot;value&quot;:&quot;encryptedPayload&quot;}]"/>
 ```
 
 ### Pol_AADCacheList
@@ -91,7 +91,7 @@ URI base:
 - Value (enable with sample):
 
 ```xml
-<enabled/><data id="Txt_AADCacheList" value="{\"name\":\"cache1\",\"value\":\"encryptedPayload\"}"/>
+<enabled/><data id="Txt_AADCacheList" value="{&quot;name&quot;:&quot;cache1&quot;,&quot;value&quot;:&quot;encryptedPayload&quot;}"/>
 ```
 
 Notes:
@@ -106,7 +106,7 @@ Notes:
 - Value (enable with sample):
 
 ```xml
-<enabled/><data id="Txt_ServiceUrls" value="[{\"name\":\"baseUrl\",\"value\":\"https://api.example.com\"}]"/>
+<enabled/><data id="Txt_ServiceUrls" value="[{&quot;name&quot;:&quot;baseUrl&quot;,&quot;value&quot;:&quot;https://api.example.com&quot;}]"/>
 ```
 
 ### Pol_AzureBlobStorage
@@ -117,7 +117,7 @@ Notes:
 - Value (enable with sample):
 
 ```xml
-<enabled/><data id="Txt_AzureBlobStorage" value="[{\"name\":\"blob1\",\"value\":\"encryptedConnection\"}]"/>
+<enabled/><data id="Txt_AzureBlobStorage" value="[{&quot;name&quot;:&quot;blob1&quot;,&quot;value&quot;:&quot;encryptedConnection&quot;}]"/>
 ```
 
 ### Pol_AzureBlobStorageList
@@ -128,7 +128,7 @@ Notes:
 - Value (enable with sample):
 
 ```xml
-<enabled/><data id="Txt_AzureBlobStorageList" value="{\"name\":\"blob1\",\"value\":\"encryptedConnection\"}"/>
+<enabled/><data id="Txt_AzureBlobStorageList" value="{&quot;name&quot;:&quot;blob1&quot;,&quot;value&quot;:&quot;encryptedConnection&quot;}"/>
 ```
 
 Notes:
@@ -143,7 +143,7 @@ Notes:
 - Value (enable with sample):
 
 ```xml
-<enabled/><data id="Txt_SharedMailboxContacts" value="[{\"name\":\"shared-mailbox\",\"value\":\"mailbox1@contoso.com\"}]"/>
+<enabled/><data id="Txt_SharedMailboxContacts" value="[{&quot;name&quot;:&quot;shared-mailbox&quot;,&quot;value&quot;:&quot;mailbox1@contoso.com&quot;}]"/>
 ```
 
 ### Pol_CustomDatasourceNames
@@ -154,7 +154,7 @@ Notes:
 - Value (enable with sample):
 
 ```xml
-<enabled/><data id="Txt_CustomDatasourceNames" value="[{\"defaultid\":\"ABS1\",\"customid\":\"HUB\",\"customname\":\"HubSpot\"}]"/>
+<enabled/><data id="Txt_CustomDatasourceNames" value="[{&quot;defaultid&quot;:&quot;ABS1&quot;,&quot;customid&quot;:&quot;HUB&quot;,&quot;customname&quot;:&quot;HubSpot&quot;}]"/>
 ```
 
 ### Pol_InternalLink
@@ -204,4 +204,4 @@ To keep it enabled but provide an empty text value, use:
   - SecContacts.AzureBlobStorageList
   - SecContacts.SharedMailboxContacts
   - SecContacts.CustomDatasourceNames
-  - SecContacts.InternalLink
+  - SecContacts.InternalLinks

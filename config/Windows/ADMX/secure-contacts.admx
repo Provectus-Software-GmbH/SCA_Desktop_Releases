@@ -107,11 +107,11 @@
       </elements>
     </policy>
 
-    <policy name="Pol_InternalLink" class="Machine" displayName="$(string.Title_InternalLink)" explainText="$(string.Help_InternalLink)" presentation="$(presentation.Pol_InternalLink)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.InternalLink">
+    <policy name="Pol_InternalLink" class="Machine" displayName="$(string.Title_InternalLink)" explainText="$(string.Help_InternalLink)" presentation="$(presentation.Pol_InternalLink)" key="Software\Policies\ProvectusSoftwareGmbH\SecureContactsDesktop" valueName="SecContacts.InternalLinks">
       <parentCategory ref="SecContactsCategory" />
       <supportedOn ref="SUPPORTED_Windows10" />
       <elements>
-        <text id="Txt_InternalLink" valueName="SecContacts.InternalLink" required="false" />
+        <text id="Txt_InternalLink" valueName="SecContacts.InternalLinks" required="false" />
       </elements>
     </policy>
   </policies>

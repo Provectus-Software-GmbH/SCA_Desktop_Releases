@@ -44,9 +44,9 @@
       "description": "Set the SecContacts.CustomDatasourceNames configuration string.",
       "type": "string"
     },
-    "SecContacts.InternalLink": {
-      "title": "Internal Link",
-      "description": "Set the SecContacts.InternalLink configuration string.",
+    "SecContacts.InternalLinks": {
+      "title": "Internal Links",
+      "description": "Set the SecContacts.InternalLinks configuration string.",
       "type": "string"
     }
   }

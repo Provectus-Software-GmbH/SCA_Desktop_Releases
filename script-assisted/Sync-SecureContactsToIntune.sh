@@ -4,13 +4,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VALIDATOR="$SCRIPT_DIR/Validate-SecureContactsPackage.sh"
 OUTPUT_PATH="$SCRIPT_DIR/artifacts"
+GITHUB_REPO="${GITHUB_REPO:-}"
+RELEASE_TAG="${RELEASE_TAG:-}"
+PKG_ASSET_NAME="${PKG_ASSET_NAME:-}"
 MANIFEST_OUTPUT=""
 DECISION_MANIFEST_OUTPUT=""
-GITHUB_API_URL="${GITHUB_API_URL:-https://api.github.com}"
-GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-Provectus-Software-GmbH/SCA_Desktop_Releases}"
-GITHUB_TOKEN="${GITHUB_TOKEN:-}"
 INTUNE_APP_ID="${INTUNE_APP_ID:-}"
 GRAPH_ACCESS_TOKEN="${GRAPH_ACCESS_TOKEN:-}"
+SECURE_CONTACTS_GITHUB_TOKEN="${SECURE_CONTACTS_GITHUB_TOKEN:-}"
 INTUNE_TENANT_ID="${INTUNE_TENANT_ID:-}"
 INTUNE_CLIENT_ID="${INTUNE_CLIENT_ID:-}"
 INTUNE_CERTIFICATE_PATH="${INTUNE_CERTIFICATE_PATH:-}"
@@ -20,17 +21,28 @@ PUBLISH=false
 WHAT_IF=false
 CLEANUP=false
 CLEANUP_APPLY=false
+USE_EXISTING_PACKAGE=false
+RELEASE_TAG_NAME=""
+RELEASE_VERSION=""
+RELEASE_PACKAGE_NAME=""
 POLL_ATTEMPTS="${INTUNE_POLL_ATTEMPTS:-10}"
 
 usage() {
   cat <<'EOF'
-Usage: Sync-SecureContactsToIntune.sh [--output PATH] [--manifest-output PATH]
+Usage: Sync-SecureContactsToIntune.sh --github-repo OWNER/REPOSITORY
+  [--release-tag TAG] [--pkg-asset-name NAME] [--use-existing-package]
+  [--output PATH] [--manifest-output PATH]
   [--decision-manifest-output PATH] [--app-id GUID]
   [--auth-method auto|certificate|token]
   [--publish] [--what-if] [--cleanup [--apply]]
 
-Downloads the latest stable Secure Contacts ARM64 PKG and checksum, then stages
-and validates them. Validation is the default.
+Downloads, stages, and validates one Secure Contacts ARM64 PKG. Download and
+validation are the default. Use --use-existing-package when the output directory
+already contains the approved package artifact.
+--release-tag selects an exact vMAJOR.MINOR.PATCH GitHub release; otherwise the
+latest published stable release is used.
+--pkg-asset-name selects an exact PKG asset name; otherwise the expected name is
+SecureContacts-<version>-arm64.pkg.
 --what-if performs a read-only Microsoft Graph beta lookup and version decision.
 --publish updates the explicitly selected existing macOS PKG app only.
 --cleanup lists abandoned uncommitted content versions from the selected app.
@@ -48,12 +60,36 @@ status() {
   printf '[Secure Contacts] %s\n' "$1"
 }
 
+github_headers=(--header 'Accept: application/vnd.github+json' --header 'X-GitHub-Api-Version: 2022-11-28')
+if [ -n "$SECURE_CONTACTS_GITHUB_TOKEN" ] && ! printf '%s\n' "$SECURE_CONTACTS_GITHUB_TOKEN" | grep -Eq '^\$\([^)]+\)$'; then
+  github_headers+=(--header "Authorization: Bearer $SECURE_CONTACTS_GITHUB_TOKEN")
+fi
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --output)
       [ "$#" -ge 2 ] || { echo "--output requires a path" >&2; exit 2; }
       OUTPUT_PATH="$2"
       shift 2
+      ;;
+    --github-repo)
+      [ "$#" -ge 2 ] || { echo "--github-repo requires OWNER/REPOSITORY" >&2; exit 2; }
+      GITHUB_REPO="$2"
+      shift 2
+      ;;
+    --release-tag)
+      [ "$#" -ge 2 ] || { echo "--release-tag requires a tag" >&2; exit 2; }
+      RELEASE_TAG="$2"
+      shift 2
+      ;;
+    --pkg-asset-name)
+      [ "$#" -ge 2 ] || { echo "--pkg-asset-name requires a filename" >&2; exit 2; }
+      PKG_ASSET_NAME="$2"
+      shift 2
+      ;;
+    --use-existing-package)
+      USE_EXISTING_PACKAGE=true
+      shift
       ;;
     --manifest-output)
       [ "$#" -ge 2 ] || { echo "--manifest-output requires a path" >&2; exit 2; }
@@ -103,6 +139,52 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
+[ -n "$GITHUB_REPO" ] || { echo "--github-repo or GITHUB_REPO is required" >&2; exit 2; }
+printf '%s\n' "$GITHUB_REPO" | grep -Eq '^[^/ ]+/[^/ ]+$' || { echo "Invalid GitHub repository; expected OWNER/REPOSITORY" >&2; exit 2; }
+if [ -n "$RELEASE_TAG" ]; then
+  printf '%s\n' "$RELEASE_TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$' || { echo "Invalid release tag; expected vMAJOR.MINOR.PATCH" >&2; exit 2; }
+fi
+
+resolve_release_metadata() {
+  command -v curl >/dev/null || { echo "curl is required for GitHub release lookup" >&2; exit 1; }
+  command -v jq >/dev/null || { echo "jq is required for GitHub release lookup" >&2; exit 1; }
+  local release_endpoint release_json package_name
+  release_endpoint="releases/latest"
+  [ -z "$RELEASE_TAG" ] || release_endpoint="releases/tags/$RELEASE_TAG"
+  status "Resolving GitHub release $GITHUB_REPO ($release_endpoint)"
+  release_json=$(curl --fail --silent --show-error \
+    "${github_headers[@]}" \
+    "https://api.github.com/repos/$GITHUB_REPO/$release_endpoint")
+  RELEASE_TAG_NAME=$(jq -r '.tag_name // empty' <<< "$release_json")
+  printf '%s\n' "$RELEASE_TAG_NAME" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$' || {
+    echo "GitHub release has an invalid stable tag: $RELEASE_TAG_NAME" >&2
+    exit 1
+  }
+  RELEASE_VERSION="${RELEASE_TAG_NAME#v}"
+  package_name="${PKG_ASSET_NAME:-SecureContacts-${RELEASE_VERSION}-arm64.pkg}"
+  RELEASE_PACKAGE_NAME="$package_name"
+}
+
+download_package() {
+  local release_url checksum_name release_json pkg_asset checksum_asset
+  [ -n "$RELEASE_TAG_NAME" ] || resolve_release_metadata
+  checksum_name="${RELEASE_PACKAGE_NAME}.sha256"
+  release_json=$(curl --fail --silent --show-error \
+    "${github_headers[@]}" \
+    "https://api.github.com/repos/$GITHUB_REPO/releases/tags/$RELEASE_TAG_NAME")
+  pkg_asset=$(jq -c --arg name "$RELEASE_PACKAGE_NAME" '[.assets[]? | select(.name == $name)] | .[0]' <<< "$release_json")
+  checksum_asset=$(jq -c --arg name "$checksum_name" '[.assets[]? | select(.name == $name)] | .[0]' <<< "$release_json")
+  [ "$pkg_asset" != null ] || { echo "PKG asset not found in release $RELEASE_TAG_NAME: $RELEASE_PACKAGE_NAME" >&2; exit 1; }
+  [ "$checksum_asset" != null ] || { echo "Checksum asset not found in release $RELEASE_TAG_NAME: $checksum_name" >&2; exit 1; }
+  release_url="https://github.com/$GITHUB_REPO/releases/download/$RELEASE_TAG_NAME"
+  mkdir -p "$OUTPUT_PATH"
+  status "Downloading $RELEASE_PACKAGE_NAME and checksum"
+  curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' "${github_headers[@]}" "$release_url/$RELEASE_PACKAGE_NAME" \
+    --output "$OUTPUT_PATH/$RELEASE_PACKAGE_NAME"
+  curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' "${github_headers[@]}" "$release_url/$checksum_name" \
+    --output "$OUTPUT_PATH/$checksum_name"
+}
+
 if [ "$WHAT_IF" = true ] && [ "$PUBLISH" != true ]; then
   echo "--what-if requires --publish" >&2
   exit 2
@@ -137,60 +219,13 @@ if [ -z "$DECISION_MANIFEST_OUTPUT" ]; then
 fi
 
 mkdir -p "$OUTPUT_PATH"
-if [ "$CLEANUP" != true ]; then
-  command -v curl >/dev/null || { echo "curl is required to download the Secure Contacts release" >&2; exit 1; }
-  command -v jq >/dev/null || { echo "jq is required to resolve the Secure Contacts release" >&2; exit 1; }
-
-  release_json=$(mktemp)
-  release_api_url="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases/latest"
-  github_headers=(--header 'Accept: application/vnd.github+json' --header 'X-GitHub-Api-Version: 2022-11-28')
-  if [ -n "$GITHUB_TOKEN" ]; then
-    github_headers+=(--header "Authorization: Bearer $GITHUB_TOKEN")
+if [ "$CLEANUP" != true ] && { [ "$WHAT_IF" = true ] || [ "$USE_EXISTING_PACKAGE" != true ]; }; then
+  resolve_release_metadata
+fi
+if [ "$CLEANUP" != true ] && [ "$WHAT_IF" != true ]; then
+  if [ "$USE_EXISTING_PACKAGE" != true ]; then
+    download_package
   fi
-  status "Resolving latest stable Secure Contacts release"
-  curl --fail --silent --show-error --location \
-    --connect-timeout 15 --max-time 60 \
-    "${github_headers[@]}" \
-    "$release_api_url" --output "$release_json" || {
-      rm -f "$release_json"
-      echo "Unable to resolve the latest stable GitHub release" >&2
-      exit 1
-    }
-  release_tag=$(jq -r '.tag_name // empty' "$release_json")
-  printf '%s\n' "$release_tag" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$' || {
-    rm -f "$release_json"
-    echo "Latest stable release has an invalid tag: ${release_tag:-missing}" >&2
-    exit 1
-  }
-  release_version="${release_tag#v}"
-  package_name="SecureContacts-${release_version}-arm64.pkg"
-  checksum_name="${package_name}.sha256"
-  package_url=$(jq -r --arg name "$package_name" '.assets[]? | select(.name == $name) | .browser_download_url // empty' "$release_json")
-  checksum_url=$(jq -r --arg name "$checksum_name" '.assets[]? | select(.name == $name) | .browser_download_url // empty' "$release_json")
-  [ -n "$package_url" ] || { rm -f "$release_json"; echo "Release asset not found: $package_name" >&2; exit 1; }
-  [ -n "$checksum_url" ] || { rm -f "$release_json"; echo "Release asset not found: $checksum_name" >&2; exit 1; }
-
-  rm -f "$OUTPUT_PATH"/SecureContacts-*-arm64.pkg "$OUTPUT_PATH"/SecureContacts-*-arm64.pkg.sha256
-  status "Downloading $package_name"
-  curl --fail --silent --show-error --location \
-    --connect-timeout 15 --max-time 600 \
-    "${github_headers[@]}" \
-    "$package_url" --output "$OUTPUT_PATH/$package_name" || {
-      rm -f "$release_json" "$OUTPUT_PATH/$package_name"
-      echo "Unable to download $package_name" >&2
-      exit 1
-    }
-  status "Downloading $checksum_name"
-  curl --fail --silent --show-error --location \
-    --connect-timeout 15 --max-time 60 \
-    "${github_headers[@]}" \
-    "$checksum_url" --output "$OUTPUT_PATH/$checksum_name" || {
-      rm -f "$release_json" "$OUTPUT_PATH/$checksum_name"
-      echo "Unable to download $checksum_name" >&2
-      exit 1
-    }
-  rm -f "$release_json"
-
   validator_arguments=(--output "$OUTPUT_PATH" --manifest-output "$MANIFEST_OUTPUT")
 
   status "Validating macOS PKG"
@@ -206,7 +241,7 @@ if [ "$PUBLISH" = true ] || [ "$CLEANUP" = true ]; then
 
   command -v curl >/dev/null || { echo "curl is required for Graph publishing" >&2; exit 1; }
   command -v jq >/dev/null || { echo "jq is required for Graph publishing; install it with 'brew install jq'" >&2; exit 1; }
-  if [ "$CLEANUP" != true ]; then
+  if [ "$CLEANUP" != true ] && [ "$WHAT_IF" != true ]; then
     command -v openssl >/dev/null || { echo "openssl is required for Graph publishing" >&2; exit 1; }
     command -v xxd >/dev/null || { echo "xxd is required for Graph publishing" >&2; exit 1; }
     command -v dd >/dev/null || { echo "dd is required for Graph publishing" >&2; exit 1; }
@@ -366,8 +401,8 @@ if [ "$PUBLISH" = true ] || [ "$CLEANUP" = true ]; then
   fi
 
   if [ "$WHAT_IF" = true ]; then
-    candidate_bundle_id=$(/usr/bin/plutil -extract BundleId raw -o - "$MANIFEST_OUTPUT")
-    candidate_version=$(/usr/bin/plutil -extract ReleaseVersion raw -o - "$MANIFEST_OUTPUT")
+    candidate_bundle_id='de.provectus.SecureContactsDesktop'
+    candidate_version="$RELEASE_VERSION"
     matching_count=$(jq '[.includedApps[]? | select(.bundleId == $bundle_id)] | length' --arg bundle_id "$candidate_bundle_id" "$graph_response")
     intune_version=$(jq -r --arg bundle_id "$candidate_bundle_id" '.includedApps[] | select(.bundleId == $bundle_id) | .bundleVersion' "$graph_response")
     [ "$candidate_bundle_id" = 'de.provectus.SecureContactsDesktop' ] || { echo "Unexpected candidate bundle ID" >&2; exit 1; }
@@ -378,10 +413,7 @@ if [ "$PUBLISH" = true ] || [ "$CLEANUP" = true ]; then
       awk -v left="$1" -v right="$2" 'BEGIN { lc=split(left,l,"."); rc=split(right,r,"."); c=lc>rc?lc:rc; for(i=1;i<=c;i++){lv=(i<=lc?l[i]:0)+0;rv=(i<=rc?r[i]:0)+0;if(lv<rv){print -1;exit}if(lv>rv){print 1;exit}}print 0}'
     }
     version_order=$(version_compare "$candidate_version" "$intune_version")
-    if [ "$version_order" -lt 0 ]; then
-      echo "Candidate version $candidate_version is older than Intune version $intune_version" >&2
-      exit 1
-    elif [ "$version_order" -eq 0 ]; then
+    if [ "$version_order" -le 0 ]; then
       decision="NoUpdateRequired"
     else
       decision="UpdateExistingApp"

@@ -1,0 +1,99 @@
+name: Secure Contacts Intune Windows
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish to Intune
+        required: true
+        type: boolean
+        default: false
+      whatIf:
+        description: Review only (What-If)
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  INTUNE_MODULE_VERSION: '1.5.0'
+
+jobs:
+  sync:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install pinned IntuneWin32App module
+        shell: pwsh
+        run: Install-Module -Name IntuneWin32App -RequiredVersion $env:INTUNE_MODULE_VERSION -Scope CurrentUser -Force -AllowClobber
+
+      - name: Import Intune certificate
+        if: ${{ inputs.publish || inputs.whatIf }}
+        shell: pwsh
+        env:
+          INTUNE_CERTIFICATE_BASE64: ${{ secrets.INTUNE_CERTIFICATE_BASE64 }}
+          INTUNE_CERTIFICATE_PASSWORD: ${{ secrets.INTUNE_CERTIFICATE_PASSWORD }}
+        run: |
+          $env:INTUNE_CERTIFICATE_PATH = Join-Path $env:RUNNER_TEMP 'intune-auth.pfx'
+          $bytes = [Convert]::FromBase64String($env:INTUNE_CERTIFICATE_BASE64)
+          [IO.File]::WriteAllBytes($env:INTUNE_CERTIFICATE_PATH, $bytes)
+          $password = ConvertTo-SecureString $env:INTUNE_CERTIFICATE_PASSWORD -AsPlainText -Force
+          $certificate = Import-PfxCertificate -FilePath $env:INTUNE_CERTIFICATE_PATH -CertStoreLocation 'Cert:\CurrentUser\My' -Password $password | Where-Object HasPrivateKey | Select-Object -First 1
+          if (-not $certificate) { throw 'The imported PFX does not contain a certificate with a private key.' }
+          "INTUNE_CERTIFICATE_THUMBPRINT=$($certificate.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Validate or publish Secure Contacts
+        shell: pwsh
+        env:
+          INTUNE_TENANT_ID: ${{ secrets.INTUNE_TENANT_ID }}
+          INTUNE_CLIENT_ID: ${{ secrets.INTUNE_CLIENT_ID }}
+          INTUNE_APP_ID: ${{ secrets.INTUNE_APP_ID }}
+          SECURE_CONTACTS_GITHUB_TOKEN: ${{ secrets.SECURE_CONTACTS_GITHUB_TOKEN }}
+          SECURE_CONTACTS_MSI_SHA256: ${{ secrets.SECURE_CONTACTS_MSI_SHA256 }}
+          SECURE_CONTACTS_EXPECTED_SIGNER: ${{ secrets.SECURE_CONTACTS_EXPECTED_SIGNER }}
+        run: |
+          $artifactPath = Join-Path $env:RUNNER_TEMP 'SecureContacts-Intune-Artifacts'
+          New-Item -ItemType Directory -Path $artifactPath -Force | Out-Null
+          $scriptPath = Join-Path $env:GITHUB_WORKSPACE '.github\workflows\Sync-SecureContactsToIntune.ps1'
+          $parameters = @{
+            GitHubRepo = 'Provectus-Software-GmbH/SCA_Desktop_Releases'
+            ArtifactOutputPath = $artifactPath
+          }
+          if ('${{ inputs.publish }}' -eq 'true' -or '${{ inputs.whatIf }}' -eq 'true') {
+            $parameters.TenantId = $env:INTUNE_TENANT_ID
+            $parameters.ClientId = $env:INTUNE_CLIENT_ID
+            $parameters.CertificateStoreLocation = 'CurrentUser\My'
+            $parameters.CertificateThumbprint = $env:INTUNE_CERTIFICATE_THUMBPRINT
+            $parameters.AppId = $env:INTUNE_APP_ID
+            $parameters.Publish = $true
+            if ('${{ inputs.whatIf }}' -eq 'true') { $parameters.WhatIf = $true }
+          }
+          if ($env:SECURE_CONTACTS_MSI_SHA256) { $parameters.ExpectedSha256 = $env:SECURE_CONTACTS_MSI_SHA256 }
+          if ($env:SECURE_CONTACTS_EXPECTED_SIGNER) { $parameters.ExpectedSigner = $env:SECURE_CONTACTS_EXPECTED_SIGNER }
+          & $scriptPath @parameters
+
+      - name: Ensure artifact directory exists
+        if: ${{ always() }}
+        shell: pwsh
+        run: New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'SecureContacts-Intune-Artifacts') -Force | Out-Null
+
+      - name: Upload Intune artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: secure-contacts-intune-artifacts
+          path: ${{ runner.temp }}\SecureContacts-Intune-Artifacts
+          if-no-files-found: warn
+
+      - name: Remove Intune certificate
+        if: ${{ always() }}
+        shell: pwsh
+        run: |
+          Remove-Item $env:INTUNE_CERTIFICATE_PATH -Force -ErrorAction SilentlyContinue
+          if ($env:INTUNE_CERTIFICATE_THUMBPRINT) {
+            Remove-Item "Cert:\CurrentUser\My\$env:INTUNE_CERTIFICATE_THUMBPRINT" -Force -ErrorAction SilentlyContinue
+          }

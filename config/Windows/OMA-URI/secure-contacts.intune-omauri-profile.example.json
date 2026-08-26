@@ -15,82 +15,82 @@
       "displayName": "Pol_Defaults",
       "description": "SecContacts.Defaults",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_Defaults",
-      "value": "<enabled/><data id=\"Txt_Defaults\" value=\"[{\\\"name\\\":\\\"aad_initvalue\\\",\\\"value\\\":\\\"true\\\"}]\"/>"
+      "value": "<enabled/><data id=\"Txt_Defaults\" value=\"[{&quot;name&quot;:&quot;aad_initvalue&quot;,&quot;value&quot;:&quot;true&quot;}]\"/>"
     },
     {
       "@odata.type": "#microsoft.graph.omaSettingString",
       "displayName": "Pol_DefaultsExtension",
       "description": "SecContacts.DefaultsExtension",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_DefaultsExtension",
-      "value": "<enabled/><data id=\"Txt_DefaultsExtension\" value=\"[{\\\"name\\\":\\\"searchalldatasources_initvalue\\\",\\\"value\\\":\\\"false\\\"}]\"/>"
+      "value": "<enabled/><data id=\"Txt_DefaultsExtension\" value=\"[{&quot;name&quot;:&quot;searchalldatasources_initvalue&quot;,&quot;value&quot;:&quot;false&quot;}]\"/>"
     },
     {
       "@odata.type": "#microsoft.graph.omaSettingString",
       "displayName": "Pol_Licenses",
       "description": "SecContacts.Licenses",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_Licenses",
-      "value": "<enabled/><data id=\"Txt_Licenses\" value=\"[{\\\"name\\\":\\\"tenant-or-license-name\\\",\\\"key\\\":\\\"encrypted-license-key\\\"}]\"/>"
+      "value": "<enabled/><data id=\"Txt_Licenses\" value=\"[{&quot;name&quot;:&quot;tenant-or-license-name&quot;,&quot;key&quot;:&quot;encrypted-license-key&quot;}]\"/>"
     },
     {
       "@odata.type": "#microsoft.graph.omaSettingString",
       "displayName": "Pol_AADGroups",
       "description": "SecContacts.AADGroups",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_AADGroups",
-      "value": "<enabled/><data id=\"Txt_AADGroups\" value=\"[{\\\"name\\\":\\\"group-id-or-name\\\",\\\"value\\\":\\\"display-value\\\"}]\"/>"
+      "value": "<enabled/><data id=\"Txt_AADGroups\" value=\"[{&quot;name&quot;:&quot;group-id-or-name&quot;,&quot;value&quot;:&quot;display-value&quot;}]\"/>"
     },
     {
       "@odata.type": "#microsoft.graph.omaSettingString",
       "displayName": "Pol_AADCache",
       "description": "SecContacts.AADCache",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_AADCache",
-      "value": "<enabled/><data id=\"Txt_AADCache\" value=\"[{\\\"name\\\":\\\"cache1\\\",\\\"value\\\":\\\"encryptedPayload\\\"}]\"/>"
+      "value": "<enabled/><data id=\"Txt_AADCache\" value=\"[{&quot;name&quot;:&quot;cache1&quot;,&quot;value&quot;:&quot;encryptedPayload&quot;}]\"/>"
     },
     {
       "@odata.type": "#microsoft.graph.omaSettingString",
       "displayName": "Pol_AADCacheList",
       "description": "SecContacts.AADCacheList",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_AADCacheList",
-      "value": "<enabled/><data id=\"Txt_AADCacheList\" value=\"{\\\"name\\\":\\\"cache1\\\",\\\"value\\\":\\\"encryptedPayload\\\"}\"/>"
+      "value": "<enabled/><data id=\"Txt_AADCacheList\" value=\"{&quot;name&quot;:&quot;cache1&quot;,&quot;value&quot;:&quot;encryptedPayload&quot;}\"/>"
     },
     {
       "@odata.type": "#microsoft.graph.omaSettingString",
       "displayName": "Pol_ServiceUrls",
       "description": "SecContacts.ServiceUrls",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_ServiceUrls",
-      "value": "<enabled/><data id=\"Txt_ServiceUrls\" value=\"[{\\\"name\\\":\\\"baseUrl\\\",\\\"value\\\":\\\"https://api.example.com\\\"}]\"/>"
+      "value": "<enabled/><data id=\"Txt_ServiceUrls\" value=\"[{&quot;name&quot;:&quot;baseUrl&quot;,&quot;value&quot;:&quot;https://api.example.com&quot;}]\"/>"
     },
     {
       "@odata.type": "#microsoft.graph.omaSettingString",
       "displayName": "Pol_AzureBlobStorage",
       "description": "SecContacts.AzureBlobStorage",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_AzureBlobStorage",
-      "value": "<enabled/><data id=\"Txt_AzureBlobStorage\" value=\"[{\\\"name\\\":\\\"blob1\\\",\\\"value\\\":\\\"encryptedConnection\\\"}]\"/>"
+      "value": "<enabled/><data id=\"Txt_AzureBlobStorage\" value=\"[{&quot;name&quot;:&quot;blob1&quot;,&quot;value&quot;:&quot;encryptedConnection&quot;}]\"/>"
     },
     {
       "@odata.type": "#microsoft.graph.omaSettingString",
       "displayName": "Pol_AzureBlobStorageList",
       "description": "SecContacts.AzureBlobStorageList",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_AzureBlobStorageList",
-      "value": "<enabled/><data id=\"Txt_AzureBlobStorageList\" value=\"{\\\"name\\\":\\\"blob1\\\",\\\"value\\\":\\\"encryptedConnection\\\"}\"/>"
+      "value": "<enabled/><data id=\"Txt_AzureBlobStorageList\" value=\"{&quot;name&quot;:&quot;blob1&quot;,&quot;value&quot;:&quot;encryptedConnection&quot;}\"/>"
     },
     {
       "@odata.type": "#microsoft.graph.omaSettingString",
       "displayName": "Pol_SharedMailboxContacts",
       "description": "SecContacts.SharedMailboxContacts",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_SharedMailboxContacts",
-      "value": "<enabled/><data id=\"Txt_SharedMailboxContacts\" value=\"[{\\\"name\\\":\\\"shared-mailbox\\\",\\\"value\\\":\\\"mailbox1@contoso.com\\\"}]\"/>"
+      "value": "<enabled/><data id=\"Txt_SharedMailboxContacts\" value=\"[{&quot;name&quot;:&quot;shared-mailbox&quot;,&quot;value&quot;:&quot;mailbox1@contoso.com&quot;}]\"/>"
     },
     {
       "@odata.type": "#microsoft.graph.omaSettingString",
       "displayName": "Pol_CustomDatasourceNames",
       "description": "SecContacts.CustomDatasourceNames",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_CustomDatasourceNames",
-      "value": "<enabled/><data id=\"Txt_CustomDatasourceNames\" value=\"[{\\\"defaultid\\\":\\\"ABS1\\\",\\\"customid\\\":\\\"HUB\\\",\\\"customname\\\":\\\"HubSpot\\\"}]\"/>"
+      "value": "<enabled/><data id=\"Txt_CustomDatasourceNames\" value=\"[{&quot;defaultid&quot;:&quot;ABS1&quot;,&quot;customid&quot;:&quot;HUB&quot;,&quot;customname&quot;:&quot;HubSpot&quot;}]\"/>"
     },
     {
       "@odata.type": "#microsoft.graph.omaSettingString",
       "displayName": "Pol_InternalLink",
-      "description": "SecContacts.InternalLink",
+      "description": "SecContacts.InternalLinks",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_InternalLink",
       "value": "<enabled/><data id=\"Txt_InternalLink\" value=\"https://internal.example.com\"/>"
     }

@@ -20,7 +20,7 @@ You can configure the app using either of these methods:
 - Access to the Secure Contacts deployment files.
 - Microsoft Graph PowerShell module (Method B Option 2 only).
 
-> **App installation:** This guide covers app *configuration* only. To install Secure Contacts as an Intune Win32 app, use [`Scripts/Install-SecureContacts.ps1`](Scripts/Install-SecureContacts.ps1) as the install script and [`Scripts/Test-SecureContactsInstalled.ps1`](Scripts/Test-SecureContactsInstalled.ps1) as the detection rule. See [`README.Intune-Win32-Deploy-Win.md`](README.Intune-Win32-Deploy-Win.md) for the full deployment walkthrough.
+> **Application lifecycle:** This guide covers policy configuration only. Application updates are handled by the existing-app publisher in [`script-assisted/Sync-SecureContactsToIntune.ps1`](../../script-assisted/Sync-SecureContactsToIntune.ps1) or its [CI integrations](../../README.md). The target Intune app and its device-side detection rules must be created and configured manually before publishing. Follow the [Manual Intune App Creation guide](../../README.Intune-Manual-App-Setup.md) for the complete setup and pilot procedure.
 
 ## Choosing a setup path
 
@@ -101,7 +101,7 @@ Notes:
 - `OMA-URI/README.Intune-OMA-URI.md` is the blank template version. Use `OMA-URI/README.Intune-OMA-URI.Example.md` when you want filled sample values.
 - Most Secure Contacts OMA-URI String values must contain a JSON array string, not a comma-separated plain text value.
 - `SecContacts.Licenses` specifically uses JSON objects with `name` and `key`.
-- `SecContacts.InternalLink` uses a plain string value.
+- `SecContacts.InternalLinks` uses a plain string value.
 - Most other JSON-backed settings use `name` and `value`.
 - `SecContacts.AADCacheList` and `SecContacts.AzureBlobStorageList` are multi-string values and should contain one JSON object per line.
 - Replace all sample values with production values before deployment.
@@ -191,6 +191,5 @@ After successful deployment:
 - `OMA-URI/README.Intune-OMA-URI.md`
 - `OMA-URI/import-secure-contacts-omauri.ps1`
 - `OMA-URI/README.Intune-OMA-URI-Import.md`
-- `Scripts/Install-SecureContacts.ps1` — Win32 app install/update script
-- `Scripts/Test-SecureContactsInstalled.ps1` — Win32 app detection script
-- `Scripts/Test-SecureContactsUpToDate.ps1` — Win32 app up-to-date detection script
+- [`script-assisted/README.md`](../../script-assisted/README.md) — direct validation and existing-app update workflow
+- [`README.Intune-Win32-Deploy-Win.md`](README.Intune-Win32-Deploy-Win.md) — Windows lifecycle prerequisites and update workflow

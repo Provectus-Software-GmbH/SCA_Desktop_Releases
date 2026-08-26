@@ -27,7 +27,7 @@ The script remains compatible with the system Bash shipped by macOS, but compati
 
 ## Files
 
-- Deployment script: `Scripts/Uninstall-SecureContacts.sh`
+- Deployment script: [`Uninstall-SecureContacts.sh`](Uninstall-SecureContacts.sh)
 - Managed configuration that must remain untouched: `/Library/Managed Preferences/de.provectus.SecureContactsDesktop.plist`
 - Intune-captured operation output: standard output
 
@@ -66,7 +66,7 @@ Copy only reviewed values from a notarized production artifact. Do not use the M
 ### Application Only
 
 ```bash
-sudo ./Scripts/Uninstall-SecureContacts.sh application-only
+sudo ./uninstall/Uninstall-SecureContacts.sh application-only
 ```
 
 This mode:
@@ -82,7 +82,7 @@ Removing the application while preserving its login item can leave a stale macOS
 ### Complete Purge
 
 ```bash
-sudo ./Scripts/Uninstall-SecureContacts.sh complete-purge
+sudo ./uninstall/Uninstall-SecureContacts.sh complete-purge
 ```
 
 This mode additionally enumerates eligible local users through directory services and removes these exact paths from each validated home:
@@ -110,7 +110,7 @@ Deleting `Data` removes the application-owned settings, Level stores, SCACore ca
 Use dry-run before destructive deployment:
 
 ```bash
-./Scripts/Uninstall-SecureContacts.sh complete-purge --dry-run
+./uninstall/Uninstall-SecureContacts.sh complete-purge --dry-run
 ```
 
 Dry-run performs validation and reports planned operations without sending signals, changing login items, or deleting files. Production identity constants are still required so dry-run cannot give approval to an unconfigured script.
@@ -237,6 +237,6 @@ Test on macOS 15 Sequoia and macOS 26 Tahoe separately because login-item behavi
 
 ## Related files and references
 
-- [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md) - macOS initial PKG deployment and removal-workflow context
-- [README.Intune-Config-MacOS.md](README.Intune-Config-MacOS.md) - managed-preferences configuration guide
-- [README.md](README.md) - macOS deployment files and operational entry points
+- [../script-assisted/README.md](../script-assisted/README.md) - macOS package validation and existing-app update workflow
+- [../config/MacOS/README.Intune-Config-MacOS.md](../config/MacOS/README.Intune-Config-MacOS.md) - managed-preferences configuration guide
+- [../config/MacOS/README.md](../config/MacOS/README.md) - macOS configuration assets and operational entry points

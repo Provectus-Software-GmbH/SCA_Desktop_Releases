@@ -1,105 +1,125 @@
-# Secure Contacts App (SCA) Desktop Releases
+# Secure Contacts Intune Deployment and Configuration
 
 Secure Contacts App (SCA) is an enterprise contact management solution that lets organizations securely manage, synchronize, and distribute business contacts across managed devices. Learn more at [secure-contacts.com](https://secure-contacts.com).
 
-This repository publishes official SCA Desktop releases and the supporting files IT administrators need to configure and manage the app via Microsoft Intune, SCCM/MECM, or other MDM platforms on Windows and macOS.
+This repository is the deployment and configuration companion for the official SCA Desktop releases. The signed Windows MSI and macOS PKG release assets are published in the [SCA Desktop Releases repository](https://github.com/Provectus-Software-GmbH/SCA_Desktop_Releases); this repository provides the documentation, configuration templates, validation tools, and Intune update automation used to manage those releases.
 
-It contains:
+The SCA application source code is maintained separately and is not published in this repository.
 
-- Windows installers (.exe/.msi)
-- macOS installation packages (.pkg/.dmg)
-- Intune configuration manuals (Windows and macOS)
-- ADMX/ADML administrative template files (Windows)
-- OMA-URI templates and Graph API JSON payloads (Windows)
-- PowerShell Graph importer script (Windows)
-- PowerShell Win32 app deploy and detect scripts (Windows)
-- plist configuration files and MDM manifest (macOS)
+It supports two related responsibilities for Secure Contacts desktop apps in Microsoft Intune:
 
-The Secure Contacts App source code is maintained in a separate private repository and is not published here.
+1. **App deployment and updates:** validate releases and update existing Windows and macOS Intune apps through manual, script-assisted, or pipeline-based workflows.
+2. **App configuration:** configure the Secure Contacts policies that the applications consume on managed Windows and macOS devices.
+
+The repository is update-only for application lifecycle operations. The target Intune apps, assignments, and device-side detection rules must be created and configured manually in the tenant before automation is used. Publishing never creates a new app, changes assignments, or creates supersedence relationships. Windows publishing replaces the existing MSI detection rule when the MSI ProductCode changes, preserves unrelated rules, and never appends a second MSI rule.
 
 ## Quick start
 
-1. Download the latest SCA Desktop release package and deployment files.
-2. Review the appropriate deployment guide:
-   - Windows configuration: [README.Intune-Config-Win.md](Windows/README.Intune-Config-Win.md)
-   - Windows app deployment: [README.Intune-Win32-Deploy-Win.md](Windows/README.Intune-Win32-Deploy-Win.md) for Intune Win32 packaging and SCCM/MECM-compatible scripted deployment
-   - Windows automated publishing: [README.Intune-Publisher-Win.md](Windows/README.Intune-Publisher-Win.md) for validated MSI packaging and gated Intune publishing
-   - Windows update paths: [README.Intune-Update-Options-Win.md](Windows/README.Intune-Update-Options-Win.md) for organization-owned Graph publishing, packaged-local MSI, and Intune-managed GitHub release
-   - Windows GitHub Actions automation: [README.Intune-GitHub-Actions.md](Windows/README.Intune-GitHub-Actions.md) and [gh-publish-sca-intune-win.yml](.github/workflows/gh-publish-sca-intune-win.yml)
-   - Windows Azure DevOps automation: [README.Intune-Azure-DevOps.md](Windows/README.Intune-Azure-DevOps.md) and [azure-publish-sca-intune-win.yml](Windows/.azure-pipelines/azure-publish-sca-intune-win.yml)
-   - Windows application removal: [README.Intune-Uninstall.md](Windows/README.Intune-Uninstall.md) for application-only uninstall and optional complete data purge
-   - macOS app deployment: [README.Intune-Deploy-MacOS.md](MacOS/README.Intune-Deploy-MacOS.md) for Intune PKG deployment
-   - macOS configuration: [README.Intune-Config-MacOS.md](MacOS/README.Intune-Config-MacOS.md)
-   - macOS application removal: [README.Intune-Uninstall.MacOS.md](MacOS/README.Intune-Uninstall.MacOS.md) for application-only uninstall and optional complete data purge
-   - macOS update paths: [README.Intune-Update-Options-MacOS.md](MacOS/README.Intune-Update-Options-MacOS.md) for organization-owned Graph publishing, automated staging with manual upload, and manual GitHub download
-   - macOS Azure DevOps automation: [README.Intune-Azure-DevOps.md](MacOS/README.Intune-Azure-DevOps.md) and [azure-publish-sca-intune-macos.yml](MacOS/.azure-pipelines/azure-publish-sca-intune-macos.yml)
-   - macOS GitHub Actions automation: [README.Intune-GitHub-Actions.md](MacOS/README.Intune-GitHub-Actions.md) and [gh-publish-sca-intune-macos.yml](.github/workflows/gh-publish-sca-intune-macos.yml)
-   - macOS update-path comparison: [Choose an update path](MacOS/README.Intune-Update-Options-MacOS.md#choose-an-update-path)
-3. Configure Secure Contacts for your environment.
-4. Deploy the application and assign the configuration through your device management platform.
-5. Validate the deployment on a test device.
+1. Select the appropriate Windows MSI or macOS PKG release from the [SCA Desktop Releases repository](https://github.com/Provectus-Software-GmbH/SCA_Desktop_Releases/releases).
+2. Review the platform configuration guide and prepare the required Intune policy profile:
+	- [Windows configuration](config/Windows/README.Intune-Config-Win.md)
+	- [macOS configuration](config/MacOS/README.Intune-Config-MacOS.md)
+3. Create and configure the target Windows or macOS app manually in Intune, including requirements, assignments, and device-side detection rules. Follow the [Manual Intune App Creation guide](README.Intune-Manual-App-Setup.md) for the complete setup and pilot procedure.
+4. Choose an application update method from the deployment section below.
+5. Assign the configuration profile and application to a pilot device, then verify the installation and managed settings before broad rollout.
 
-## Application packages
+## Start with your task
 
-Prebuilt installation packages are published through GitHub Releases.
+### Deploy or update the app
 
-Supported package types:
+Choose the operating system, then select the execution method:
 
-- Windows: `.msi`, `.exe`
-- macOS: `.pkg`, `.dmg`
+| Platform | Direct scripts and validation | Pipeline documentation | Removal |
+| --- | --- | --- | --- |
+| Windows | [Windows script-assisted guide](script-assisted/README.md) | [GitHub Actions](.github/README.md) or [Azure DevOps](.azure-pipelines/README.md) | [Windows uninstall guide](uninstall/README.Intune-Uninstall.win.md) |
+| macOS | [macOS script-assisted guide](script-assisted/README.md) | [GitHub Actions](.github/README.md) or [Azure DevOps](.azure-pipelines/README.md) | [macOS uninstall guide](uninstall/README.Intune-Uninstall.macos.md) |
 
-See the repository Releases page for the latest version.
+The [script-assisted guide](script-assisted/README.md) contains platform-specific prerequisites, validation commands, authentication settings, What-If behavior, output artifacts, and cleanup operations. The CI guides add workflow triggers, secret handling, artifacts, and approval controls.
 
-## Windows deployment files
+### Configure the app
 
-| File | Role |
-|---|---|
-| [`README.Intune-Config-Win.md`](Windows/README.Intune-Config-Win.md) | Full Intune configuration guide (Method A: ADMX, Method B: OMA-URI) |
-| [`README.Intune-Win32-Deploy-Win.md`](Windows/README.Intune-Win32-Deploy-Win.md) | Windows app deployment guide — Intune Win32 packaging, SCCM/MECM-compatible scripted deployment, install/detect scripts, uninstall |
-| [`Scripts/Install-SecureContacts.ps1`](Windows/Scripts/Install-SecureContacts.ps1) | Windows install/update script — default GitHub-download mode or optional packaged-local MSI mode for Intune/SCCM deployments |
-| [`README.Intune-Publisher-Win.md`](Windows/README.Intune-Publisher-Win.md) | Validated GitHub MSI staging and gated Intune publishing automation for administrator workstations and CI/CD |
-| [`README.Intune-Update-Options-Win.md`](Windows/README.Intune-Update-Options-Win.md) | Windows update paths, detection behavior, approval, and organization-owned Graph publishing design |
-| [`README.Intune-GitHub-Actions.md`](Windows/README.Intune-GitHub-Actions.md) | GitHub Actions implementation guide for organization-owned Windows Graph publishing |
-| [`gh-publish-sca-intune-win.yml`](.github/workflows/gh-publish-sca-intune-win.yml) | Customer-operated GitHub Actions validation and gated Intune publishing workflow |
-| [`README.Intune-Azure-DevOps.md`](Windows/README.Intune-Azure-DevOps.md) | Azure DevOps implementation guide for organization-owned Windows Graph publishing |
-| [`azure-publish-sca-intune-win.yml`](Windows/.azure-pipelines/azure-publish-sca-intune-win.yml) | Customer-operated Azure DevOps validation and gated Intune publishing pipeline |
-| [`Scripts/Uninstall-SecureContacts.ps1`](Windows/Scripts/Uninstall-SecureContacts.ps1) | Optional Windows application-only uninstall or complete per-user data purge script |
-| [`Scripts/Test-SecureContactsInstalled.ps1`](Windows/Scripts/Test-SecureContactsInstalled.ps1) | Intune Win32 app detection script — checks registry for installed version compliance |
-| [`Scripts/Test-SecureContactsUpToDate.ps1`](Windows/Scripts/Test-SecureContactsUpToDate.ps1) | Intune Win32 app detection script — compares the installed version with the latest eligible GitHub release |
-| [`ADMX/secure-contacts.admx`](Windows/ADMX/secure-contacts.admx) | ADMX policy schema — required for both Intune methods |
-| [`ADMX/secure-contacts.adml`](Windows/ADMX/secure-contacts.adml) | Matching ADML locale labels for the ADMX |
-| [`OMA-URI/README.Intune-OMA-URI.md`](Windows/OMA-URI/README.Intune-OMA-URI.md) | Blank OMA-URI row template for manual Intune entry |
-| [`OMA-URI/README.Intune-OMA-URI.Example.md`](Windows/OMA-URI/README.Intune-OMA-URI.Example.md) | Filled OMA-URI reference showing valid sample values |
-| [`OMA-URI/secure-contacts.intune-omauri-profile.json`](Windows/OMA-URI/secure-contacts.intune-omauri-profile.json) | Blank Graph API payload for the PowerShell importer |
-| [`OMA-URI/secure-contacts.intune-omauri-profile.ready.json`](Windows/OMA-URI/secure-contacts.intune-omauri-profile.ready.json) | Ready-to-use Graph payload with the current ADMX content already embedded |
-| [`OMA-URI/secure-contacts.intune-omauri-profile.example.json`](Windows/OMA-URI/secure-contacts.intune-omauri-profile.example.json) | Filled Graph payload reference showing valid sample values |
-| [`OMA-URI/import-secure-contacts-omauri.ps1`](Windows/OMA-URI/import-secure-contacts-omauri.ps1) | PowerShell script — creates the Intune profile via Microsoft Graph |
-| [`OMA-URI/README.Intune-OMA-URI-Import.md`](Windows/OMA-URI/README.Intune-OMA-URI-Import.md) | Quick-start guide for the PowerShell importer |
-| [`README.Intune-Uninstall.md`](Windows/README.Intune-Uninstall.md) | Windows uninstall modes, safety scope, Intune usage, and exit codes |
+Use the platform-specific configuration assets and guides:
 
-## macOS deployment files
+| Platform | Configuration method | Entry point |
+| --- | --- | --- |
+| Windows | Imported ADMX/ADML templates or Windows Policy CSP OMA-URI | [Windows configuration guide](config/Windows/README.Intune-Config-Win.md) |
+| macOS | Intune preference-file profile using the Secure Contacts plist | [macOS configuration guide](config/MacOS/README.Intune-Config-MacOS.md) |
 
-| File | Role |
-|---|---|
-| [`README.Intune-Deploy-MacOS.md`](MacOS/README.Intune-Deploy-MacOS.md) | macOS app deployment guide - PKG verification, Intune upload, detection, assignment, updates, and rollback planning |
-| [`README.Intune-Uninstall.MacOS.md`](MacOS/README.Intune-Uninstall.MacOS.md) | Optional macOS application-only uninstall or complete per-user data purge guide |
-| [`Scripts/Uninstall-SecureContacts.sh`](MacOS/Scripts/Uninstall-SecureContacts.sh) | Intune macOS Shell script for validated application removal and optional complete data purge |
-| [`README.Intune-Update-Options-MacOS.md`](MacOS/README.Intune-Update-Options-MacOS.md) | macOS update paths, validation, approval, and optional Graph publishing design |
-| [`README.Intune-Azure-DevOps.md`](MacOS/README.Intune-Azure-DevOps.md) | Azure DevOps implementation guide for the organization-owned macOS Graph pipeline |
-| [`azure-publish-sca-intune-macos.yml`](MacOS/.azure-pipelines/azure-publish-sca-intune-macos.yml) | Customer-operated Azure DevOps validation and gated Intune publishing pipeline |
-| [`README.Intune-GitHub-Actions.md`](MacOS/README.Intune-GitHub-Actions.md) | GitHub Actions implementation guide for the organization-owned macOS Graph pipeline |
-| [`gh-publish-sca-intune-macos.yml`](.github/workflows/gh-publish-sca-intune-macos.yml) | Customer-operated GitHub Actions validation and gated Intune publishing workflow |
-| [`Scripts/Validate-SecureContactsPackage.sh`](MacOS/Scripts/Validate-SecureContactsPackage.sh) | Graph-free macOS runner that stages and validates ARM64 artifacts; Graph publishing is disabled |
-| [`Scripts/Sync-SecureContactsToIntune.sh`](MacOS/Scripts/Sync-SecureContactsToIntune.sh) | Self-contained macOS release download, staging, validation, and optional Graph publishing entry point |
-| [`README.Intune-Config-MacOS.md`](MacOS/README.Intune-Config-MacOS.md) | Full Intune configuration guide (plist method + non-Intune MDM) |
-| [`plist/de.provectus.SecureContactsDesktop.plist`](MacOS/plist/de.provectus.SecureContactsDesktop.plist) | Blank plist config template for production use |
-| [`plist/de.provectus.SecureContactsDesktop.plist.demo`](MacOS/plist/de.provectus.SecureContactsDesktop.plist.demo) | Demo plist with sample values (reference only) |
-| [`plist/secure-contacts-manifest.json`](MacOS/plist/secure-contacts-manifest.json) | Manifest schema reference for non-Intune MDM platforms (Jamf, Kandji) |
+Configuration is separate from application publishing. The files under [`config/Windows`](config/Windows) and [`config/MacOS`](config/MacOS) are policy templates and configuration references; they do not install the application or create the Intune app. Configure production values in the tenant or approved profile payloads, assign profiles to the intended device groups, and validate them on pilot devices.
 
-## Additional documentation
+## Official application packages
 
-- Windows deployment and configuration: [`Windows/README.Intune-Config-Win.md`](Windows/README.Intune-Config-Win.md)
-- macOS app deployment: [`MacOS/README.Intune-Deploy-MacOS.md`](MacOS/README.Intune-Deploy-MacOS.md)
-- macOS configuration: [`MacOS/README.Intune-Config-MacOS.md`](MacOS/README.Intune-Config-MacOS.md)
-- macOS application removal: [`MacOS/README.Intune-Uninstall.MacOS.md`](MacOS/README.Intune-Uninstall.MacOS.md)
-- Official policy documentation: [Secure Contacts Policy Documentation](https://docs.secure-contacts.com/documentation/app-configuration-policy-name-values-for-sca)
+Prebuilt SCA Desktop packages are published through GitHub Releases in the [SCA Desktop Releases repository](https://github.com/Provectus-Software-GmbH/SCA_Desktop_Releases/releases).
+
+Supported package types are:
+
+- Windows: `.msi` and `.exe`
+- macOS: `.pkg` and `.dmg`
+
+The scripts in this repository resolve the approved release assets, verify their checksums and platform identity, and use them for validation or updates. Keep the release repository as the source of truth for package binaries and this repository as the source of truth for deployment, configuration, and operational documentation.
+
+## App deployment and updates
+
+All supported update paths compare a release with the existing Intune app before making changes.
+
+| Path | Download and verification | Version comparison | Intune update |
+| --- | --- | --- | --- |
+| Fully manual | Operator | Operator | Operator |
+| Script-assisted | PowerShell or Bash script | Script | Script |
+| Pipeline automation | Workflow and script | Workflow and script | Workflow and script |
+
+### Fully manual
+
+Use this path when an administrator wants to control every step without using the repository scripts or either pipeline:
+
+1. Select a published release from `Provectus-Software-GmbH/SCA_Desktop_Releases`.
+2. Download the platform installer and its matching checksum file.
+3. Verify the checksum and package signature or identity using the platform's approved tools.
+4. Prepare the installer using the organization's approved Intune packaging process.
+5. Compare the release with the existing Intune app version.
+6. Update the existing app through Intune administration tools and retain the release, verification, and update records.
+
+This repository does not provide a separate manual packaging command. Follow your organization's Intune packaging and change-control procedures for the exact administrative steps.
+
+### Script-assisted
+
+Run the PowerShell or Bash scripts on an administrator workstation. Start with the [script-assisted README](script-assisted/README.md), which contains the detailed guide and links to the scripts and validator.
+
+### Pipeline automation
+
+Use the existing CI integrations when you need repeatable execution, centralized secret handling, artifacts, cleanup, or approval controls:
+
+- [GitHub Actions](.github/README.md)
+- [Azure DevOps](.azure-pipelines/README.md)
+
+Those documents contain platform-specific pipeline triggers, secret configuration, artifact handling, environment approvals, and CI cleanup details.
+
+## Repository map
+
+| Folder | Responsibility |
+| --- | --- |
+| [`config/Windows`](config/Windows) | Windows ADMX/ADML and OMA-URI policy templates and configuration documentation |
+| [`config/MacOS`](config/MacOS) | macOS plist and manifest templates and configuration documentation |
+| [`script-assisted`](script-assisted) | Direct Windows and macOS release validation and existing-app update scripts |
+| [`uninstall`](uninstall) | Standalone Windows and macOS application removal and optional data cleanup |
+| [`.github`](.github) | GitHub Actions workflows and publishing documentation |
+| [`.azure-pipelines`](.azure-pipelines) | Azure DevOps pipelines and publishing documentation |
+
+## Configuration assets
+
+| Platform | Included assets |
+| --- | --- |
+| Windows | ADMX/ADML administrative templates, OMA-URI row templates, Graph API payloads, and an OMA-URI profile importer |
+| macOS | Intune preference-file plist templates and a manifest reference for other MDM platforms |
+
+The configuration guides explain which template to use, where production values belong, how to assign the resulting profile, and how to validate managed settings on a pilot device.
+
+## Operating boundary
+
+Application deployment and configuration have different ownership boundaries:
+
+- **Intune administrators** create the initial apps, configure assignments and detection rules, enter production policy values, and approve rollout.
+- **This repository** validates release artifacts, packages and updates existing apps when requested, provides configuration templates, and documents operational workflows.
+- **The release repository** remains the source of published Windows MSI and macOS PKG assets.
+
+Test every application update and configuration profile on a pilot device before broad assignment. Keep credentials, certificates, private keys, and production policy values out of source control.

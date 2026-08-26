@@ -2,7 +2,7 @@
 
 This guide shows how to configure Secure Contacts for macOS with Microsoft Intune.
 
-> **Related:** Deploy the signed application package first using [README.Intune-Deploy-MacOS.md](README.Intune-Deploy-MacOS.md).
+> **Related:** Application updates are handled by the existing-app publisher documented in the [script-assisted guide](../../script-assisted/README.md) and the [CI guides](../../README.md). Configure the target Intune app and its detection rules manually before publishing.
 
 ## Scope
 
@@ -104,7 +104,7 @@ All keys below are optional and can be left empty by default.
 | `SecContacts.AzureBlobStorage` | `<string>` | JSON array of objects: `[ { "name": "...", "value": "..." } ]` |
 | `SecContacts.SharedMailboxContacts` | `<string>` | JSON array of objects: `[ { "name": "...", "value": "..." } ]` |
 | `SecContacts.CustomDatasourceNames` | `<string>` | JSON array of objects: `[ { "defaultid": "...", "customid": "...", "customname": "..." } ]` |
-| `SecContacts.InternalLink` | `<string>` | Internal link string |
+| `SecContacts.InternalLinks` | `<string>` | Internal links string |
 
 Tip:
 
@@ -150,7 +150,7 @@ Use this only for Jamf, Kandji, or other MDM systems.
 - `SecContacts.AzureBlobStorage`
 - `SecContacts.SharedMailboxContacts`
 - `SecContacts.CustomDatasourceNames`
-- `SecContacts.InternalLink`
+- `SecContacts.InternalLinks`
 
 ## Expected result
 

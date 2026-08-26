@@ -215,4 +215,4 @@ To keep it enabled but provide an empty text value, use:
   - SecContacts.AzureBlobStorageList
   - SecContacts.SharedMailboxContacts
   - SecContacts.CustomDatasourceNames
-  - SecContacts.InternalLink
+  - SecContacts.InternalLinks

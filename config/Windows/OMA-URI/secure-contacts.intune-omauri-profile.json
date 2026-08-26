@@ -90,7 +90,7 @@
     {
       "@odata.type": "#microsoft.graph.omaSettingString",
       "displayName": "Pol_InternalLink",
-      "description": "SecContacts.InternalLink",
+      "description": "SecContacts.InternalLinks",
       "omaUri": "./Device/Vendor/MSFT/Policy/Config/SecureContacts~Policy~SecureContactsCategory~SecContactsCategory/Pol_InternalLink",
       "value": "<enabled/><data id=\"Txt_InternalLink\" value=\"\"/>"
     }

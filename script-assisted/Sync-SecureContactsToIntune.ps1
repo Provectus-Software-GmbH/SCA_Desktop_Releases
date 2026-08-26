@@ -8,8 +8,9 @@
     and writes non-secret audit artifacts. It does not authenticate to Microsoft Graph or change Intune unless
     -Publish is supplied. Release tags must use vMAJOR.MINOR.PATCH and the MSI filename must match the normalized
     release version. MSI ProductVersion is compared using its first three numeric components, so 0.8.18.0 matches
-    release v0.8.18. In publish mode, Intune is queried before the MSI download and equal
-    or newer versions are skipped. Use -WhatIf with -Publish to review the target action without writing the change.
+    release v0.8.18. In publish mode, the existing Intune app identified by -AppId is queried before the MSI download
+    and equal or newer versions are skipped. Use -WhatIf to review the target publish action without writing the change.
+    WhatIf implies Publish: the script performs release and Intune version lookup, downloads and validates a newer candidate MSI, and writes a decision manifest without changing Intune.
 
 .PARAMETER GitHubRepo
     GitHub repository in owner/repository format. The latest published, non-draft, non-prerelease release is used unless -ReleaseTag is supplied.
@@ -51,19 +52,7 @@
     Optional text that must occur in the Authenticode signer certificate subject of the downloaded MSI.
 
 .PARAMETER AppId
-    Existing Intune Win32 app ID to update. Prefer this over display-name matching for repeatable publishing.
-
-.PARAMETER AppName
-    Display name used when searching for an existing app or creating a new app when -AppId is not supplied.
-
-.PARAMETER Publisher
-    Publisher value written to a newly created Intune app. It is not used when updating an existing app.
-
-.PARAMETER Description
-    Description written to a newly created Intune app. It is not used when updating an existing app.
-
-.PARAMETER IconPath
-    PNG file used as the icon for a newly created Intune app. Defaults to the repository's Windows logo.
+    Existing Intune Win32 app ID to update. Required with -Publish.
 
 .PARAMETER ProcessingTimeoutMinutes
     Maximum number of minutes to wait for Intune to report a recognized successful processing state after upload.
@@ -73,6 +62,7 @@
 
 .PARAMETER Publish
     Enables Graph authentication and the Intune create/update operation. Without this switch, the script only stages and validates the package. In publish mode, an Intune app with an equal or newer displayVersion is a successful no-op.
+    -WhatIf implies -Publish and previews this operation by validating the candidate MSI without packaging, uploading, or updating the app.
 
 .EXAMPLE
     .\Sync-SecureContactsToIntune.ps1 -GitHubRepo 'owner/repository'
@@ -80,9 +70,9 @@
     Validates and packages the release without requiring Graph credentials or contacting Intune.
 
 .EXAMPLE
-    .\Sync-SecureContactsToIntune.ps1 -GitHubRepo 'owner/repository' -ReleaseTag 'v0.8.18' -Publish
+    .\Sync-SecureContactsToIntune.ps1 -GitHubRepo 'owner/repository' -ReleaseTag 'v0.8.18' -AppId $env:INTUNE_APP_ID -Publish
 
-    Validates and publishes a specific release. MsiAssetName is not needed when the release contains one matching MSI.
+    Validates and updates an existing Intune app. The app must be created and configured in Intune beforehand.
 
 .EXAMPLE
     .\Sync-SecureContactsToIntune.ps1 -GitHubRepo 'owner/repository' -TenantId $tenantId -ClientId $clientId -CertificateThumbprint $thumbprint -AppId $appId -Publish
@@ -101,6 +91,9 @@
     Imports a protected PFX for the run, publishes the package, and removes the imported certificate during cleanup.
 
 .NOTES
+    Set SECURE_CONTACTS_GITHUB_TOKEN to a customer-owned GitHub token when authenticated access is needed.
+    The token is optional for public repositories and required for private repositories.
+
     Required Entra ID Application Permissions:
     - DeviceManagementApps.ReadWrite.All
 
@@ -123,23 +116,29 @@ param (
     [Parameter(Mandatory = $false)] [ValidatePattern('^[a-fA-F0-9]{64}$')] [string]$ExpectedSha256,
     [Parameter(Mandatory = $false)] [string]$ExpectedSigner,
     [Parameter(Mandatory = $false)] [string]$AppId,
-    [Parameter(Mandatory = $false)] [string]$AppName = 'Secure Contacts Desktop Enterprise',
-    [Parameter(Mandatory = $false)] [string]$Publisher = 'Provectus Software GmbH',
-    [Parameter(Mandatory = $false)] [string]$Description = 'Secure Contacts enterprise desktop app.',
-    [Parameter(Mandatory = $false)] [string]$IconPath = (Join-Path $PSScriptRoot 'icon.png'),
     [Parameter(Mandatory = $false)] [ValidateRange(1, 60)] [int]$ProcessingTimeoutMinutes = 15,
-    [Parameter(Mandatory = $false)] [string]$ArtifactOutputPath = (Join-Path (Get-Location) 'SecureContacts-Intune-Artifacts'),
+    [Parameter(Mandatory = $false)] [string]$ArtifactOutputPath,
     [Parameter(Mandatory = $false)] [switch]$Publish
 )
 
 # Fail fast: a partially validated package must never reach Intune.
 $ErrorActionPreference = "Stop"
+if (-not $ArtifactOutputPath) {
+    $ArtifactOutputPath = Join-Path $PSScriptRoot 'SecureContacts-Intune-Artifacts'
+}
+if ($WhatIfPreference) {
+    $Publish = $true
+}
+if ($Publish -and -not $AppId) {
+    throw '-AppId is required when -Publish is specified. Create and configure the app manually in Intune first.'
+}
 $moduleName = 'IntuneWin32App'
 $moduleVersion = '1.5.0'
 $workDir = $null
 $importedCertificateThumbprint = $null
 $targetApp = $null
 $previousIntuneVersion = $null
+$detectionRulePlan = $null
 $releaseVersion = $null
 $updateDecision = 'ValidationOnly'
 $publicationPerformed = $false
@@ -157,6 +156,18 @@ function Assert-Command {
     }
 }
 
+function Get-GitHubRequestHeaders {
+    $headers = @{
+        Accept = 'application/vnd.github+json'
+        'X-GitHub-Api-Version' = '2022-11-28'
+    }
+    $token = [Environment]::GetEnvironmentVariable('SECURE_CONTACTS_GITHUB_TOKEN')
+    if ($token -and $token -notmatch '^\$\([^)]+\)$') {
+        $headers.Authorization = "Bearer $token"
+    }
+    return $headers
+}
+
 function Get-AssetChecksum {
     # GitHub exposes a digest on newer APIs; older releases use a separate checksum asset.
     param ([Parameter(Mandatory = $true)]$Release, [Parameter(Mandatory = $true)]$MsiAsset)
@@ -169,7 +180,7 @@ function Get-AssetChecksum {
     if ($checksumAsset.Count -ne 1) {
         throw "GitHub asset '$($MsiAsset.name)' has no unique SHA-256 digest. Supply -ExpectedSha256 or publish a matching .sha256 asset."
     }
-    $raw = Invoke-WebRequest -Uri $checksumAsset[0].browser_download_url -UseBasicParsing
+    $raw = Invoke-WebRequest -Uri $checksumAsset[0].browser_download_url -Headers (Get-GitHubRequestHeaders) -UseBasicParsing
     $content = $raw.Content
     if ($content -is [byte[]]) { $content = [Text.Encoding]::UTF8.GetString($content) }
     if ($content.Trim() -notmatch '(?i)\b([a-f0-9]{64})\b') { throw "Checksum asset '$($checksumAsset[0].name)' does not contain a SHA-256 value." }
@@ -205,6 +216,15 @@ function Connect-Intune {
     if (-not $TenantId -or -not $ClientId) {
         throw 'TenantId and ClientId are required when -Publish is specified.'
     }
+    if ($TenantId -notmatch '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$') {
+        throw "TenantId '$TenantId' is not a valid Microsoft Entra tenant GUID. Set INTUNE_TENANT_ID to the directory (tenant) ID."
+    }
+    if ($ClientId -notmatch '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$') {
+        throw "ClientId '$ClientId' is not a valid application GUID. Set INTUNE_CLIENT_ID to the App Registration's application (client) ID."
+    }
+    if ($TenantId -eq $ClientId) {
+        throw 'INTUNE_TENANT_ID and INTUNE_CLIENT_ID are identical. Set INTUNE_TENANT_ID to the directory (tenant) ID and INTUNE_CLIENT_ID to the App Registration application (client) ID.'
+    }
     if ($ClientSecretEnvironmentVariable) {
         if ($ClientSecret) { throw 'Specify either -ClientSecret or -ClientSecretEnvironmentVariable, not both.' }
         $ClientSecret = [Environment]::GetEnvironmentVariable($ClientSecretEnvironmentVariable)
@@ -233,11 +253,21 @@ function Connect-Intune {
         if (-not $certificate) { throw "Certificate '$CertificateThumbprint' was not found at $certificatePath." }
         if (-not $certificate.HasPrivateKey) { throw "Certificate '$CertificateThumbprint' does not contain a private key." }
         if ($certificate.NotAfter -le (Get-Date)) { throw "Certificate '$CertificateThumbprint' is expired." }
-        [void](Connect-MSIntuneGraph -TenantID $TenantId -ClientID $ClientId -ClientCert $certificate)
+        try {
+            [void](Connect-MSIntuneGraph -TenantID $TenantId -ClientID $ClientId -ClientCert $certificate -ErrorAction Stop)
+        }
+        catch {
+            throw "Microsoft Entra certificate authentication failed for application '$ClientId' in tenant '$TenantId'. Verify INTUNE_TENANT_ID, INTUNE_CLIENT_ID, certificate registration, and admin consent. Details: $($_.Exception.Message)"
+        }
     }
     else {
         Write-Warning 'Client-secret authentication is intended for testing. Use certificate authentication in production.'
-        [void](Connect-MSIntuneGraph -TenantID $TenantId -ClientID $ClientId -ClientSecret $ClientSecret)
+        try {
+            [void](Connect-MSIntuneGraph -TenantID $TenantId -ClientID $ClientId -ClientSecret $ClientSecret -ErrorAction Stop)
+        }
+        catch {
+            throw "Microsoft Entra client-secret authentication failed for application '$ClientId' in tenant '$TenantId'. Verify INTUNE_TENANT_ID, INTUNE_CLIENT_ID, and admin consent. Details: $($_.Exception.Message)"
+        }
     }
 }
 
@@ -290,10 +320,105 @@ function ConvertTo-ComparableVersion {
 function Get-IntuneAppVersion {
     # Missing version metadata is unsafe to treat as an old version.
     param ([Parameter(Mandatory = $true)]$App)
-    if (-not $App.displayVersion -or $App.displayVersion -notmatch '^\d+\.\d+\.\d+$') {
+    if (-not $App.displayVersion) {
         throw "Intune app '$($App.id)' has no usable displayVersion. Refusing to publish without a version comparison."
     }
-    return [version]$App.displayVersion
+    try {
+        return ConvertTo-ComparableVersion -VersionString ([string]$App.displayVersion)
+    }
+    catch {
+        throw "Intune app '$($App.id)' has no usable displayVersion. Refusing to publish without a version comparison. Details: $($_.Exception.Message)"
+    }
+}
+
+function ConvertTo-OrderedDictionary {
+    param ([Parameter(Mandatory = $true)]$Value)
+    if ($Value -is [System.Collections.IDictionary]) {
+        $dictionary = [ordered]@{}
+        foreach ($key in $Value.Keys) {
+            $dictionary[[string]$key] = ConvertTo-OrderedDictionary -Value $Value[$key]
+        }
+        return $dictionary
+    }
+    if ($Value -is [System.Collections.IEnumerable] -and $Value -isnot [string]) {
+        return @($Value | ForEach-Object { ConvertTo-OrderedDictionary -Value $_ })
+    }
+    if ($Value -is [psobject] -and $Value.PSObject.Properties.Count -gt 0 -and $Value -isnot [string]) {
+        $dictionary = [ordered]@{}
+        foreach ($property in $Value.PSObject.Properties) {
+            $dictionary[$property.Name] = ConvertTo-OrderedDictionary -Value $property.Value
+        }
+        return $dictionary
+    }
+    return $Value
+}
+
+function Get-ObjectPropertyValue {
+    param ([Parameter(Mandatory = $true)]$Object, [Parameter(Mandatory = $true)][string]$Name)
+    if ($Object -is [System.Collections.IDictionary]) { return $Object[$Name] }
+    $property = $Object.PSObject.Properties[$Name]
+    if ($property) { return $property.Value }
+    return $null
+}
+
+function ConvertTo-NormalizedProductCode {
+    param ([Parameter(Mandatory = $true)][string]$ProductCode)
+    try { return ([guid]::Parse($ProductCode.Trim())).ToString('B').ToUpperInvariant() }
+    catch { throw "MSI ProductCode '$ProductCode' is not a valid GUID." }
+}
+
+function Get-DetectionRulePlan {
+    param ([Parameter(Mandatory = $true)]$App, [Parameter(Mandatory = $true)][string]$CandidateProductCode)
+    $rules = @((Get-ObjectPropertyValue -Object $App -Name 'detectionRules'))
+    if ($rules.Count -eq 0) { throw "Intune app '$($App.id)' has no detection rules. Refusing to create a new MSI rule automatically." }
+    $msiRules = @($rules | Where-Object {
+        (Get-ObjectPropertyValue -Object $_ -Name '@odata.type') -eq '#microsoft.graph.win32LobAppProductCodeDetection'
+    })
+    if ($msiRules.Count -ne 1) { throw "Intune app '$($App.id)' must have exactly one existing MSI detection rule; found $($msiRules.Count)." }
+    $existingProductCode = [string](Get-ObjectPropertyValue -Object $msiRules[0] -Name 'productCode')
+    if (-not $existingProductCode) { throw "Intune app '$($App.id)' has an MSI detection rule without a ProductCode." }
+    $normalizedExisting = ConvertTo-NormalizedProductCode -ProductCode $existingProductCode
+    $normalizedCandidate = ConvertTo-NormalizedProductCode -ProductCode $CandidateProductCode
+    $replacementRequired = $normalizedExisting -ne $normalizedCandidate
+    $normalizedRules = @($rules | ForEach-Object {
+        if ((Get-ObjectPropertyValue -Object $_ -Name '@odata.type') -eq '#microsoft.graph.win32LobAppProductCodeDetection') {
+            if ($replacementRequired) { New-IntuneWin32AppDetectionRuleMSI -ProductCode $normalizedCandidate }
+            else { ConvertTo-OrderedDictionary -Value $_ }
+        }
+        else { ConvertTo-OrderedDictionary -Value $_ }
+    })
+    [pscustomobject]@{
+        ExistingProductCode = $normalizedExisting
+        CandidateProductCode = $normalizedCandidate
+        ReplacementRequired = $replacementRequired
+        Rules = [System.Collections.Specialized.OrderedDictionary[]]$normalizedRules
+    }
+}
+
+function Write-DecisionManifest {
+    param (
+        [Parameter(Mandatory = $true)][string]$Repository,
+        [Parameter(Mandatory = $true)]$Release,
+        [Parameter(Mandatory = $true)][version]$CandidateVersion,
+        [Parameter(Mandatory = $true)]$App,
+        [Parameter(Mandatory = $true)][version]$IntuneVersion,
+        [Parameter(Mandatory = $true)][string]$Decision
+    )
+    $artifactDir = Join-Path $ArtifactOutputPath ($Release.tag_name -replace '[^a-zA-Z0-9._-]', '_')
+    New-Item -ItemType Directory -Path $artifactDir -Force -WhatIf:$false | Out-Null
+    $manifest = [ordered]@{
+        Repository = $Repository
+        ReleaseTag = $Release.tag_name
+        ReleaseVersion = $CandidateVersion.ToString()
+        IntuneAppId = $App.id
+        IntuneDisplayName = $App.displayName
+        IntuneResourceType = $App.'@odata.type'
+        IntuneVersion = $IntuneVersion.ToString()
+        Decision = $Decision
+        CreatedUtc = [DateTime]::UtcNow.ToString('o')
+    }
+    $manifest | ConvertTo-Json | Set-Content -Path (Join-Path $artifactDir 'decision-manifest.json') -Encoding UTF8
+    Write-Status "Wrote preflight decision artifact to '$artifactDir'."
 }
 
 try {
@@ -304,18 +429,13 @@ try {
         throw "Module '$moduleName' version $moduleVersion or newer is required. Install it with: Install-Module -Name $moduleName -RequiredVersion $moduleVersion -Scope CurrentUser"
     }
     Import-Module -Name $moduleName -MinimumVersion ([version]$moduleVersion)
-    @('New-IntuneWin32AppPackage', 'New-IntuneWin32AppDetectionRuleMSI', 'New-IntuneWin32AppRequirementRule') | ForEach-Object { Assert-Command -Name $_ }
     Write-Status "Module '$moduleName' $($installedModule[0].Version) is available."
 
-    # Use a unique workspace so concurrent runs cannot delete or reuse one another's package files.
-    $workDir = Join-Path ([IO.Path]::GetTempPath()) ('SecureContacts-Intune-' + [guid]::NewGuid().ToString('N'))
-    $sourceDir = Join-Path $workDir 'Source'; $outDir = Join-Path $workDir 'Output'
-    New-Item -ItemType Directory -Path $sourceDir, $outDir -Force -WhatIf:$false | Out-Null
     $repo = $GitHubRepo.Trim()
     # Only a published GitHub release is eligible for packaging.
     $releaseEndpoint = if ($ReleaseTag) { "releases/tags/$ReleaseTag" } else { 'releases/latest' }
     Write-Status "Resolving GitHub release from '$repo'."
-    $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/$releaseEndpoint" -Method Get
+    $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/$releaseEndpoint" -Method Get -Headers (Get-GitHubRequestHeaders)
     if (-not $release.tag_name -or $release.draft -or $release.prerelease) { throw 'Latest GitHub release is missing, draft, or prerelease.' }
     $releaseVersion = ConvertTo-ReleaseVersion -Tag $release.tag_name
     Write-Status "Selected release $($release.tag_name) (version $releaseVersion)."
@@ -324,47 +444,34 @@ try {
     if ($Publish) {
         Write-Status 'Authenticating to Intune.'
         Connect-Intune
-        if ($AppId) {
-            Write-Status "Looking up Intune app '$AppId'."
-        }
-        else {
-            Write-Status "Looking up Intune Win32 apps and matching display name '$AppName'."
-        }
-        $targetApps = @(
-            if ($AppId) {
-                Get-IntuneWin32App -ID $AppId
-            }
-            else {
-                $allIntuneApps = @(Get-IntuneWin32App)
-                Write-Status "Retrieved $($allIntuneApps.Count) Intune Win32 app(s) for local matching."
-                $allIntuneApps | Where-Object {
-                    [string]::Equals(([string]$_.displayName).Trim(), $AppName.Trim(), [StringComparison]::OrdinalIgnoreCase)
-                }
-            }
-        )
+        Write-Status "Looking up existing Intune app '$AppId'."
+        $targetApps = @(Get-IntuneWin32App -ID $AppId)
         $targetAppCount = @($targetApps).Count
-        Write-Status "Found $targetAppCount Intune app(s) matching the requested target."
-        if ($targetAppCount -gt 1) { throw "More than one Intune app matched '$AppName'; specify -AppId." }
-        if ($AppId -and $targetAppCount -eq 0) { throw "No Intune app was found with ID '$AppId'; refusing to create a different app." }
-        if ($targetAppCount -eq 1) {
-            $targetApp = $targetApps[0]
-            $previousIntuneVersion = Get-IntuneAppVersion -App $targetApp
-            if ($previousIntuneVersion -ge $releaseVersion) {
-                $updateDecision = 'NoUpdateRequired'
-                $artifactDir = Join-Path $ArtifactOutputPath ($release.tag_name -replace '[^a-zA-Z0-9._-]', '_')
-                New-Item -ItemType Directory -Path $artifactDir -Force -WhatIf:$false | Out-Null
-                [ordered]@{ Repository = $repo; ReleaseTag = $release.tag_name; ReleaseVersion = $releaseVersion.ToString(); PreviousIntuneVersion = $previousIntuneVersion.ToString(); UpdateDecision = $updateDecision; FinalAction = 'Skipped'; CreatedUtc = [DateTime]::UtcNow.ToString('o') } | ConvertTo-Json | Set-Content -Path (Join-Path $artifactDir 'manifest.json') -Encoding UTF8
-                Write-Host "No update required. Intune version is $previousIntuneVersion; GitHub version is $releaseVersion." -ForegroundColor Yellow
-                return
-            }
-            $updateDecision = 'UpdateExistingApp'
-            Write-Status "Existing Intune app is at version $previousIntuneVersion; update will use $releaseVersion."
+        if ($targetAppCount -ne 1) {
+            throw "Expected exactly one existing Intune app for ID '$AppId'; found $targetAppCount. The script never creates apps."
         }
-        else {
-            $updateDecision = 'CreateNewApp'
-            Write-Status "No existing Intune app matched; a new app will be created."
+        $targetApp = $targetApps[0]
+        $targetAppResourceType = $targetApp.'@odata.type'
+        if ($targetAppResourceType -and $targetAppResourceType -ne '#microsoft.graph.win32LobApp') {
+            throw "Target Intune app '$AppId' is not a Win32 app ('$targetAppResourceType')."
         }
+        $previousIntuneVersion = Get-IntuneAppVersion -App $targetApp
+        if ($previousIntuneVersion -ge $releaseVersion) {
+            $updateDecision = 'NoUpdateRequired'
+            Write-DecisionManifest -Repository $repo -Release $release -CandidateVersion $releaseVersion -App $targetApp -IntuneVersion $previousIntuneVersion -Decision $updateDecision
+            Write-Host "No update required. Intune version is $previousIntuneVersion; GitHub version is $releaseVersion." -ForegroundColor Yellow
+            return
+        }
+        $updateDecision = 'UpdateExistingApp'
+        Write-Status "Existing Intune app is at version $previousIntuneVersion; update will use $releaseVersion."
     }
+
+    @('New-IntuneWin32AppPackage', 'Set-IntuneWin32App', 'Update-IntuneWin32AppPackageFile') | ForEach-Object { Assert-Command -Name $_ }
+
+    # Use a unique workspace only after preflight; no-update remains metadata-only while WhatIf validates the candidate MSI.
+    $workDir = Join-Path ([IO.Path]::GetTempPath()) ('SecureContacts-Intune-' + [guid]::NewGuid().ToString('N'))
+    $sourceDir = Join-Path $workDir 'Source'; $outDir = Join-Path $workDir 'Output'
+    New-Item -ItemType Directory -Path $sourceDir, $outDir -Force -WhatIf:$false | Out-Null
 
     # Never choose the first matching file: multiple MSI assets usually represent different architectures.
     $msiAssets = @($release.assets | Where-Object { $_.name -match '(?i)\.msi$' })
@@ -374,7 +481,7 @@ try {
     $expectedMsiName = "SecureContacts-$releaseVersion.msi"
     if ($msiAsset.name -ne $expectedMsiName) { throw "MSI asset '$($msiAsset.name)' does not match expected asset name '$expectedMsiName' for release '$($release.tag_name)'." }
     Write-Status "Downloading MSI '$($msiAsset.name)'."
-    Invoke-WebRequest -Uri $msiAsset.browser_download_url -OutFile $msiPath -UseBasicParsing
+    Invoke-WebRequest -Uri $msiAsset.browser_download_url -Headers (Get-GitHubRequestHeaders) -OutFile $msiPath -UseBasicParsing
     Write-Status 'Validating MSI checksum, signature, identity, and version.'
     $actualSha256 = (Get-FileHash -Path $msiPath -Algorithm SHA256).Hash.ToLowerInvariant()
     $releaseSha256 = Get-AssetChecksum -Release $release -MsiAsset $msiAsset
@@ -388,12 +495,22 @@ try {
     $msiIdentity = Get-MsiIdentity -Path $msiPath
     $msiComparableVersion = ConvertTo-ComparableVersion -VersionString $msiIdentity.ProductVersion
     if ($msiComparableVersion -ne $releaseVersion) { throw "MSI ProductVersion '$($msiIdentity.ProductVersion)' does not match release version '$releaseVersion'." }
+    if ($Publish) {
+        $detectionRulePlan = Get-DetectionRulePlan -App $targetApp -CandidateProductCode $msiIdentity.ProductCode
+        $ruleAction = if ($detectionRulePlan.ReplacementRequired) { "replace existing MSI detection rule ($($detectionRulePlan.ExistingProductCode) -> $($detectionRulePlan.CandidateProductCode))" } else { 'preserve existing MSI detection rule' }
+        Write-Status "Detection rule plan: $ruleAction; unrelated rules will be preserved."
+        if ($WhatIfPreference) {
+            Write-DecisionManifest -Repository $repo -Release $release -CandidateVersion $releaseVersion -App $targetApp -IntuneVersion $previousIntuneVersion -Decision "$updateDecision`:$ruleAction"
+            Write-Host "What-if: update required. Intune version is $previousIntuneVersion; GitHub version is $releaseVersion. ProductCode $($detectionRulePlan.ExistingProductCode) -> $($detectionRulePlan.CandidateProductCode); $ruleAction." -ForegroundColor Yellow
+            return
+        }
+    }
     Write-Status "Packaging '$($msiAsset.name)' as an Intune Win32 app."
     $package = New-IntuneWin32AppPackage -SourceFolder $sourceDir -SetupFile $msiAsset.name -OutputFolder $outDir -Force
     $intuneWinPath = $package.Path
     if (-not (Test-Path $intuneWinPath)) { throw 'Packaging did not produce an .intunewin file.' }
 
-    $finalAction = if (-not $Publish) { 'Validated' } elseif ($targetApp) { 'UpdateRequested' } else { 'CreateRequested' }
+    $finalAction = if (-not $Publish) { 'Validated' } else { 'UpdateRequested' }
     $manifest = [ordered]@{ Repository = $repo; ReleaseTag = $release.tag_name; ReleaseVersion = $releaseVersion.ToString(); AssetName = $msiAsset.name; Sha256 = $actualSha256; Signer = $signature.SignerCertificate.Subject; ProductCode = $msiIdentity.ProductCode; ProductName = $msiIdentity.ProductName; ProductVersion = $msiIdentity.ProductVersion; PreviousIntuneVersion = if ($previousIntuneVersion) { $previousIntuneVersion.ToString() } else { $null }; UpdateDecision = $updateDecision; FinalAction = $finalAction; PackageName = [IO.Path]::GetFileName($intuneWinPath); Module = $moduleName; ModuleVersion = (Get-Module $moduleName).Version.ToString(); CreatedUtc = [DateTime]::UtcNow.ToString('o') }
     # Keep audit evidence outside the disposable workspace, but exclude all credentials by construction.
     $artifactDir = Join-Path $ArtifactOutputPath ($release.tag_name -replace '[^a-zA-Z0-9._-]', '_')
@@ -409,46 +526,23 @@ try {
         Write-Status 'Validation-only run complete; no Intune changes were requested.'
         return
     }
-    # An explicit ID is preferred; name matching is accepted only when it is unambiguous.
-    $apps = if ($targetApp) { @($targetApp) } else { @() }
-    # Existing apps receive new content; otherwise create a new app with MSI-based detection.
-    if ($apps.Count -eq 1) {
-        Write-Status "Requesting package update for existing Intune app '$($apps[0].id)'."
-        if ($PSCmdlet.ShouldProcess("Intune app $($apps[0].id)", 'Update package')) {
-            [void](Update-IntuneWin32AppPackageFile -ID $apps[0].id -FilePath $intuneWinPath)
-            $publicationPerformed = $true
-            Wait-IntuneAppProcessing -Id $apps[0].id | Out-Null
+    Write-Status "Requesting package update for existing Intune app '$AppId'."
+    if ($PSCmdlet.ShouldProcess("Intune app $AppId", 'Update package')) {
+        [void](Update-IntuneWin32AppPackageFile -ID $AppId -FilePath $intuneWinPath)
+        $setParameters = @{
+            ID = $AppId
+            AppVersion = $releaseVersion.ToString()
+            InstallCommandLine = "msiexec /i `"$($msiAsset.name)`" /qn ALLUSERS=1"
+            UninstallCommandLine = "msiexec /x `"$($msiIdentity.ProductCode)`" /qn"
+            DetectionRule = $detectionRulePlan.Rules
         }
-    }
-    else {
-        Write-Status "Requesting creation of Intune app '$AppName'."
-        $detectionRule = New-IntuneWin32AppDetectionRuleMSI `
-            -ProductCode $msiIdentity.ProductCode `
-            -ProductVersionOperator 'greaterThanOrEqual' `
-            -ProductVersion $msiIdentity.ProductVersion
-        $requirementRule = New-IntuneWin32AppRequirementRule -Architecture 'x64' -MinimumSupportedWindowsRelease 'W10_1909'
-        if (-not (Test-Path -LiteralPath $IconPath -PathType Leaf)) {
-            throw "Icon file '$IconPath' was not found. Supply a valid PNG path with -IconPath."
-        }
-        $icon = New-IntuneWin32AppIcon -FilePath $IconPath
-        if ($PSCmdlet.ShouldProcess("Intune app $AppName", 'Create app')) {
-            $createdApp = Add-IntuneWin32App `
-                -FilePath $intuneWinPath `
-                -DisplayName $AppName `
-                -Publisher $Publisher `
-                -Description $Description `
-                -DetectionRule $detectionRule `
-                -RequirementRule $requirementRule `
-                -AppVersion $releaseVersion.ToString() `
-                -Developer $Publisher `
-                -InstallExperience 'system' `
-                -RestartBehavior 'suppress' `
-                -UnattendedInstall `
-                -UnattendedUninstall `
-                -Icon $icon
-            if (-not $createdApp.id) { throw 'Intune create completed without returning an app ID; processing cannot be verified.' }
-            $publicationPerformed = $true
-            Wait-IntuneAppProcessing -Id $createdApp.id | Out-Null
+        Write-Status "Updating Intune app metadata, commands, and detection rule for ProductCode $($msiIdentity.ProductCode)."
+        [void](Set-IntuneWin32App @setParameters)
+        $publicationPerformed = $true
+        $publishedApp = Wait-IntuneAppProcessing -Id $AppId
+        $publishedVersion = Get-IntuneAppVersion -App $publishedApp
+        if ($publishedVersion -ne $releaseVersion) {
+            throw "Intune processing completed, but app '$AppId' is still at version $publishedVersion; expected $releaseVersion."
         }
     }
     if ($publicationPerformed) {

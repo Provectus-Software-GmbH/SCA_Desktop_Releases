@@ -1,0 +1,167 @@
+name: Secure Contacts Intune macOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish to Intune
+        required: true
+        type: boolean
+        default: false
+      whatIf:
+        description: Review only (What-If)
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate macOS package
+    runs-on: macos-latest
+    outputs:
+      update_required: ${{ steps.preflight.outputs.update_required }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check macOS package tools
+        run: |
+          set -euo pipefail
+          command -v curl >/dev/null
+          command -v jq >/dev/null || brew install jq
+          if [ '${{ inputs.publish }}' = 'true' ] && [ '${{ inputs.whatIf }}' != 'true' ]; then
+            command -v shasum >/dev/null
+            command -v pkgutil >/dev/null
+            command -v spctl >/dev/null
+          fi
+
+      - name: Compare GitHub and Intune versions
+        id: preflight
+        if: ${{ inputs.publish || inputs.whatIf }}
+        env:
+          INTUNE_CERTIFICATE_BASE64: ${{ secrets.INTUNE_CERTIFICATE_BASE64 }}
+          INTUNE_CERTIFICATE_PASSWORD: ${{ secrets.INTUNE_CERTIFICATE_PASSWORD }}
+          INTUNE_TENANT_ID: ${{ secrets.INTUNE_TENANT_ID }}
+          INTUNE_CLIENT_ID: ${{ secrets.INTUNE_CLIENT_ID }}
+          INTUNE_APP_ID: ${{ secrets.INTUNE_MACOS_APP_ID }}
+          SECURE_CONTACTS_GITHUB_TOKEN: ${{ secrets.SECURE_CONTACTS_GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          command -v az >/dev/null || brew install azure-cli
+          output_path="$RUNNER_TEMP/secure-contacts-macos-artifacts"
+          mkdir -p "$output_path"
+          umask 077
+          certificate_path="$RUNNER_TEMP/intune-auth.p12"
+          password_path="$RUNNER_TEMP/intune-auth.password"
+          printf '%s' "$INTUNE_CERTIFICATE_BASE64" | openssl base64 -d -A > "$certificate_path"
+          printf '%s\n' "$INTUNE_CERTIFICATE_PASSWORD" > "$password_path"
+          chmod 600 "$certificate_path" "$password_path"
+          export INTUNE_CERTIFICATE_PATH="$certificate_path"
+          export INTUNE_CERTIFICATE_PASSWORD_FILE="$password_path"
+          export INTUNE_AUTH_METHOD=certificate
+          .github/workflows/Sync-SecureContactsToIntune.sh \
+            --output "$output_path" \
+            --decision-manifest-output "$output_path/decision-manifest.json" \
+            --github-repo 'Provectus-Software-GmbH/SCA_Desktop_Releases' \
+            --publish \
+            --what-if
+          decision=$(jq -r '.Decision // empty' "$output_path/decision-manifest.json")
+          case "$decision" in
+            UpdateExistingApp) echo 'update_required=true' >> "$GITHUB_OUTPUT" ;;
+            NoUpdateRequired) echo 'update_required=false' >> "$GITHUB_OUTPUT" ;;
+            *) echo "Unexpected macOS preflight decision: $decision" >&2; exit 1 ;;
+          esac
+
+      - name: Download and validate package
+        if: ${{ (!inputs.publish && !inputs.whatIf) || (inputs.publish && !inputs.whatIf && steps.preflight.outputs.update_required == 'true') }}
+        env:
+          SECURE_CONTACTS_GITHUB_TOKEN: ${{ secrets.SECURE_CONTACTS_GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          output_path="$RUNNER_TEMP/secure-contacts-macos-artifacts"
+          mkdir -p "$output_path"
+          chmod +x .github/workflows/Sync-SecureContactsToIntune.sh .github/workflows/Validate-SecureContactsPackage.sh
+          .github/workflows/Sync-SecureContactsToIntune.sh \
+            --github-repo 'Provectus-Software-GmbH/SCA_Desktop_Releases' \
+            --output "$output_path" \
+            --manifest-output "$output_path/validation-manifest.json"
+
+      - name: Ensure artifact directory exists
+        if: ${{ always() }}
+        run: mkdir -p "$RUNNER_TEMP/secure-contacts-macos-artifacts"
+
+      - name: Upload validation artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: secure-contacts-macos-intune-artifacts
+          path: ${{ runner.temp }}/secure-contacts-macos-artifacts
+          if-no-files-found: warn
+
+      - name: Remove temporary certificate files
+        if: ${{ always() }}
+        run: |
+          rm -f "$RUNNER_TEMP/intune-auth.p12"
+          rm -f "$RUNNER_TEMP/intune-auth.password"
+
+  publish:
+    name: Publish macOS package
+    needs: validate
+    if: ${{ needs.validate.result == 'success' && inputs.publish && !inputs.whatIf && needs.validate.outputs.update_required == 'true' }}
+    runs-on: macos-latest
+    environment: intune-production
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download validation artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: secure-contacts-macos-intune-artifacts
+          path: ${{ runner.temp }}/secure-contacts-macos-artifacts
+
+      - name: Publish validated package to Intune
+        env:
+          INTUNE_CERTIFICATE_BASE64: ${{ secrets.INTUNE_CERTIFICATE_BASE64 }}
+          INTUNE_CERTIFICATE_PASSWORD: ${{ secrets.INTUNE_CERTIFICATE_PASSWORD }}
+          INTUNE_TENANT_ID: ${{ secrets.INTUNE_TENANT_ID }}
+          INTUNE_CLIENT_ID: ${{ secrets.INTUNE_CLIENT_ID }}
+          INTUNE_APP_ID: ${{ secrets.INTUNE_MACOS_APP_ID }}
+          SECURE_CONTACTS_GITHUB_TOKEN: ${{ secrets.SECURE_CONTACTS_GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          output_path="$RUNNER_TEMP/secure-contacts-macos-artifacts"
+          command -v az >/dev/null || brew install azure-cli
+          umask 077
+          certificate_path="$RUNNER_TEMP/intune-auth.p12"
+          password_path="$RUNNER_TEMP/intune-auth.password"
+          printf '%s' "$INTUNE_CERTIFICATE_BASE64" | openssl base64 -d -A > "$certificate_path"
+          printf '%s\n' "$INTUNE_CERTIFICATE_PASSWORD" > "$password_path"
+          chmod 600 "$certificate_path" "$password_path"
+          export INTUNE_CERTIFICATE_PATH="$certificate_path"
+          export INTUNE_CERTIFICATE_PASSWORD_FILE="$password_path"
+          export INTUNE_AUTH_METHOD=certificate
+          chmod +x .github/workflows/Sync-SecureContactsToIntune.sh .github/workflows/Validate-SecureContactsPackage.sh
+          .github/workflows/Sync-SecureContactsToIntune.sh \
+            --output "$output_path" \
+            --decision-manifest-output "$output_path/decision-manifest.json" \
+            --github-repo 'Provectus-Software-GmbH/SCA_Desktop_Releases' \
+            --use-existing-package \
+            --publish
+
+      - name: Upload publish artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: secure-contacts-macos-intune-publish-artifacts
+          path: ${{ runner.temp }}/secure-contacts-macos-artifacts
+          if-no-files-found: warn
+
+      - name: Remove temporary certificate files
+        if: ${{ always() }}
+        run: |
+          rm -f "$RUNNER_TEMP/intune-auth.p12"
+          rm -f "$RUNNER_TEMP/intune-auth.password"

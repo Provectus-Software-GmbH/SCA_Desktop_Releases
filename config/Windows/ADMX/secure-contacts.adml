@@ -42,7 +42,7 @@
       <string id="Help_CustomDatasourceNames">Set the SecContacts.CustomDatasourceNames configuration string.</string>
 
       <string id="Title_InternalLink">Internal Link</string>
-      <string id="Help_InternalLink">Set the SecContacts.InternalLink configuration string.</string>
+      <string id="Help_InternalLink">Set the SecContacts.InternalLinks configuration string.</string>
     </stringTable>
 
     <presentationTable>
