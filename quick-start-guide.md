@@ -64,10 +64,8 @@ Follow the [Manual Intune App Creation Guide](https://github.com/Provectus-Softw
 3. Configure requirements, silent installation, uninstall behavior, and detection rules.
    - Windows requires exactly one MSI ProductCode detection rule for the application.
    - macOS requires the correct bundle ID, application path, architecture, and minimum macOS version.
-4. Confirm that the corresponding configuration profile from Section 2 is ready.
-5. Assign the application and profile to the same pilot device group, or to intentionally coordinated scopes.
-6. Confirm that the application installs and Intune detects it successfully before validating managed settings.
-7. Expand assignments only after the pilot results are accepted.
+4. Assign the application and profile to the same pilot device group, or to intentionally coordinated scopes.
+5. Expand assignments only after the pilot results are accepted.
 
 After the profile is assigned and the device completes an Intune sync, the managed settings should be available to the installed application. Verify the effective settings on a pilot device rather than relying only on the profile assignment status.
 
