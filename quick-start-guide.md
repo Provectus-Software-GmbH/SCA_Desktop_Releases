@@ -21,6 +21,8 @@ SCA Desktop uses the SCA Enterprise Application for user authentication:
 
 ## 2) App Configuration
 
+SCA Desktop uses App Configuration to manage application settings, contact data sources, and licensing. Most App Configuration key/value pairs are shared with SCA Mobile, although some settings are platform-specific.
+
 Review the [SCA App Configuration Reference](https://docs.secure-contacts.com/documentation/app-configuration-policy-name-values-for-sca) before configuring a profile. It identifies which settings are supported on each platform.
 
 Many settings are shared with SCA Mobile. Review the platform support information before reusing existing Mobile configurations, as some settings are platform-specific and not every key is applicable to Desktop.

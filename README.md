@@ -15,13 +15,15 @@ The repository is update-only for application lifecycle operations. The target I
 
 ## Quick start
 
-1. Select the appropriate Windows MSI or macOS PKG release from the [SCA Desktop Releases repository](https://github.com/Provectus-Software-GmbH/SCA_Desktop_Releases/releases).
-2. Review the platform configuration guide and prepare the required Intune policy profile:
-	- [Windows configuration](config/Windows/README.Intune-Config-Win.md)
-	- [macOS configuration](config/MacOS/README.Intune-Config-MacOS.md)
-3. Create and configure the target Windows or macOS app manually in Intune, including requirements, assignments, and device-side detection rules. Follow the [Manual Intune App Creation guide](README.Intune-Manual-App-Setup.md) for the complete setup and pilot procedure.
-4. Choose an application update method from the deployment section below.
-5. Assign the configuration profile and application to a pilot device, then verify the installation and managed settings before broad rollout.
+For first-time deployment and pilot validation, follow the [SCA Desktop Admin Quickstart](quick-start-guide.md).
+
+It covers:
+
+- Enterprise application consent
+- Windows and macOS App Configuration
+- Manual Intune application creation
+- Pilot deployment and validation
+- Optional update automation
 
 ## Start with your task
 
