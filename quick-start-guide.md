@@ -25,7 +25,7 @@ SCA Desktop uses App Configuration to manage application settings, contact data 
 
 Review the [SCA App Configuration Reference](https://docs.secure-contacts.com/documentation/app-configuration-policy-name-values-for-sca) before configuring a profile. It identifies which settings are supported on each platform.
 
-Many settings are shared with SCA Mobile. Review the platform support information before reusing existing Mobile configurations, as some settings are platform-specific and not every key is applicable to Desktop.
+For SCA Desktop-only settings, see the [SCA Desktop-only configuration reference](https://docs.secure-contacts.com/documentation/app-configuration-policy-name-values-for-sca/sca-configuration-seccontacts.defaults#sca-desktop-only).
 
 > **Example:** Typical SCA Desktop deployments configure settings such as `SecContacts.Defaults`, `SecContacts.Licenses`. See the [SCA App Configuration Reference](https://docs.secure-contacts.com/documentation/app-configuration-policy-name-values-for-sca) for supported values and platform-specific details.
 
