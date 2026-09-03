@@ -567,9 +567,10 @@ if [ "$PUBLISH" = true ] || [ "$CLEANUP" = true ]; then
   status "Updating app metadata and committing content version $content_version_id"
   updated_included_apps=$(jq '[.[] | if .bundleId == "de.provectus.SecureContactsDesktop" then .bundleVersion = $version else . end]' \
     --arg version "$candidate_version" <<< "$existing_included_apps")
+  release_description="Secure Contacts Desktop - Release: $candidate_version"
   patch_body=$(mktemp)
-  jq -n --arg id "$content_version_id" --arg version "$candidate_version" --arg name "$package_name" --argjson includedApps "$updated_included_apps" \
-    '{"@odata.type":"#microsoft.graph.macOSPkgApp",committedContentVersion:$id,fileName:$name,primaryBundleVersion:$version,includedApps:$includedApps}' > "$patch_body"
+  jq -n --arg id "$content_version_id" --arg version "$candidate_version" --arg name "$package_name" --arg description "$release_description" --argjson includedApps "$updated_included_apps" \
+    '{"@odata.type":"#microsoft.graph.macOSPkgApp",description:$description,committedContentVersion:$id,fileName:$name,primaryBundleVersion:$version,includedApps:$includedApps}' > "$patch_body"
   graph_request PATCH "$graph_url" "$patch_body" "$graph_response"; rm -f "$patch_body"
   published=false
   for attempt in $(seq 1 "$POLL_ATTEMPTS"); do
@@ -597,6 +598,7 @@ if [ "$PUBLISH" = true ] || [ "$CLEANUP" = true ]; then
   [ "$(jq -r '.fileName // empty' "$graph_response")" = "$package_name" ] || { echo "Package file name verification failed" >&2; exit 1; }
   [ "$(jq -r '.primaryBundleVersion // empty' "$graph_response")" = "$candidate_version" ] || { echo "Primary bundle version verification failed" >&2; exit 1; }
   [ "$(jq -r '.includedApps[] | select(.bundleId == "de.provectus.SecureContactsDesktop") | .bundleVersion' "$graph_response")" = "$candidate_version" ] || { echo "Included app version verification failed" >&2; exit 1; }
+  [ "$(jq -r '.description // empty' "$graph_response")" = "$release_description" ] || { echo "Release description verification failed" >&2; exit 1; }
   echo "Published existing macOS PKG app: version $candidate_version"
   exit 0
 fi
