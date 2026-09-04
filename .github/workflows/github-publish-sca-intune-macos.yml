@@ -13,6 +13,10 @@ on:
         required: true
         type: boolean
         default: false
+  # schedule:
+  #   # Cron format: minute hour day-of-month month day-of-week.
+  #   # 0 6 * * * means every day at 06:00 UTC.
+  #   - cron: '0 6 * * *'
 
 permissions:
   contents: read
@@ -32,7 +36,7 @@ jobs:
           set -euo pipefail
           command -v curl >/dev/null
           command -v jq >/dev/null || brew install jq
-          if [ '${{ inputs.publish }}' = 'true' ] && [ '${{ inputs.whatIf }}' != 'true' ]; then
+          if [ '${{ github.event_name }}' = 'schedule' ] || { [ '${{ inputs.publish }}' = 'true' ] && [ '${{ inputs.whatIf }}' != 'true' ]; }; then
             command -v shasum >/dev/null
             command -v pkgutil >/dev/null
             command -v spctl >/dev/null
@@ -40,7 +44,7 @@ jobs:
 
       - name: Compare GitHub and Intune versions
         id: preflight
-        if: ${{ inputs.publish || inputs.whatIf }}
+        if: ${{ github.event_name == 'schedule' || inputs.publish || inputs.whatIf }}
         env:
           INTUNE_CERTIFICATE_BASE64: ${{ secrets.INTUNE_CERTIFICATE_BASE64 }}
           INTUNE_CERTIFICATE_PASSWORD: ${{ secrets.INTUNE_CERTIFICATE_PASSWORD }}
@@ -76,7 +80,7 @@ jobs:
           esac
 
       - name: Download and validate package
-        if: ${{ (!inputs.publish && !inputs.whatIf) || (inputs.publish && !inputs.whatIf && steps.preflight.outputs.update_required == 'true') }}
+        if: ${{ (github.event_name != 'schedule' && !inputs.publish && !inputs.whatIf) || ((github.event_name == 'schedule' || inputs.publish) && !inputs.whatIf && steps.preflight.outputs.update_required == 'true') }}
         env:
           SECURE_CONTACTS_GITHUB_TOKEN: ${{ secrets.SECURE_CONTACTS_GITHUB_TOKEN }}
         run: |
@@ -110,7 +114,7 @@ jobs:
   publish:
     name: Publish macOS package
     needs: validate
-    if: ${{ needs.validate.result == 'success' && inputs.publish && !inputs.whatIf && needs.validate.outputs.update_required == 'true' }}
+    if: ${{ needs.validate.result == 'success' && (github.event_name == 'schedule' || inputs.publish) && !inputs.whatIf && needs.validate.outputs.update_required == 'true' }}
     runs-on: macos-latest
     environment: intune-production
     steps:

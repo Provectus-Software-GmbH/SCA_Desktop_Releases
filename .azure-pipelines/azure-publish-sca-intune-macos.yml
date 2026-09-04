@@ -2,13 +2,30 @@ parameters:
 - name: publish
   displayName: Publish to Intune
   type: boolean
-  default: false
+  default: false # set this to true in scheduled runs
 - name: whatIf
   displayName: Review only (What-If)
   type: boolean
   default: false
 
 trigger: none
+
+# Cron format: minute hour day-of-month month day-of-week.
+# Cron: 0 6 * * *
+#       | | | | |
+#       | | | | +-- Day of week: every day
+#       | | | +---- Month: every month
+#       | | +------ Day of month: every day
+#       | +-------- Hour: 06
+#       +---------- Minute: 00
+# Azure Pipelines evaluates cron schedules in UTC.
+# schedules:
+# - cron: '0 6 * * *'
+#   displayName: Daily 06:00 UTC run
+#   branches:
+#     include:
+#     - main
+#   always: true
 
 variables:
 - name: intuneOutputPath

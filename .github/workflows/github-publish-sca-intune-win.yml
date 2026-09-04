@@ -13,6 +13,10 @@ on:
         required: true
         type: boolean
         default: false
+  # schedule:
+  #   # Cron format: minute hour day-of-month month day-of-week.
+  #   # 0 6 * * * means every day at 06:00 UTC.
+  #   - cron: '0 6 * * *'
 
 permissions:
   contents: read
@@ -32,7 +36,7 @@ jobs:
         run: Install-Module -Name IntuneWin32App -RequiredVersion $env:INTUNE_MODULE_VERSION -Scope CurrentUser -Force -AllowClobber
 
       - name: Import Intune certificate
-        if: ${{ inputs.publish || inputs.whatIf }}
+        if: ${{ github.event_name == 'schedule' || inputs.publish || inputs.whatIf }}
         shell: pwsh
         env:
           INTUNE_CERTIFICATE_BASE64: ${{ secrets.INTUNE_CERTIFICATE_BASE64 }}
@@ -63,7 +67,7 @@ jobs:
             GitHubRepo = 'Provectus-Software-GmbH/SCA_Desktop_Releases'
             ArtifactOutputPath = $artifactPath
           }
-          if ('${{ inputs.publish }}' -eq 'true' -or '${{ inputs.whatIf }}' -eq 'true') {
+          if ('${{ github.event_name }}' -eq 'schedule' -or '${{ inputs.publish }}' -eq 'true' -or '${{ inputs.whatIf }}' -eq 'true') {
             $parameters.TenantId = $env:INTUNE_TENANT_ID
             $parameters.ClientId = $env:INTUNE_CLIENT_ID
             $parameters.CertificateStoreLocation = 'CurrentUser\My'
